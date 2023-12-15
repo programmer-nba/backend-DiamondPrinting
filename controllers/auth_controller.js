@@ -542,6 +542,11 @@ exports.login = async (req, res) => {
     try {
         const sale = await Sale.findOne({username: username})
         const admin = await Admin.findOne({username:username})
+        const purchase = await Purchase.findOne({username:username})
+        const account = await Account.findOne({username:username})
+        const production = await Production.findOne({username:username})
+        const planing = await Planing.findOne({username:username})
+
         console.log(req.body)
         if (!sale && !admin) {
             return res.status(404).send({
@@ -561,13 +566,70 @@ exports.login = async (req, res) => {
             })
         }
 
-        const secretKey = process.env.SECRET_KEY
-        const payload = {
-            id: sale._id || admin._id || null,
-            code: sale.code || admin.code || null,
-            role: sale.role || admin.role || null,
-            name: sale.name || null,
+        if (purchase && password!==purchase.password) {
+            return res.status(403).send({
+                message: 'รหัสผ่านไม่ถูกต้อง',
+            })
         }
+
+        if (account && password!==account.password) {
+            return res.status(403).send({
+                message: 'รหัสผ่านไม่ถูกต้อง',
+            })
+        }
+
+        if (production && password!==production.password) {
+            return res.status(403).send({
+                message: 'รหัสผ่านไม่ถูกต้อง',
+            })
+        }
+
+        if (planing && password!==planing.password) {
+            return res.status(403).send({
+                message: 'รหัสผ่านไม่ถูกต้อง',
+            })
+        }
+
+        const secretKey = process.env.SECRET_KEY
+
+        const payload 
+        = (sale) ? {
+            id: sale._id ,
+            code: sale.code,
+            role: sale.role,
+            name: sale.name,
+        } 
+        : (admin) ? {
+            id: admin._id ,
+            code: admin.code,
+            role: admin.role,
+        }
+        : (account) ? {
+            id: account._id ,
+            code: account.code,
+            role: account.role,
+            name: account.name,
+        }
+        : (planing) ? {
+            id: planing._id ,
+            code: planing.code,
+            role: planing.role,
+            name: planing.name,
+        }
+        : (production) ? {
+            id: production._id ,
+            code: production.code,
+            role: production.role,
+            name: production.name,
+        }
+        : (purchase) ? {
+            id: purchase._id ,
+            code: purchase.code,
+            role: purchase.role,
+            name: purchase.name,
+        }
+        : null
+
 
         const token = jwt.sign(payload, secretKey, {expiresIn: '90d'})
 
