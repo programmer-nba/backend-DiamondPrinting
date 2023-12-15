@@ -8,6 +8,8 @@ route.post('/register/admin', Auth.adminRegister) // admin
 route.post('/register/sale', Auth.saleRegister) // sale
 route.post('/register/purchase', Auth.purchaseRegister) // purchase
 route.post('/register/account', Auth.accountRegister) // account
+route.post('/register/planing', Auth.planingRegister) // planing
+route.post('/register/production', Auth.productionRegister) // production
 
 // login
 route.post('/login', Auth.login)

@@ -5,6 +5,8 @@ const Sale = require('../models/sale_model.js')
 const Admin = require('../models/admin_model.js')
 const Purchase = require('../models/purchase_model.js')
 const Account = require('../models/account_model.js')
+const Production = require('../models/production_model.js')
+const Planing = require('../models/planing_model.js')
 
 // middleware
 const validateDuplicate = async (data) => {
@@ -82,6 +84,48 @@ const validateDuplicate = async (data) => {
             return message
         }
         if(existAccount && existAccount.phone_number === phone_number) {
+            const message = `เบอร์โทร ${phone_number} มีผู้ใช้งานแล้ว`
+            return message
+        }
+
+        //validate duplicate username in production
+        const existProduction = await Production.findOne({
+            $or: [
+                {username: username},
+                {email: email},
+                {phone_number: phone_number}
+            ]
+        })
+        if(existProduction && existProduction.username === username) {
+            const message = `username ${username} มีผู้ใช้งานแล้ว`
+            return message
+        }
+        if(existProduction && existProduction.email === email) {
+            const message = `อีเมล ${email} มีผู้ใช้งานแล้ว`
+            return message
+        }
+        if(existProduction && existProduction.phone_number === phone_number) {
+            const message = `เบอร์โทร ${phone_number} มีผู้ใช้งานแล้ว`
+            return message
+        }
+
+        //validate duplicate username in production
+        const existPlaning = await Planing.findOne({
+            $or: [
+                {username: username},
+                {email: email},
+                {phone_number: phone_number}
+            ]
+        })
+        if(existPlaning && existPlaning.username === username) {
+            const message = `username ${username} มีผู้ใช้งานแล้ว`
+            return message
+        }
+        if(existPlaning && existPlaning.email === email) {
+            const message = `อีเมล ${email} มีผู้ใช้งานแล้ว`
+            return message
+        }
+        if(existPlaning && existPlaning.phone_number === phone_number) {
             const message = `เบอร์โทร ${phone_number} มีผู้ใช้งานแล้ว`
             return message
         }
@@ -347,6 +391,140 @@ exports.accountRegister = async (req, res) => {
         return res.status(200).send({
             message: 'ลงทะเบียน ฝ่ายบัญชี สำเร็จ',
             user: saved_account
+        })
+
+    }
+    catch (err) {
+        res.send({
+            message: "ไม่สามารถสมัครสมาชิกได้",
+            error: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+// register -planing-
+exports.planingRegister = async (req, res) => {
+    const {
+        username, password, phone_number, email,
+        first_name, last_name,
+    } = req.body
+    try {
+
+        const validateData = {username:username, phone_number:phone_number, email:email}
+        const duplicate = await validateDuplicate(validateData)
+        if(duplicate) {
+            return res.status(500).send({
+                message: duplicate
+            })
+        }
+
+        const planing = await Planing.find()
+
+        const planing_code = `PL-${planing.length}`
+        const ipAddress = req.ip || req.connection.remoteAddress
+
+        const new_planing = new Sale({
+            name: {
+                first: first_name,
+                last: last_name,
+            },
+            username: username,
+            password: password,
+            phone_number: phone_number,
+            email: email,
+            role: {
+                main: 'แพลนนิ่ง',
+                sub: null,
+            },
+            code: planing_code,
+            logedInHis: 
+                {
+                    time: new Date(),
+                    ip: ipAddress,
+                },
+            rank: 'normal'
+        })
+
+        const saved_planing = await new_planing.save()
+        if(!saved_planing){
+            return res.status(500).send({
+                message: 'ไม่สามารถสมัครสมาชิกได้',
+                new_sale: new_planing,
+                saved_purchase: saved_planing
+            })
+        }
+
+        return res.status(200).send({
+            message: 'ลงทะเบียน ฝ่ายแพลนนิ่ง สำเร็จ',
+            user: saved_planing
+        })
+
+    }
+    catch (err) {
+        res.send({
+            message: "ไม่สามารถสมัครสมาชิกได้",
+            error: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+// register -production-
+exports.productionRegister = async (req, res) => {
+    const {
+        username, password, phone_number, email,
+        first_name, last_name,
+    } = req.body
+    try {
+
+        const validateData = {username:username, phone_number:phone_number, email:email}
+        const duplicate = await validateDuplicate(validateData)
+        if(duplicate) {
+            return res.status(500).send({
+                message: duplicate
+            })
+        }
+
+        const production = await Production.find()
+
+        const production_code = `PD-${production.length}`
+        const ipAddress = req.ip || req.connection.remoteAddress
+
+        const new_production = new Sale({
+            name: {
+                first: first_name,
+                last: last_name,
+            },
+            username: username,
+            password: password,
+            phone_number: phone_number,
+            email: email,
+            role: {
+                main: 'โปรดักชัน',
+                sub: null,
+            },
+            code: production_code,
+            logedInHis: 
+                {
+                    time: new Date(),
+                    ip: ipAddress,
+                },
+            rank: 'normal'
+        })
+
+        const saved_production = await new_production.save()
+        if(!saved_production){
+            return res.status(500).send({
+                message: 'ไม่สามารถสมัครสมาชิกได้',
+                new_sale: new_production,
+                saved_purchase: saved_production
+            })
+        }
+
+        return res.status(200).send({
+            message: 'ลงทะเบียน ฝ่ายโปรดักชัน สำเร็จ',
+            user: saved_production
         })
 
     }
