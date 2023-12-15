@@ -13,10 +13,7 @@ app.use(cors())
 
 // routes here
 app.use('/daimond/auth', require('./routes/auth_route.js'))
-
-app.get('/', (req, res) => {
-    res.send('hello world')
-})
+app.use('/daimond/product', require('./routes/product_route.js'))
 
 const mongoDBUrl = process.env.MONGODB_URL
 const port = process.env.PORT || 7078

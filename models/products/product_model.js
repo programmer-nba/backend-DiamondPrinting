@@ -7,12 +7,13 @@ const productSchema = new Schema({
 
     option: [
         {
+            title: String,
             name: String,
+            unit: String,
             ppu: Number
         }
     ],
 
-    unit: String
 })
 
 const Product = mongoose.model('Product', productSchema)
