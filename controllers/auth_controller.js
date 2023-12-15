@@ -547,7 +547,6 @@ exports.login = async (req, res) => {
         const production = await Production.findOne({username:username})
         const planing = await Planing.findOne({username:username})
 
-        console.log(req.body)
         if (!sale && !admin && !purchase && !account && !production && !planing) {
             return res.status(404).send({
                 message: 'ไม่พบ username นี้ในระบบ',
