@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken')
 
 // models
-const Sale = require('../models/sale_model.js')
-const Admin = require('../models/admin_model.js')
-const Purchase = require('../models/purchase_model.js')
-const Account = require('../models/account_model.js')
-const Production = require('../models/production_model.js')
-const Planing = require('../models/planing_model.js')
+const Sale = require('../models/members/sale_model.js')
+const Admin = require('../models/members/admin_model.js')
+const Purchase = require('../models/members/purchase_model.js')
+const Account = require('../models/members/account_model.js')
+const Production = require('../models/members/production_model.js')
+const Planing = require('../models/members/planing_model.js')
 
 // middleware
 const validateDuplicate = async (data) => {
@@ -164,7 +164,7 @@ exports.adminRegister = async (req, res) => {
         const admin_code = `AM-${admin.length}`
         const ipAddress = req.ip || req.connection.remoteAddress
 
-        const new_admin = new Sale({
+        const new_admin = new Admin({
             username: username,
             password: password,
             phone_number: phone_number,
@@ -290,7 +290,7 @@ exports.purchaseRegister = async (req, res) => {
         const purchase_code = `PC-${purchase.length}`
         const ipAddress = req.ip || req.connection.remoteAddress
 
-        const new_purchase = new Sale({
+        const new_purchase = new Purchase({
             name: {
                 first: first_name,
                 last: last_name,
@@ -357,7 +357,7 @@ exports.accountRegister = async (req, res) => {
         const account_code = `AC-${account.length}`
         const ipAddress = req.ip || req.connection.remoteAddress
 
-        const new_account = new Sale({
+        const new_account = new Account({
             name: {
                 first: first_name,
                 last: last_name,
@@ -424,7 +424,7 @@ exports.planingRegister = async (req, res) => {
         const planing_code = `PL-${planing.length}`
         const ipAddress = req.ip || req.connection.remoteAddress
 
-        const new_planing = new Sale({
+        const new_planing = new Planing({
             name: {
                 first: first_name,
                 last: last_name,
@@ -491,7 +491,7 @@ exports.productionRegister = async (req, res) => {
         const production_code = `PD-${production.length}`
         const ipAddress = req.ip || req.connection.remoteAddress
 
-        const new_production = new Sale({
+        const new_production = new Production({
             name: {
                 first: first_name,
                 last: last_name,

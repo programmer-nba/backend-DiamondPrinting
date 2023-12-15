@@ -1,3 +1,3 @@
 // models
-const Sale = require('../models/sale_model.js')
+const Sale = require('../models/members/sale_model.js')
 

@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
     res.send('hello world')
 })
 
-const mongoDBUrl = process.env.MONGODB_URL_TEST
+const mongoDBUrl = process.env.MONGODB_URL
 const port = process.env.PORT || 7078
 mongoose.connect( mongoDBUrl )
 .then(()=>{
