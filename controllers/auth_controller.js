@@ -563,7 +563,7 @@ exports.login = async (req, res) => {
 
         const secretKey = process.env.SECRET_KEY
         const payload = {
-            id: sale._id || null,
+            id: sale._id || admin._id || null,
             code: sale.code || admin.code || null,
             role: sale.role || admin.role || null,
             name: sale.name || null,
@@ -574,7 +574,8 @@ exports.login = async (req, res) => {
         return res.status(200).send({
             message: 'เข้าสู่ระบบสำเร็จ',
             token: token,
-            user: payload
+            user: payload,
+            success: true
         })
     }
     catch (err) {
