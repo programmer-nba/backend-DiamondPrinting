@@ -2,7 +2,7 @@ const Product = require('../models/products/product_model.js')
 
 // add new product type
 exports.addProduct = async (req, res) => {
-    const { type } = req.body
+    const { type, subType } = req.body
     try {
         const product = await Product.find()
 
@@ -10,7 +10,8 @@ exports.addProduct = async (req, res) => {
 
         const new_product = new Product({
             code: code,
-            type: type
+            type: type,
+            subType: subType
         })
         const saved_product = await new_product.save()
         if(!saved_product) {
@@ -71,16 +72,20 @@ exports.getProducts = async (req, res) => {
 // edit product option
 exports.updateProduct = async (req, res) => {
     const { id } = req.params
-    const { name, ppu, unit, title } = req.body
+    const { gsm, width, long, pkg } = req.body
+
+    const psheet = Math.ceil((gsm*width*long*pkg/3100)/500)
 
     try {
         const product = await Product.findByIdAndUpdate(id, {
             $push:{
                 option: {
-                    title: title,
-                    name: name,
-                    ppu: ppu,
-                    unit: unit || 'หน่วย'
+                    gsm: gsm,
+                    width: width,
+                    long: long,
+                    pkg: pkg,
+
+                    psheet: psheet
                 },
             }
         },{new:true})

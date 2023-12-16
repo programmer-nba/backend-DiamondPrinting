@@ -4,13 +4,18 @@ const {Schema} = mongoose
 const productSchema = new Schema({ 
     code: String,
     type: String,
+    subType: {
+        type: String,
+        default: ''
+    },
 
     option: [
         {
-            title: String,
-            name: String,
-            unit: String,
-            ppu: Number
+            gsm: Number,
+            width: Number,
+            long: Number,
+            pkg: Number,
+            psheet: Number
         }
     ],
 

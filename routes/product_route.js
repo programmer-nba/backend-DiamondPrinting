@@ -3,7 +3,6 @@ const route = require('express').Router()
 // controllers
 const Product = require('../controllers/product_controller.js')
 
-
 route.post('/', Product.addProduct)
 route.get('/', Product.getProducts)
 //route.get('/:id', Product.getProduct)
