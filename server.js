@@ -14,8 +14,10 @@ app.use(cors())
 // routes here
 app.use('/daimond/auth', require('./routes/auth_route.js'))
 app.use('/daimond/product', require('./routes/product_route.js'))
+app.use('/daimond/order', require('./routes/order_route.js'))
 
-const mongoDBUrl = process.env.MONGODB_URL
+//const mongoDBUrl = process.env.MONGODB_URL
+const mongoDBUrl = process.env.MONGODB_URL_TEST
 const port = process.env.PORT || 7078
 mongoose.connect( mongoDBUrl )
 .then(()=>{
