@@ -1,30 +1,30 @@
-const Product = require('../models/products/product_model.js')
+const RawMatt = require('../models/products/rawMatt_model.js')
 
-// add new product type
-exports.addProduct = async (req, res) => {
+// add new rawMatt
+exports.addRawMatt = async (req, res) => {
     const { type, subType } = req.body
     try {
-        const product = await Product.find()
+        const rawMatt = await RawMatt.find()
 
-        const code = `${product.length}`
+        const code = `${rawMatt.length}`
 
-        const new_product = new Product({
+        const new_rawMatt = new RawMatt({
             code: code,
             type: type,
             subType: subType
         })
-        const saved_product = await new_product.save()
-        if(!saved_product) {
+        const saved_rawMatt = await new_rawMatt.save()
+        if(!saved_rawMatt) {
             return res.status(500).send({
                 message: 'ไม่สามารถบันทึกสินค้า',
-                saved_type: saved_product
+                saved_type: saved_rawMatt
             })
         }
 
         return res.send({
             message: 'บันทึกสินค้าสำเร็จ',
             success: true,
-            product: saved_product
+            product: saved_rawMatt
         })
     }
     catch (err) {
@@ -36,27 +36,27 @@ exports.addProduct = async (req, res) => {
     }
 }
 
-// get all products
-exports.getProducts = async (req, res) => {
+// get all rawMatts
+exports.getRawMatts = async (req, res) => {
     try {
-        const products = await Product.find()
-        if(!products){
+        const rawMatts = await RawMatt.find()
+        if(!rawMatts){
             return res.send({
                 message: 'ไม่พบสินค้าในระบบ',
-                products: products
+                products: rawMatts
             })
-        } else if (products && products.length===0) {
+        } else if (rawMatts && rawMatts.length===0) {
             return res.send({
                 message: 'สินค้าในระบบมี 0 รายการ',
-                products: products || [],
+                products: rawMatts || [],
                 success: true
             })
         }
 
         return res.send({
-            message: `มีสินค้าทั้งหมด ${products.length} รายการ`,
+            message: `มีสินค้าทั้งหมด ${rawMatts.length} รายการ`,
             success: true,
-            products: products
+            products: rawMatts
         })
         
     }
@@ -69,15 +69,15 @@ exports.getProducts = async (req, res) => {
     }
 }
 
-// edit product option
-exports.updateProduct = async (req, res) => {
+// edit RawMatt option
+exports.updateRawMattOption = async (req, res) => {
     const { id } = req.params
     const { gsm, width, long, pkg } = req.body
 
     const psheet = Math.ceil((gsm*width*long*pkg/3100)/500)
 
     try {
-        const product = await Product.findByIdAndUpdate(id, {
+        const rawMatt = await RawMatt.findByIdAndUpdate(id, {
             $push:{
                 option: {
                     gsm: gsm,
@@ -89,7 +89,7 @@ exports.updateProduct = async (req, res) => {
                 },
             }
         },{new:true})
-        if(!product) {
+        if(!rawMatt) {
             return res.status(404).send({
                 message: 'ไม่พบสินค้านี้ในระบบ',
             })
@@ -98,7 +98,7 @@ exports.updateProduct = async (req, res) => {
         return res.send({
             message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
             success: true,
-            product: product
+            product: rawMatt
         })
 
     }
@@ -111,11 +111,11 @@ exports.updateProduct = async (req, res) => {
     }
 }
 
-// delete option in product
-exports.deleteOption = async (req, res) => {
+// delete option in Rawmatt
+exports.deleteRawMattOption = async (req, res) => {
     const {id, option} = req.params
     try {
-        const product = await Product.updateOne({
+        const rawMatt = await RawMatt.updateOne({
             _id: id
         },{
             $pull: {
@@ -124,7 +124,7 @@ exports.deleteOption = async (req, res) => {
                 }
             }
         })
-        if(!product){
+        if(!rawMatt){
             return res.status(404).send({
                 message: 'ไม่พบประเภทสินค้านี้ในระบบ'
             })

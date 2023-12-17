@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const {Schema} = mongoose
 
-const productSchema = new Schema({ 
+const rawMattSchema = new Schema({ 
     code: String,
     type: String,
     subType: {
@@ -21,5 +21,5 @@ const productSchema = new Schema({
 
 })
 
-const Product = mongoose.model('Product', productSchema)
-module.exports = Product
+const RawMatt = mongoose.model('RawMatt', rawMattSchema)
+module.exports = RawMatt

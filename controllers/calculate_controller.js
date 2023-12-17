@@ -1,5 +1,5 @@
 // models
-const Product = require('../models/products/product_model.js')
+const Product = require('../models/products/rawMatt_model.js')
 
 // calculate Raw-Material
 exports.calRawMaterial = async (req,res) => {
@@ -87,7 +87,7 @@ exports.calRawMaterial = async (req,res) => {
         }
 
         return res.send({
-            message: 'คำนวณราคาสำเร็จ',
+            message: 'คำนวณ RawMatt สำเร็จ',
             success: true,
             result: calRawMaterial
         })
