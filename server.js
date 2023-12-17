@@ -18,7 +18,7 @@ app.use('/daimond/order', require('./routes/order_route.js'))
 app.use('/daimond/filter', require('./routes/filter_route.js'))
 
 //const mongoDBUrl = process.env.MONGODB_URL
-const mongoDBUrl = process.env.MONGODB_URL_TEST
+const mongoDBUrl = process.env.MONGODB_URL
 const port = process.env.PORT || 7078
 mongoose.connect( mongoDBUrl )
 .then(()=>{
