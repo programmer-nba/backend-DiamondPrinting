@@ -15,6 +15,7 @@ app.use(cors())
 app.use('/daimond/auth', require('./routes/auth_route.js'))
 app.use('/daimond/product', require('./routes/product_route.js'))
 app.use('/daimond/order', require('./routes/order_route.js'))
+app.use('/daimond/filter', require('./routes/filter_route.js'))
 
 //const mongoDBUrl = process.env.MONGODB_URL
 const mongoDBUrl = process.env.MONGODB_URL_TEST

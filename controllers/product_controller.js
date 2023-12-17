@@ -69,6 +69,83 @@ exports.getRawMatts = async (req, res) => {
     }
 }
 
+// get rawMatt types&&subTypes
+exports.getRawMattTypes = async (req, res) => {
+    try {
+        const rawMatts = await RawMatt.find()
+        if(!rawMatts){
+            return res.send({
+                message: 'ไม่พบสินค้าในระบบ',
+                products: rawMatts
+            })
+        } else if (rawMatts && rawMatts.length===0) {
+            return res.send({
+                message: 'สินค้าในระบบมี 0 รายการ',
+                products: rawMatts || [],
+                success: true
+            })
+        }
+
+        const type = rawMatts.map(m => m.type)
+        const uniqueType = new Set(type)
+        const subType = rawMatts.map(m => m.subType) 
+        const uniqueSubType = new Set(subType)
+
+        return res.send({
+            success: true,
+            rawMatt_types: [...uniqueType],
+            rawMatt_subTypes: [...uniqueSubType],
+            success: true
+        })
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูประเภทได้',
+            err: err.message
+        })
+    }
+}
+
+// get rawMatt options
+exports.getRawMattOptions = async (req, res) => {
+    const { type, subType } = req.body
+    
+    try {
+       const rawMatts = await RawMatt.findOne({ type: type , subType: subType })
+        if(!rawMatts || rawMatts.length===0){
+            return res.status(404).send({
+                message: 'ไม่พบสินค้าประเภทนี้',
+                rawMatts: rawMatts || []
+            })
+        }
+
+        const gsms = rawMatts.option.map(option => option.gsm)
+        const unique_gsm = new Set(gsms)
+        const widths = rawMatts.option.map(option => option.width)
+        const unique_width = new Set(widths)
+        const longs = rawMatts.option.map(option => option.long)
+        const unique_long = new Set(longs)
+
+        return res.send({
+            gsm: [...unique_gsm],
+            width: [...unique_width],
+            long: [...unique_long],
+            success: true
+        })
+
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูตัวเลือกได้',
+            err: err.message
+        })
+    }
+}
+
 // edit RawMatt option
 exports.updateRawMattOption = async (req, res) => {
     const { id } = req.params
