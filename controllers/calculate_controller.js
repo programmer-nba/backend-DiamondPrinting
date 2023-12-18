@@ -1,6 +1,7 @@
 // models
 const RawMatt = require('../models/products/rawMatt_model.js')
 const Plate = require('../models/products/plate_model.js')
+const Print = require('../models/products/print_model.js')
 
 // calculate Raw-Material
 exports.calRawMaterial = async (req,res) => {
@@ -135,6 +136,54 @@ exports.calPlate = async (req,res) => {
             message: 'คำนวณ เพลท สำเร็จ',
             success: true,
             result: calPlate
+        })
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        conbsole.log(err.message)
+    }
+}
+
+// calculate Print
+exports.calPrint = async (req,res) => {
+    const { 
+        colors,
+        order, lay 
+    } = req.body
+
+    try {
+        const print = await Print.findOne({
+            colors: parseInt(colors)
+        })
+        if(!print){
+            return res.status(404).send({
+                message: 'ไม่พบประเภทสินค้านี้ในระบบ',
+                product: print
+            })
+        }
+
+        const order_lay = parseInt(order)/parseInt(lay)
+        
+        const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
+        if(option.length!==1){
+            return res.status(404).send({
+                message: 'ไม่พบเรทราคาในช่วงเลเอาท์นี้',
+                option: option
+            })
+        }
+
+        const cal_print = {
+            order_lay: order_lay,
+            round: option[0].round.join,
+            price: (option[0].round.start >= 10001)
+            ? option[0].price*order_lay : option[0].price
+        }
+
+        return res.send({
+            message: 'คำนวณ ราคาปรินท์ สำเร็จ',
+            success: true,
+            result: cal_print
         })
         
     }

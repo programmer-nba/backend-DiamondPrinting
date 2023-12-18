@@ -83,7 +83,7 @@ exports.updatePrintOption = async (req, res) => {
                         end: end,
                         join: `${parseInt(start).toLocaleString()}-${parseInt(end).toLocaleString()}`
                     },
-                    price: parseInt(price)
+                    price: parseFloat(price)
                 }
             },
         },{new:true})
