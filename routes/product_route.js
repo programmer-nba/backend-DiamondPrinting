@@ -3,6 +3,7 @@ const route = require('express').Router()
 // controllers
 const RawMatt = require('../controllers/rawMatt_controller.js')
 const Plate = require('../controllers/plate_controller.js')
+const Print = require('../controllers/print_controller.js')
 
 /* --------------RawMatt-------------- */
 route.post('/rawmatt', RawMatt.addRawMatt)
@@ -17,5 +18,13 @@ route.post('/plate', Plate.addPlate)
 route.get('/plates', Plate.getPlates)
 route.put('/plate/:id', Plate.updatePlatePrice)
 route.delete('/plate/:id', Plate.deletePlate)
+
+/* --------------Print-------------- */ 
+route.post('/print', Print.addPrintColor)
+route.get('/prints', Print.getPrints)
+route.get('/print/:id', Print.getPrint)
+route.put('/print/:id', Print.updatePrintOption)
+route.delete('/print/:id/:option', Print.deletePrintOption)
+route.delete('/print/:id', Print.deletePrint)
 
 module.exports = route
