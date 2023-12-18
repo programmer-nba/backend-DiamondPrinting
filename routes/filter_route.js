@@ -1,9 +1,9 @@
 const route = require('express').Router()
 
 // controllers
-const Product = require('../controllers/product_controller.js')
+const RawMatt = require('../controllers/rawMatt_controller.js')
 
-route.get('/rawMatt-type', Product.getRawMattTypes)
-route.get('/rawMatt-option', Product.getRawMattOptions)
+route.get('/rawMatt-type', RawMatt.getRawMattTypes)
+route.get('/rawMatt-option', RawMatt.getRawMattOptions)
 
 module.exports = route

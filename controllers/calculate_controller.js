@@ -1,5 +1,6 @@
 // models
-const Product = require('../models/products/rawMatt_model.js')
+const RawMatt = require('../models/products/rawMatt_model.js')
+const Plate = require('../models/products/plate_model.js')
 
 // calculate Raw-Material
 exports.calRawMaterial = async (req,res) => {
@@ -10,24 +11,24 @@ exports.calRawMaterial = async (req,res) => {
     } = req.body
 
     try {
-        const product = await Product.findOne({
+        const rawMatt = await RawMatt.findOne({
             type: type,
             subType: subType,
         })
-        if(!product){
+        if(!rawMatt){
             return res.status(404).send({
                 message: 'ไม่พบประเภทสินค้านี้ในระบบ',
-                product: product
+                product: rawMatt
             })
         }
-        if(product && !product.option || product && product.option.length === 0){
+        if(rawMatt && !rawMatt.option || rawMatt && rawMatt.option.length === 0){
             return res.status(404).send({
                 message: 'สินค้านี้ยังไม่ได้เพิ่มรายละเอียด',
-                product: product
+                product: rawMatt
             })
         }
 
-        const match_option = product.option.filter(item=>
+        const match_option = rawMatt.option.filter(item=>
             item.gsm === gsm &&
             item.width === width &&
             item.long === long
@@ -49,7 +50,7 @@ exports.calRawMaterial = async (req,res) => {
         const papers_cost = Math.ceil(((papers*psheet)*0.01))*100 // ทุนกระดาษ:งาน
 
         const calRawMaterial = {
-            paperType: `${product.type} ${product.subType}`,
+            paperType: `${rawMatt.type} ${rawMatt.subType}`,
             option: option,
             order: {
                 amount: order,
@@ -66,7 +67,7 @@ exports.calRawMaterial = async (req,res) => {
                 amount: papers
             },
             details: {
-                ประเภทกระดาษ : `${product.type} ${product.subType}`,
+                ประเภทกระดาษ : `${rawMatt.type} ${rawMatt.subType}`,
                 แกรม : option.gsm,
                 กว้าง : option.width,
                 ยาว : option.long,
@@ -99,3 +100,46 @@ exports.calRawMaterial = async (req,res) => {
     }
 }
 
+// calculate Plate
+exports.calPlate = async (req,res) => {
+    const { size, colors } = req.body
+
+    try {
+        const plate = await Plate.findOne({
+            size: size,
+        })
+        if(!plate){
+            return res.status(404).send({
+                message: 'ไม่พบประเภทสินค้านี้ในระบบ',
+                product: plate
+            })
+        }
+
+        const reqColors = parseInt(colors)
+        const plate_price = plate.price*reqColors
+        
+        const calPlate = {
+            size: plate.size || size,
+            ppu: plate.price,
+            colors: reqColors || colors,
+            result: plate_price,
+            details: {
+                เพลทตัด: plate.size || size,
+                ราคาต่อสี: plate.price,
+                จำนวนสี: `${reqColors || colors} สี`,
+                ราคารวม: plate_price
+            }
+        }
+
+        return res.send({
+            message: 'คำนวณ เพลท สำเร็จ',
+            success: true,
+            result: calPlate
+        })
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        conbsole.log(err.message)
+    }
+}
