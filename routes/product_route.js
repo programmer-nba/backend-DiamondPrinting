@@ -4,6 +4,7 @@ const route = require('express').Router()
 const RawMatt = require('../controllers/rawMatt_controller.js')
 const Plate = require('../controllers/plate_controller.js')
 const Print = require('../controllers/print_controller.js')
+const Coating = require('../controllers/coating_controller.js')
 
 /* --------------RawMatt-------------- */
 route.post('/rawmatt', RawMatt.addRawMatt)
@@ -26,5 +27,11 @@ route.get('/print/:id', Print.getPrint)
 route.put('/print/:id', Print.updatePrintOption)
 route.delete('/print/:id/:option', Print.deletePrintOption)
 route.delete('/print/:id', Print.deletePrint)
+
+/* --------------Coating-------------- */
+route.post('/coating', Coating.addCoating)
+route.get('/coatings', Coating.getCoatings)
+route.put('/coating/:id', Coating.updateCoatingOption)
+//route.delete('/rawmatt/:id/:option', RawMatt.deleteRawMattOption)
 
 module.exports = route
