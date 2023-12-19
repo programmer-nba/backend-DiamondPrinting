@@ -105,28 +105,21 @@ exports.getCoatingTypes = async (req, res) => {
 
 // get coating options
 exports.getCoatingOptions = async (req, res) => {
-    const { type, subType } = req.body
-    
+    const { type } = req.params
     try {
-       const rawMatts = await RawMatt.findOne({ type: type , subType: subType })
-        if(!rawMatts || rawMatts.length===0){
-            return res.status(404).send({
+       const coating = await Coating.findOne({type:type})
+        if(!coating || coating.length===0){
+            return res.send({
                 message: 'ไม่พบสินค้าประเภทนี้',
-                rawMatts: rawMatts || []
+                rawMatts: coating || []
             })
         }
 
-        const gsms = rawMatts.option.map(option => option.gsm)
-        const unique_gsm = new Set(gsms)
-        const widths = rawMatts.option.map(option => option.width)
-        const unique_width = new Set(widths)
-        const longs = rawMatts.option.map(option => option.long)
-        const unique_long = new Set(longs)
+        const subTypes = coating.option.map(option => option.subType)
+        const unique_subTypes = new Set(subTypes)
 
         return res.send({
-            gsm: [...unique_gsm],
-            width: [...unique_width],
-            long: [...unique_long],
+            subTypes: [...unique_subTypes],
             success: true
         })
 
@@ -144,18 +137,14 @@ exports.getCoatingOptions = async (req, res) => {
 // edit Coating option
 exports.updateCoatingOption = async (req, res) => {
     const { id } = req.params
-    const { width, long, avr, minPrice } = req.body
-
-    const unit = 'in'
+    const { subType, avr, minPrice } = req.body
 
     try {
         const coating = await Coating.findByIdAndUpdate(id, {
             $push:{
                 option: {
-                    width: width,
-                    long: long,
+                    subType: subType,
                     avr: avr,
-                    unit: unit,
                     minPrice: minPrice
                 },
             }
@@ -182,11 +171,11 @@ exports.updateCoatingOption = async (req, res) => {
     }
 }
 
-// delete option in Rawmatt
-exports.deleteRawMattOption = async (req, res) => {
+// delete option in Coating
+exports.deleteCoatingOption = async (req, res) => {
     const {id, option} = req.params
     try {
-        const rawMatt = await RawMatt.updateOne({
+        const coating = await Coating.updateOne({
             _id: id
         },{
             $pull: {
@@ -195,8 +184,8 @@ exports.deleteRawMattOption = async (req, res) => {
                 }
             }
         })
-        if(!rawMatt){
-            return res.status(404).send({
+        if(!coating){
+            return res.send({
                 message: 'ไม่พบประเภทสินค้านี้ในระบบ'
             })
         }

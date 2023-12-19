@@ -5,6 +5,7 @@ const RawMatt = require('../controllers/rawMatt_controller.js')
 const Plate = require('../controllers/plate_controller.js')
 const Print = require('../controllers/print_controller.js')
 const Coating = require('../controllers/coating_controller.js')
+const Emboss = require('../controllers/emboss_controller.js')
 
 /* --------------RawMatt-------------- */
 route.post('/rawmatt', RawMatt.addRawMatt)
@@ -32,6 +33,12 @@ route.delete('/print/:id', Print.deletePrint)
 route.post('/coating', Coating.addCoating)
 route.get('/coatings', Coating.getCoatings)
 route.put('/coating/:id', Coating.updateCoatingOption)
-//route.delete('/rawmatt/:id/:option', RawMatt.deleteRawMattOption)
+route.delete('/coating/:id/:option', Coating.deleteCoatingOption)
+
+/* --------------Emboss-------------- */
+route.post('/emboss', Emboss.addEmboss)
+route.get('/embosses', Emboss.getEmbosses)
+route.put('/emboss/:id', Emboss.updateEmbossOption)
+route.delete('/emboss/:id', Emboss.deleteEmboss)
 
 module.exports = route

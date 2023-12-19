@@ -11,5 +11,6 @@ route.get('/rawMatt-option', RawMatt.getRawMattOptions)
 route.get('/print-color', Print.getPrintColors)
 
 route.get('/coating-type', Coating.getCoatingTypes)
+route.get('/coating-option/:type', Coating.getCoatingOptions)
 
 module.exports = route

@@ -2,6 +2,7 @@
 const RawMatt = require('../models/products/rawMatt_model.js')
 const Plate = require('../models/products/plate_model.js')
 const Print = require('../models/products/print_model.js')
+const Coating = require('../models/products/coating_model.js')
 
 // calculate Raw-Material
 exports.calRawMaterial = async (req,res) => {
@@ -184,6 +185,68 @@ exports.calPrint = async (req,res) => {
             message: 'คำนวณ ราคาปรินท์ สำเร็จ',
             success: true,
             result: cal_print
+        })
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        conbsole.log(err.message)
+    }
+}
+
+// calculate Coating
+exports.calCoating = async (req,res) => {
+    const { 
+        type, subType,
+        width, long, cut,
+        order, lay 
+    } = req.body
+
+    try {
+        const coating = await Coating.findOne({
+            type: type
+        })
+        if(!coating){
+            return res.send({
+                message: 'ไม่พบประเภทสินค้านี้ในระบบ',
+                product: coating
+            })
+        }
+
+        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        const inWidth = width/cut
+        const inLong = long/cut
+        
+        const option = coating.option.filter(item=>item.subType === subType)
+        if(option.length!==1){
+            return res.status(404).send({
+                message: 'ไม่พบเรทราคาในช่วงเลเอาท์นี้',
+                option: option
+            })
+        }
+
+        const coating_option = option[0]
+
+        const coating_price = 
+            (type==='spot-uv' && coating_option.avr*inWidth*inLong < 1.2) ? 1.2
+            : (type==='dip-off') ? 5
+            : coating_option.avr*inWidth*inLong
+        const total_price = coating_price*(order/lay)
+
+        const cal_coating = {
+            inWidth: inWidth,
+            inLong: inLong,
+            order_lay: order_lay,
+            avr: coating_option.avr,
+            coating_price: parseFloat(coating_price.toFixed(2)),
+            price: (total_price < coating_option.minPrice)
+            ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
+        }
+
+        return res.send({
+            message: 'คำนวณ ราคาเคลือบสำเร็จ',
+            success: true,
+            result: cal_coating
         })
         
     }
