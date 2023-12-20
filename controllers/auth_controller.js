@@ -548,43 +548,43 @@ exports.login = async (req, res) => {
         const planing = await Planing.findOne({username:username})
 
         if (!sale && !admin && !purchase && !account && !production && !planing) {
-            return res.status(404).send({
+            return res.send({
                 message: 'ไม่พบ username นี้ในระบบ',
             })
         }
         
         if (sale && password!==sale.password) {
-            return res.status(403).send({
+            return res.send({
                 message: 'รหัสผ่านไม่ถูกต้อง',
             })
         }
 
         if (admin && password!==admin.password) {
-            return res.status(403).send({
+            return res.send({
                 message: 'รหัสผ่านไม่ถูกต้อง',
             })
         }
 
         if (purchase && password!==purchase.password) {
-            return res.status(403).send({
+            return res.send({
                 message: 'รหัสผ่านไม่ถูกต้อง',
             })
         }
 
         if (account && password!==account.password) {
-            return res.status(403).send({
+            return res.send({
                 message: 'รหัสผ่านไม่ถูกต้อง',
             })
         }
 
         if (production && password!==production.password) {
-            return res.status(403).send({
+            return res.send({
                 message: 'รหัสผ่านไม่ถูกต้อง',
             })
         }
 
         if (planing && password!==planing.password) {
-            return res.status(403).send({
+            return res.send({
                 message: 'รหัสผ่านไม่ถูกต้อง',
             })
         }
@@ -632,7 +632,7 @@ exports.login = async (req, res) => {
 
         const token = jwt.sign(payload, secretKey, {expiresIn: '90d'})
 
-        return res.status(200).send({
+        return res.send({
             message: 'เข้าสู่ระบบสำเร็จ',
             token: token,
             user: payload,
