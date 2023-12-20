@@ -274,25 +274,24 @@ exports.calEmboss = async (req,res) => {
         }
 
         const order_lay = Math.floor(parseInt(order)/parseInt(lay))
-
-        console.log(emboss[0].round)
-        console.log(order_lay)
         
-        const option = emboss.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay && item.option.plateSize === plateSize)
-        if(option.length===0){
+        const round_option = emboss.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
+        if(round_option.length===0){
             return res.status(404).send({
                 message: 'ไม่พบเรทราคาในช่วงเลเอาท์นี้',
-                option: option
+                option: round_option
             })
         }
 
+        const option = round_option[0].option.filter(item=>item.plateSize===plateSize)
+
         const emboss_option = option[0]
 
-        const emboss_cost = (Math.ceil(inWidth*inLong*26)*0.01)*100
+        const emboss_cost = Math.ceil((inWidth*inLong*26)*0.01)*100
 
         const emboss_price = lay*emboss_cost
 
-        const pumpPrice = emboss_option.option.pumpPrice
+        const pumpPrice = emboss_option.pumpPrice
 
         const total_price = emboss_price+pumpPrice
 
@@ -302,6 +301,7 @@ exports.calEmboss = async (req,res) => {
             order_lay: order_lay,
             pumpPrice: pumpPrice,
             emboss_price: parseFloat(emboss_price.toFixed(2)),
+            emboss_cost: emboss_cost,
             price: parseFloat(total_price.toFixed(2))
         }
 

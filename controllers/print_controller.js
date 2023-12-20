@@ -72,31 +72,35 @@ exports.getPrintColors = async (req, res) => {
 // edit plate price
 exports.updatePrintOption = async (req, res) => {
     const { id } = req.params
-    const { start, end, price } = req.body
-
+    const { option } = req.body //start, end, price
+    let pint_list = []
     try {
-        const print = await Print.findByIdAndUpdate(id, {
-            $push:{
-                option: {
-                    round: {
-                        start: start,
-                        end: end,
-                        join: `${parseInt(start).toLocaleString()}-${parseInt(end).toLocaleString()}`
-                    },
-                    price: parseFloat(price)
-                }
-            },
-        },{new:true})
-        if(!print) {
-            return res.status(404).send({
-                message: 'ไม่พบสินค้านี้ในระบบ',
-            })
+        for (item of option) {
+            const print = await Print.findByIdAndUpdate(id, {
+                $push:{
+                    option: {
+                        round: {
+                            start: item.start,
+                            end: item.end,
+                            join: `${parseInt(item.start).toLocaleString()}-${parseInt(item.end).toLocaleString()}`
+                        },
+                        price: parseFloat(item.price)
+                    }
+                },
+            },{new:true})
+            if(!print) {
+                return res.status(404).send({
+                    message: 'ไม่พบสินค้านี้ในระบบ',
+                })
+            }
+            pint_list.push(print)
         }
+        
 
         return res.send({
             message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
             success: true,
-            product: print
+            product: pint_list
         })
 
     }
