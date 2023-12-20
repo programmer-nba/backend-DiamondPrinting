@@ -149,33 +149,37 @@ exports.getRawMattOptions = async (req, res) => {
 // edit RawMatt option
 exports.updateRawMattOption = async (req, res) => {
     const { id } = req.params
-    const { gsm, width, long, pkg } = req.body
-
-    const psheet = Math.ceil((gsm*width*long*pkg/3100)/500)
-
+    const { option } = req.body //gsm, width, long, pkg
+    console.log(option)
+    let rawMatt_list = []
     try {
-        const rawMatt = await RawMatt.findByIdAndUpdate(id, {
-            $push:{
-                option: {
-                    gsm: gsm,
-                    width: width,
-                    long: long,
-                    pkg: pkg,
-
-                    psheet: psheet
-                },
+        for(item of option) {
+            console.log(item)
+            console.log(item.gsm)
+            const psheet = Math.ceil((item.gsm*item.width*item.long*item.pkg/3100)/500)
+            const rawMatt = await RawMatt.findByIdAndUpdate(id, {
+                $push:{
+                    option: {
+                        gsm: item.gsm,
+                        width: item.width,
+                        long: item.long,
+                        pkg: item.pkg,
+                        psheet: psheet
+                    },
+                }
+            },{new:true})
+            if(!rawMatt) {
+                return res.status(404).send({
+                    message: 'ไม่พบสินค้านี้ในระบบ',
+                })
             }
-        },{new:true})
-        if(!rawMatt) {
-            return res.status(404).send({
-                message: 'ไม่พบสินค้านี้ในระบบ',
-            })
+            rawMatt_list.push(rawMatt)
         }
 
         return res.send({
             message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
             success: true,
-            product: rawMatt
+            product: rawMatt_list
         })
 
     }

@@ -40,5 +40,6 @@ route.post('/emboss', Emboss.addEmboss)
 route.get('/embosses', Emboss.getEmbosses)
 route.put('/emboss/:id', Emboss.updateEmbossOption)
 route.delete('/emboss/:id', Emboss.deleteEmboss)
+route.delete('/emboss/:id/:option', Emboss.deleteEmbossOption)
 
 module.exports = route

@@ -75,12 +75,15 @@ exports.getEmbosses = async (req, res) => {
 exports.updateEmbossOption = async (req, res) => {
     const { id } = req.params
     const { pumpPrice, plateSize } = req.body
+    console.log(req.body)
 
     try {
         const emboss = await Emboss.findByIdAndUpdate(id, {
             $push:{
-                plateSize: plateSize,
-                pumpPrice: pumpPrice
+                option: {
+                    plateSize: plateSize,
+                    pumpPrice: pumpPrice
+                }
             }
         },{new:true})
         if(!emboss) {
@@ -118,6 +121,39 @@ exports.deleteEmboss = async (req, res) => {
 
         return res.send({
             message: 'ลบ emboss สำเร็จ',
+            success: true
+        })
+    }
+    catch (err) {
+        res.send({
+            message: 'ไม่สามารถลบตัวเลือกของสินค้านี้',
+            err: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+// delete option in Emboss
+exports.deleteEmbossOption = async (req, res) => {
+    const {id, option} = req.params
+    try {
+        const emboss = await Emboss.updateOne({
+            _id: id
+        },{
+            $pull: {
+                option: {
+                    _id: option
+                }
+            }
+        })
+        if(!emboss){
+            return res.status(404).send({
+                message: 'ไม่พบประเภทสินค้านี้ในระบบ'
+            })
+        }
+
+        return res.send({
+            message: 'ลบตัวเลือกสำเร็จ',
             success: true
         })
     }

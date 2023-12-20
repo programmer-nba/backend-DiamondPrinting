@@ -3,6 +3,7 @@ const RawMatt = require('../models/products/rawMatt_model.js')
 const Plate = require('../models/products/plate_model.js')
 const Print = require('../models/products/print_model.js')
 const Coating = require('../models/products/coating_model.js')
+const Emboss = require('../models/products/emboss_model.js')
 
 // calculate Raw-Material
 exports.calRawMaterial = async (req,res) => {
@@ -253,5 +254,66 @@ exports.calCoating = async (req,res) => {
     catch (err) {
         res.send(`ERR : ${err.message}`)
         conbsole.log(err.message)
+    }
+}
+
+// calculate Emboss
+exports.calEmboss = async (req,res) => {
+    const { 
+        inWidth, inLong, plateSize,
+        order, lay 
+    } = req.body
+
+    try {
+        const emboss = await Emboss.find()
+        if(!emboss){
+            return res.send({
+                message: 'ไม่พบประเภทสินค้านี้ในระบบ',
+                product: emboss
+            })
+        }
+
+        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+
+        console.log(emboss[0].round)
+        console.log(order_lay)
+        
+        const option = emboss.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay && item.option.plateSize === plateSize)
+        if(option.length===0){
+            return res.status(404).send({
+                message: 'ไม่พบเรทราคาในช่วงเลเอาท์นี้',
+                option: option
+            })
+        }
+
+        const emboss_option = option[0]
+
+        const emboss_cost = (Math.ceil(inWidth*inLong*26)*0.01)*100
+
+        const emboss_price = lay*emboss_cost
+
+        const pumpPrice = emboss_option.option.pumpPrice
+
+        const total_price = emboss_price+pumpPrice
+
+        const cal_emboss = {
+            inWidth: inWidth,
+            inLong: inLong,
+            order_lay: order_lay,
+            pumpPrice: pumpPrice,
+            emboss_price: parseFloat(emboss_price.toFixed(2)),
+            price: parseFloat(total_price.toFixed(2))
+        }
+
+        return res.send({
+            message: 'คำนวณ ราคาปั้มนูน สำเร็จ',
+            success: true,
+            result: cal_emboss
+        })
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        console.log(err.message)
     }
 }
