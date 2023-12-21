@@ -12,7 +12,7 @@ route.post('/rawmatt', RawMatt.addRawMatt)
 route.get('/rawmatts', RawMatt.getRawMatts)
 //route.get('/:id', RawMatt.getProduct)
 route.put('/rawmatt/:id', RawMatt.updateRawMattOption)
-//route.delete('/:id', RawMatt.deleteProduct)
+route.delete('/rawmatt/:id', RawMatt.deleteRawMatt)
 route.delete('/rawmatt/:id/:option', RawMatt.deleteRawMattOption)
 
 /* --------------Plate-------------- */ 

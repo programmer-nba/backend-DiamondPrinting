@@ -224,3 +224,28 @@ exports.deleteRawMattOption = async (req, res) => {
         console.log(err.message)
     }
 }
+
+// delete Rawmatt
+exports.deleteRawMatt = async (req, res) => {
+    const {id} = req.params
+    try {
+        const rawMatt = await RawMatt.findByIdAndDelete(id)
+        if(!rawMatt){
+            return res.status(404).send({
+                message: 'ไม่พบประเภทสินค้านี้ในระบบ'
+            })
+        }
+
+        return res.send({
+            message: 'ลบสำเร็จ',
+            success: true
+        })
+    }
+    catch (err) {
+        res.send({
+            message: 'ไม่สามารถลบสินค้านี้',
+            err: err.message
+        })
+        console.log(err.message)
+    }
+}
