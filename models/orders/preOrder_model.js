@@ -44,11 +44,13 @@ const preOrderSchema = new Schema(
             }   
         ],
         dieCut: String,
-        glue: {
-            amount: Number,
-            width: Number,
-            long: Number
-        },
+        glue: [
+            {
+                mark: String,
+                width: Number,
+                long: Number
+            }
+        ],
         note: String
     },
     {
