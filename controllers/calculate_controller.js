@@ -7,14 +7,34 @@ const Emboss = require('../models/products/emboss_model.js')
 
 // send calculate all
 exports.calAll = async (req, res) => {
-    const { order, width, long, cut, lay,
-        rawMattData, plateData, printData, coatingData, embossData
-    } = req.body
-    let costs = []
+    const { rawMattData, plateData, printData, coatingData, embossData } = req.body
+    let datas = []
+    let costs = {}
     try {
-        
+        const rawMatt_cost = await calRawMattCost(rawMattData)
+        datas.push({rawMatt:rawMatt_cost.data})
+        costs.rawMatt = rawMatt_cost.cost
 
+        const plate_cost = await calPlateCost(plateData)
+        datas.push({plate:plate_cost.data})
+        costs.plate = plate_cost.cost
 
+        const print_cost = await calPrintCost(printData)
+        datas.push({print:print_cost.data})
+        costs.print = print_cost.cost
+
+        const coating_cost = await calCoatingCost(coatingData)
+        datas.push({coating:coating_cost.data})
+        costs.coating = coating_cost.cost
+
+        console.log(costs)
+        const costIncosts = Object.values(costs)
+        const sumCost = costIncosts.reduce( (a, b)=> a + b )
+        return res.send({
+            datas: datas,
+            costDetails: costs,
+            sumCost: sumCost
+        })
     }
     catch(err) {
         res.status(500).send({
@@ -26,12 +46,12 @@ exports.calAll = async (req, res) => {
 }
 
 // calculate Raw-Material
-const calRawMaterial = async (req,res) => {
+const calRawMattCost = async (rawMattData) => {
     const {
         type, subType,
         gsm, width, long,
         order, cut, lay 
-    } = req.body
+    } = rawMattData
 
     try {
         const rawMatt = await RawMatt.findOne({
@@ -39,16 +59,10 @@ const calRawMaterial = async (req,res) => {
             subType: subType,
         })
         if(!rawMatt){
-            return res.status(404).send({
-                message: 'ไม่พบประเภทสินค้านี้ในระบบ',
-                product: rawMatt
-            })
+            return 0
         }
         if(rawMatt && !rawMatt.option || rawMatt && rawMatt.option.length === 0){
-            return res.status(404).send({
-                message: 'สินค้านี้ยังไม่ได้เพิ่มรายละเอียด',
-                product: rawMatt
-            })
+            return 0
         }
 
         const match_option = rawMatt.option.filter(item=>
@@ -57,10 +71,7 @@ const calRawMaterial = async (req,res) => {
             item.long === long
         )
         if(match_option.length===0){
-            return res.status(404).send({
-                message: 'ไม่พบตัวเลือกสินค้านี้ในระบบ',
-                option: match_option
-            })
+            return 0
         }
 
         const option = match_option[0]
@@ -110,11 +121,7 @@ const calRawMaterial = async (req,res) => {
 
         }
 
-        return res.send({
-            message: 'คำนวณ RawMatt สำเร็จ',
-            success: true,
-            result: calRawMaterial
-        })
+        return {cost:calRawMaterial.paper.cost ,data:calRawMaterial}
         
     }
     catch (err) {
@@ -123,6 +130,151 @@ const calRawMaterial = async (req,res) => {
     }
 }
 
+// calculate Plate
+const calPlateCost = async (plateData) => {
+    if(!plateData){
+        return {cost: 0, data: null}
+    }
+    const { size, colors } = plateData
+
+    try {
+        const plate = await Plate.findOne({
+            size: size,
+        })
+        if(!plate){
+            return {cost: 0, data: null}
+        }
+
+        const reqColors = parseInt(colors)
+        const plate_price = plate.price*reqColors
+        
+        const calPlate = {
+            size: plate.size || size,
+            ppu: plate.price,
+            colors: reqColors || colors,
+            result: plate_price,
+            details: {
+                เพลทตัด: plate.size || size,
+                ราคาต่อสี: plate.price,
+                จำนวนสี: `${reqColors || colors} สี`,
+                ราคารวม: plate_price
+            }
+        }
+
+        return {
+            cost: calPlate.result,
+            data: calPlate
+        }
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        conbsole.log(err.message)
+    }
+}
+
+// calculate Print
+const calPrintCost = async (printData) => {
+
+    if(!printData){
+        return {cost: 0, data: null}
+    }
+
+    const { 
+        colors,
+        order, lay 
+    } = printData
+
+    try {
+        const print = await Print.findOne({
+            colors: parseInt(colors)
+        })
+        if(!print){
+            return {cost: 0, data: 'ไม่พบ'}
+        }
+
+        const order_lay = parseInt(order)/parseInt(lay)
+        
+        const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
+        if(option.length!==1){
+            return {cost: 0, data: 'ไม่พบ'}
+        }
+
+        const cal_print = {
+            order_lay: order_lay,
+            round: option[0].round.join,
+            price: (option[0].round.start >= 10001)
+            ? option[0].price*order_lay : option[0].price
+        }
+
+        return {cost: cal_print.price, data: cal_print}
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        conbsole.log(err.message)
+    }
+}
+
+// calculate Coating
+const calCoatingCost = async (coatingData) => {
+    if(!coatingData){
+        return {cost: 0, data: null}
+    }
+    const { 
+        type, subType,
+        width, long, cut,
+        order, lay 
+    } = coatingData
+
+    try {
+        const coating = await Coating.findOne({
+            type: type
+        })
+        if(!coating){
+            return {cost: 0, data: 'ไม่พบ'}
+        }
+
+        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        const inWidth = width/cut
+        const inLong = long/cut
+        
+        const option = coating.option.filter(item=>item.subType === subType)
+        if(option.length!==1){
+            return {cost: 0, data: 'ไม่พบ'}
+        }
+
+        const coating_option = option[0]
+
+        const coating_price = 
+            (type==='spot-uv' && coating_option.avr*inWidth*inLong < 1.2) ? 1.2
+            : (type==='dip-off') ? 5
+            : coating_option.avr*inWidth*inLong
+        const total_price = coating_price*(order/lay)
+
+        const cal_coating = {
+            inWidth: inWidth,
+            inLong: inLong,
+            order_lay: order_lay,
+            avr: coating_option.avr,
+            coating_price: parseFloat(coating_price.toFixed(2)),
+            price: (total_price < coating_option.minPrice)
+            ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
+        }
+
+        return {cost: cal_coating.price, data: cal_coating}
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        conbsole.log(err.message)
+    }
+}
+
+/*--------------------------------------------------------------
+-------------------------alone calculate------------------------
+--------------------------------------------------------------*/
+ 
 // calculate Raw-Material
 exports.calRawMaterial = async (req,res) => {
     const {
