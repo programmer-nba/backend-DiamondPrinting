@@ -217,6 +217,53 @@ exports.updatePreOrder = async (req, res) => {
     }
 }
 
+exports.addProductionDatas = async (req, res) => {
+    const { id } = req.params
+    const { rawMattData, printData, plateData } = req.body
+    try {
+        const preOrder = await PreOrder.findById(id)
+        const updated_preOrder = await PreOrder.findByIdAndUpdate(id,
+            {
+                $push: {   
+                    production: null,
+                    rawMattData : {
+                        order : preOrder.order.amount, // from pre-order
+                        type : preOrder.paper.type, // from pre-order
+                        subType: preOrder.paper.subType, // from pre-order
+
+                        gsm: rawMattData.gsm, 
+                        width: rawMattData.width,
+                        long: rawMattData.long,
+                        cut : rawMattData.cut,
+                        lay : rawMattData.lay
+                    },
+                    plateData : {
+                        colors : [preOrder.colors.front, preOrder.colors.back], // from pre-order
+                        size : plateData.size
+                    },
+                    printData : {
+                        colors : [preOrder.colors.front, preOrder.colors.back], // from pre-order
+                        order : preOrder.order.amount, // from pre-order
+                        lay : rawMattData.lay
+                    }
+                }
+            }
+        )
+        if(!updated_preOrder){
+            return res.send({
+                message: 'can not update',
+                updated_preOrder: updated_preOrder
+            })
+        }
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).send({
+            message: err.message
+        })
+    }
+}
+
 exports.creatQuotation = async (req, res) => {
     try {
 

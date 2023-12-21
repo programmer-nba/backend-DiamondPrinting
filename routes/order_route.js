@@ -8,4 +8,6 @@ route.get('/pre-orders', Order.getPreOrders)
 route.get('/pre-order/:id', Order.getPreOrder)
 route.put('/pre-order/:id', Order.updatePreOrder)
 
+route.put('/pre-production/:id', Order.addProductionDatas)
+
 module.exports = route

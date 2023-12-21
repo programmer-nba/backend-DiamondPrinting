@@ -19,10 +19,12 @@ exports.calAll = async (req, res) => {
         datas.push({plate:plate_cost.data})
         costs.plate = plate_cost.cost
 
-        const print_cost = await calPrintCost(printData)
-        datas.push({print:print_cost.data})
-        costs.print = print_cost.cost
-
+        for (i in printData.colors) {
+            const print_cost = await calPrintCost(printData)
+            datas.push({[`print_${i}`]:print_cost.data})
+            costs[`print${i}`] = print_cost.cost
+        }
+        
         const coating_cost = await calCoatingCost(coatingData)
         datas.push({coating:coating_cost.data})
         costs.coating = coating_cost.cost
@@ -182,7 +184,7 @@ const calPrintCost = async (printData) => {
 
     const { 
         colors,
-        order, lay 
+        order, lay
     } = printData
 
     try {
