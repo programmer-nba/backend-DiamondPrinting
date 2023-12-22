@@ -3,6 +3,7 @@ const { Schema } = mongoose
 
 const preProductionSchema = new Schema(
     {
+        code: String,
         production: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Production',
@@ -13,7 +14,6 @@ const preProductionSchema = new Schema(
             ref: 'PreOrder'
         },
         rawMattData : {
-            order : Number, // from pre-order
             type : {
                 type: String
             }, 
@@ -30,7 +30,6 @@ const preProductionSchema = new Schema(
         },
         printData : {
             colors : [Number, Number], // from pre-order
-            order : Number, // from pre-order
             lay : Number
         },
         coatingData : {
@@ -43,7 +42,6 @@ const preProductionSchema = new Schema(
             width: Number, // from pre-order
             long: Number, // from pre-order
             cut: Number,  // from pre-order
-            order: Number, // from pre-order
             lay: Number // from pre-order
         }
     }

@@ -9,16 +9,21 @@ exports.addPreOrder = async (req, res) => {
         customer,
         name,
         brand,
-        order,
+
+        demensions,
         paper,
+
         colors_front,
         colors_back,
-        //pantone,
+        front_pantone,
+        back_pantone,
+
         coating,
         hotStamp,
         emboss,
         dieCut,
         glue,
+
         note
     } = req.body
     
@@ -53,38 +58,44 @@ exports.addPreOrder = async (req, res) => {
         // add new pre-order
         const new_preOrder = new PreOrder({
             customer: curCustomer._id,
-            name: name,
-            brand: brand,
-            order: {
-                amount: order.amount,
-                demensions: {
-                    width: order.width,
-                    long: order.long,
-                    height: order.height
-                }
+            name: (name) && name,
+            brand: (brand) && brand,
+            
+            demensions: (demensions) && {
+                width: demensions.width,
+                long: demensions.long,
+                height: demensions.height
             },
+            
             paper: {
-                type: paper.type,
-                subType: paper.subType
+                type: (paper && paper.type) && paper.type,
+                subType: (paper && paper.subType) && paper.subType
             },
+
             colors: {
-                front: colors_front || null,
-                back: colors_back || null
+                front: (colors_front) ? colors_front : 0,
+                front_pantone: (front_pantone) && front_pantone,
+                back: (colors_back) ? colors_back : 0,
+                back_pantone: (back_pantone) && back_pantone,
             },
-            //pantone: pantone || null,
-            /* coating: {
-                method: {
+
+            coating: {
+                method: (coating && coating.method) ? {
                     type: coating.method.type || null,
                     subType: coating.method.subType || null
-                },
-                spotUv: coating.spotUv || null,
-                dipOff: coating.dipOff || null
-            }, */
-            hotStamp: hotStamp || null,
-            emboss: emboss || null,
-            dieCut: dieCut || null,
-            glue: glue || null,
-            note: note || ''
+                } : null,
+                spotUv: (coating && coating.spotUv) ? coating.spotUv : null,
+                dipOff: (coating && coating.dipOff) ? coating.dipOff : null
+            },
+
+            hotStamp: (hotStamp) ? hotStamp : null,
+            emboss: (emboss) ? emboss : null,
+
+            dieCut: (dieCut) ? dieCut : null,
+
+            glue: (glue) ? glue : null,
+
+            note: (note) ? note : ''
         })
         const saved_preOrder = await new_preOrder.save()
         if(!saved_preOrder){
@@ -157,11 +168,12 @@ exports.getPreOrder = async (req, res) => {
 exports.updatePreOrder = async (req, res) => {
     const { id } = req.params
     const {
-        order,
+        demensions,
         paper,
         colors_front,
         colors_back,
-        //pantone,
+        front_pantone,
+        back_pantone,
         coating,
         hotStamp,
         emboss,
@@ -178,16 +190,17 @@ exports.updatePreOrder = async (req, res) => {
             })
         }
         
-        preOrder.order.amount = (order && order.amount) ? order.amount : preOrder.order.amount
-        preOrder.order.demensions.width = (order && order.width) ? order.width : preOrder.order.demensions.width
-        preOrder.order.demensions.long = (order && order.long) ? order.long : preOrder.order.demensions.long
-        preOrder.order.demensions.height = (order && order.height) ? order.height : preOrder.order.demensions.height
+        preOrder.demensions.width = (demensions && demensions.width) ? demensions.width : preOrder.demensions.width
+        preOrder.demensions.long = (demensions && demensions.long) ? demensions.long : preOrder.demensions.long
+        preOrder.demensions.height = (demensions && demensions.height) ? demensions.height : preOrder.demensions.height
             
         preOrder.paper.type = (paper && paper.type) ? paper.type : preOrder.paper.type
         preOrder.paper.subType = (paper && paper.subType) ? paper.subType : preOrder.paper.subType
        
         preOrder.colors.front = (colors_front) ? colors_front : preOrder.colors.front
         preOrder.colors.back = (colors_back) ? colors_back : preOrder.colors.back
+        preOrder.colors.front_pantone = (front_pantone) ? front_pantone : preOrder.colors.front_pantone
+        preOrder.colors.back_pantone = (back_pantone) ? back_pantone : preOrder.colors.back_pantone
         
         preOrder.coating.type = (coating && coating.type) ? coating.type : preOrder.coating.type
         preOrder.coating.subType = (coating && coating.subType) ? coating.subType : preOrder.coating.subType
@@ -296,7 +309,9 @@ exports.getPreProductionsOfOrder = async (req, res) => {
 
 exports.addPreProduction = async (req, res) => {
     const { id } = req.params
-    const { rawMattData, plateData } = req.body
+    const { userId, userName, userRole } = req.user
+    const { files } = req.files
+    const { gsm, width, long, cut, lay, plateSize } = req.body
 
     try {
         const preOrder = await PreOrder.findById(id)
@@ -310,34 +325,31 @@ exports.addPreProduction = async (req, res) => {
             production: null,
             preOrder: id,
             rawMattData : {
-                order : preOrder.order.amount, // from pre-order
-                type : preOrder.paper.type, // from pre-order
-                subType: preOrder.paper.subType, // from pre-order
-                gsm: rawMattData.gsm, 
-                width: rawMattData.width,
-                long: rawMattData.long,
-                cut : rawMattData.cut,
-                lay : rawMattData.lay
+                type : (preOrder.paper && preOrder.paper.type) && preOrder.paper.type, // from pre-order
+                subType: (preOrder.paper && preOrder.paper.subType) &&  preOrder.paper.subType, // from pre-order
+                gsm: (gsm) && gsm, 
+                width: (width) && width,
+                long: (long) && long,
+                cut : (cut) && cut,
+                lay : (lay) && lay
             },
             plateData : {
-                colors : [preOrder.colors.front, preOrder.colors.back], // from pre-order
-                size : plateData.size
+                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
+                size : (plateSize) && plateSize
             },
             printData : {
-                colors : [preOrder.colors.front, preOrder.colors.back], // from pre-order
-                order : preOrder.order.amount, // from pre-order
-                lay : rawMattData.lay
+                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
+                lay : (lay) && lay
             },
             coatingData : {
-                method: {
+                method: (preOrder.coating && preOrder.coating.method) ? {
                     type: preOrder.coating.method.type, // from pre-order
                     subType: preOrder.coating.method.subType // from pre-order
-                },
-                width: rawMattData.width, // from pre-order
-                long: rawMattData.long, // from pre-order
-                cut: rawMattData.cut,  // from pre-order
-                order: preOrder.order.amount, // from pre-order
-                lay: rawMattData.lay // from pre-order
+                } : {type: null, subTypes: null},
+                width: (width) && width, // from pre-order
+                long: (long) && long, // from pre-order
+                cut: (cut) && cut,  // from pre-order
+                lay: (lay) && lay // from pre-order
             }
         })
         const saved_production = await new_preProduction.save()
@@ -412,7 +424,9 @@ exports.getPreProduction = async (req, res) => {
 
 exports.updatePreProduction = async (req, res) => {
     const { id } = req.params
-    const { rawMattData, plateData } = req.body
+    const { userId, userName, userRole } = req.user
+    const { files } = req.files
+    const { gsm, width, long, cut, lay, plateSize } = req.body
 
     try {
         let preProduction = await PreProduction.findById(id)
@@ -422,15 +436,15 @@ exports.updatePreProduction = async (req, res) => {
             })
         }
         
-        preProduction.rawMattData.gsm = rawMattData.gsm || preProduction.rawMattData.gsm, 
-        preProduction.rawMattData.width = rawMattData.width || preProduction.rawMattData.width,
-        preProduction.rawMattData.long = rawMattData.long || preProduction.rawMattData.long,
-        preProduction.rawMattData.cut = rawMattData.cut || preProduction.rawMattData.cut,
-        preProduction.rawMattData.lay = rawMattData.lay || preProduction.rawMattData.lay
+        preProduction.rawMattData.gsm = gsm || preProduction.rawMattData.gsm, 
+        preProduction.rawMattData.width = width || preProduction.rawMattData.width,
+        preProduction.rawMattData.long = long || preProduction.rawMattData.long,
+        preProduction.rawMattData.cut = cut || preProduction.rawMattData.cut,
+        preProduction.rawMattData.lay = lay || preProduction.rawMattData.lay
     
-        preProduction.plateData.size = plateData.size || preProduction.plateData.size
+        preProduction.plateData.size = plateSize || preProduction.plateData.size
     
-        preProduction.printData.lay = rawMattData.lay || preProduction.printData.lay
+        preProduction.printData.lay = lay || preProduction.printData.lay
             
         const updated_production = await preProduction.save()
         if(!updated_production){
@@ -480,22 +494,9 @@ exports.deletePreProduction = async (req, res) => {
 
 // Order------------------------------------------
 
-exports.createOrder = async (req, res) => {
-    const {id} = req.params
-    try {
-
-    }
-    catch(err) {
-        res.send({
-            message: err.message
-        })
-        console.log(err)
-    }
-}
-
 exports.creatQuotation = async (req, res) => {
-    const {id} = req.params
-    const {userId, userRole, userName} = req.user
+    const { id } = req.params
+    const { userId, userRole, userName } = req.user
     const { datas, costDetails, sumCost } = req.body
     try {
         const preProduction = await PreProduction.findById(id)

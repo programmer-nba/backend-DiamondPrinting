@@ -3,6 +3,7 @@ const {Schema} = mongoose
 
 const preOrderSchema = new Schema(
     { 
+        code: String,
         customer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customer'
@@ -13,14 +14,13 @@ const preOrderSchema = new Schema(
         },
         name: String,
         brand: String,
-        order: {
-            amount: Number,
-            demensions: {
-                width: Number,
-                long: Number,
-                height: Number
-            }
+        
+        demensions: {
+            width: Number,
+            long: Number,
+            height: Number
         },
+       
         paper: {
             type: {
                 type: String
@@ -29,9 +29,10 @@ const preOrderSchema = new Schema(
         },
         colors: {
             front: Number,
-            back: Number
+            front_pantone: String,
+            back: Number,
+            back_pantone: String,
         },
-        //pantone: [{type:String}],
         coating: {
             method: {
                 type: {

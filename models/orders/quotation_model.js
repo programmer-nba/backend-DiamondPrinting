@@ -3,6 +3,7 @@ const {Schema} = mongoose
 
 const quotationSchema = new Schema(
     {
+        code: String,
         customer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customer'

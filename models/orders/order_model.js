@@ -3,6 +3,7 @@ const {Schema} = mongoose
 
 const orderSchema = new Schema(
     {
+        code: String,
         client: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customer'
