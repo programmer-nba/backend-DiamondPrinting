@@ -32,6 +32,19 @@ const preProductionSchema = new Schema(
             colors : [Number, Number], // from pre-order
             order : Number, // from pre-order
             lay : Number
+        },
+        coatingData : {
+            method: {
+                type: {
+                    type: String
+                },
+                subType: String
+            },
+            width: Number, // from pre-order
+            long: Number, // from pre-order
+            cut: Number,  // from pre-order
+            order: Number, // from pre-order
+            lay: Number // from pre-order
         }
     }
 )

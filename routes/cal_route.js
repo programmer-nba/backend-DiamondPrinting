@@ -3,7 +3,7 @@ const route = require('express').Router()
 // controllers
 const Cal = require('../controllers/calculate_controller.js')
 
-route.post('/:id', Cal.calAll)
+route.post('/all/:id', Cal.calAll)
 route.post('/rawMatt', Cal.calRawMaterial)
 route.post('/plate', Cal.calPlate)
 route.post('/print', Cal.calPrint)

@@ -7,6 +7,8 @@ const PreProduction = require('../models/orders/preProduction_model.js')
 exports.addPreOrder = async (req, res) => {
     const {
         customer,
+        name,
+        brand,
         order,
         paper,
         colors_front,
@@ -51,6 +53,8 @@ exports.addPreOrder = async (req, res) => {
         // add new pre-order
         const new_preOrder = new PreOrder({
             customer: curCustomer._id,
+            name: name,
+            brand: brand,
             order: {
                 amount: order.amount,
                 demensions: {
@@ -69,7 +73,10 @@ exports.addPreOrder = async (req, res) => {
             },
             //pantone: pantone || null,
             coating: {
-                method: coating.method || null,
+                method: {
+                    type: coating.method.type || null,
+                    subType: coating.method.subType || null
+                },
                 spotUv: coating.spotUv || null,
                 dipOff: coating.dipOff || null
             },
@@ -320,6 +327,17 @@ exports.addPreProduction = async (req, res) => {
                 colors : [preOrder.colors.front, preOrder.colors.back], // from pre-order
                 order : preOrder.order.amount, // from pre-order
                 lay : rawMattData.lay
+            },
+            coatingData : {
+                method: {
+                    type: preOrder.coating.method.type, // from pre-order
+                    subType: preOrder.coating.method.subType // from pre-order
+                },
+                width: rawMattData.width, // from pre-order
+                long: rawMattData.long, // from pre-order
+                cut: rawMattData.cut,  // from pre-order
+                order: preOrder.order.amount, // from pre-order
+                lay: rawMattData.lay // from pre-order
             }
         })
         const saved_production = await new_preProduction.save()
@@ -462,9 +480,43 @@ exports.deletePreProduction = async (req, res) => {
 
 // Order------------------------------------------
 
-exports.creatQuotation = async (req, res) => {
+exports.createOrder = async (req, res) => {
+    const {id} = req.params
     try {
 
+    }
+    catch(err) {
+        res.send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
+exports.creatQuotation = async (req, res) => {
+    const {id} = req.params
+    const {userId, userRole, userName} = req.user
+    const { datas, costDetails, sumCost } = req.body
+    try {
+        const preProduction = await PreProduction.findById(id)
+        if(!preProduction || preProduction.length===0){
+            return res.send({
+                message: 'ไม่พบรายการนี้ในระบบ',
+                preProduction: preProduction
+            })
+        }
+
+        const preOrder = await PreOrder.findById(preProduction.preOrder).populate('customer', 'nameTh nameEng taxID contact')
+        if(!preOrder || preOrder.length===0){
+            return res.send({
+                message: 'ไม่พบรายการนี้ในระบบ',
+                preOrder: preOrder
+            })
+        }
+
+        const new_quotation = {
+            
+        }
     }
     catch (err) {
         res.status(500).send({

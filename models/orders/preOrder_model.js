@@ -11,6 +11,8 @@ const preOrderSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Sale'
         },
+        name: String,
+        brand: String,
         order: {
             amount: Number,
             demensions: {
@@ -31,7 +33,12 @@ const preOrderSchema = new Schema(
         },
         //pantone: [{type:String}],
         coating: {
-            method: String,
+            method: {
+                type: {
+                    type: String
+                },
+                subType: String
+            },
             spotUv: Boolean,
             dipOff: Boolean
         },

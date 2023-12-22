@@ -36,7 +36,12 @@ exports.calAll = async (req, res) => {
         
         if(printData){
             for (i in printData.colors) {
-                const print_cost = await calPrintCost(printData)
+                const sendPrint = {
+                    order: printData.order,
+                    lay: printData.lay,
+                    colors: printData.colors[i]
+                }
+                const print_cost = await calPrintCost(sendPrint)
                 datas.push({[`print_${i}`]:print_cost.data})
                 costs[`print${i}`] = print_cost.cost
             }
@@ -62,7 +67,7 @@ exports.calAll = async (req, res) => {
             message: 'ไม่สามารถส่งการคำนวณได้',
             err: err.message
         })
-        console.log(err.message)
+        console.log(err)
     }
 }
 
@@ -232,8 +237,7 @@ const calPrintCost = async (printData) => {
         
     }
     catch (err) {
-        res.send(`ERR : ${err.message}`)
-        conbsole.log(err.message)
+        return {cost: 0, data: 'ไม่พบ'}
     }
 }
 
@@ -243,14 +247,14 @@ const calCoatingCost = async (coatingData) => {
         return {cost: 0, data: null}
     }
     const { 
-        type, subType,
+        method,
         width, long, cut,
         order, lay 
     } = coatingData
 
     try {
         const coating = await Coating.findOne({
-            type: type
+            type: method.type
         })
         if(!coating){
             return {cost: 0, data: 'ไม่พบ'}
@@ -260,7 +264,7 @@ const calCoatingCost = async (coatingData) => {
         const inWidth = width/cut
         const inLong = long/cut
         
-        const option = coating.option.filter(item=>item.subType === subType)
+        const option = coating.option.filter(item=>item.subType === method.subType)
         if(option.length!==1){
             return {cost: 0, data: 'ไม่พบ'}
         }
@@ -268,8 +272,8 @@ const calCoatingCost = async (coatingData) => {
         const coating_option = option[0]
 
         const coating_price = 
-            (type==='spot-uv' && coating_option.avr*inWidth*inLong < 1.2) ? 1.2
-            : (type==='dip-off') ? 5
+            (method.type==='spot-uv' && coating_option.avr*inWidth*inLong < 1.2) ? 1.2
+            : (method.type==='dip-off') ? 5
             : coating_option.avr*inWidth*inLong
         const total_price = coating_price*(order/lay)
 
@@ -489,14 +493,14 @@ exports.calPrint = async (req,res) => {
 // calculate Coating
 exports.calCoating = async (req,res) => {
     const { 
-        type, subType,
+        method,
         width, long, cut,
         order, lay 
     } = req.body
 
     try {
         const coating = await Coating.findOne({
-            type: type
+            'method.type': method.type
         })
         if(!coating){
             return res.send({
@@ -509,7 +513,7 @@ exports.calCoating = async (req,res) => {
         const inWidth = width/cut
         const inLong = long/cut
         
-        const option = coating.option.filter(item=>item.subType === subType)
+        const option = coating.option.filter(item=>item.subType === method.subType)
         if(option.length!==1){
             return res.status(404).send({
                 message: 'ไม่พบเรทราคาในช่วงเลเอาท์นี้',
@@ -520,8 +524,8 @@ exports.calCoating = async (req,res) => {
         const coating_option = option[0]
 
         const coating_price = 
-            (type==='spot-uv' && coating_option.avr*inWidth*inLong < 1.2) ? 1.2
-            : (type==='dip-off') ? 5
+            (method.type==='spot-uv' && coating_option.avr*inWidth*inLong < 1.2) ? 1.2
+            : (method.type==='dip-off') ? 5
             : coating_option.avr*inWidth*inLong
         const total_price = coating_price*(order/lay)
 
@@ -544,7 +548,7 @@ exports.calCoating = async (req,res) => {
     }
     catch (err) {
         res.send(`ERR : ${err.message}`)
-        conbsole.log(err.message)
+        conbsole.log(err)
     }
 }
 
