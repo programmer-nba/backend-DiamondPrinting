@@ -4,30 +4,49 @@ const Plate = require('../models/products/plate_model.js')
 const Print = require('../models/products/print_model.js')
 const Coating = require('../models/products/coating_model.js')
 const Emboss = require('../models/products/emboss_model.js')
+const PreProduction = require('../models/orders/preProduction_model.js')
 
-// send calculate all
 exports.calAll = async (req, res) => {
-    const { rawMattData, plateData, printData, coatingData, embossData } = req.body
+    const { id } = req.params // _id of preProduction
     let datas = []
     let costs = {}
     try {
-        const rawMatt_cost = await calRawMattCost(rawMattData)
-        datas.push({rawMatt:rawMatt_cost.data})
-        costs.rawMatt = rawMatt_cost.cost
 
-        const plate_cost = await calPlateCost(plateData)
-        datas.push({plate:plate_cost.data})
-        costs.plate = plate_cost.cost
+        const preProduction = await PreProduction.findById(id)
+        console.log(preProduction)
+        if(!preProduction || preProduction.length===0){
+            return res.send({
+                massage: 'ไม่พบรายการนี้ในระบบ'
+            })
+        }
 
-        for (i in printData.colors) {
-            const print_cost = await calPrintCost(printData)
-            datas.push({[`print_${i}`]:print_cost.data})
-            costs[`print${i}`] = print_cost.cost
+        const {rawMattData, plateData, printData, coatingData} = preProduction
+
+        if(rawMattData){
+            const rawMatt_cost = await calRawMattCost(rawMattData)
+            datas.push({rawMatt:rawMatt_cost.data})
+            costs.rawMatt = rawMatt_cost.cost
         }
         
-        const coating_cost = await calCoatingCost(coatingData)
-        datas.push({coating:coating_cost.data})
-        costs.coating = coating_cost.cost
+        if(plateData){
+            const plate_cost = await calPlateCost(plateData)
+            datas.push({plate:plate_cost.data})
+            costs.plate = plate_cost.cost
+        }
+        
+        if(printData){
+            for (i in printData.colors) {
+                const print_cost = await calPrintCost(printData)
+                datas.push({[`print_${i}`]:print_cost.data})
+                costs[`print${i}`] = print_cost.cost
+            }
+        }
+        
+        if(coatingData){
+            const coating_cost = await calCoatingCost(coatingData)
+            datas.push({coating:coating_cost.data})
+            costs.coating = coating_cost.cost
+        }
 
         console.log(costs)
         const costIncosts = Object.values(costs)

@@ -1,5 +1,8 @@
 const Customer = require('../models/customers/customer_model.js')
 const PreOrder = require('../models/orders/preOrder_model.js')
+const PreProduction = require('../models/orders/preProduction_model.js')
+
+// Sale ----------------------------------------
 
 exports.addPreOrder = async (req, res) => {
     const {
@@ -66,8 +69,7 @@ exports.addPreOrder = async (req, res) => {
             },
             //pantone: pantone || null,
             coating: {
-                type: coating.type || null,
-                subType: coating.subType || null,
+                method: coating.method || null,
                 spotUv: coating.spotUv || null,
                 dipOff: coating.dipOff || null
             },
@@ -129,12 +131,12 @@ exports.getPreOrder = async (req, res) => {
         if(!preOrder || preOrder.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
-                preOrders: preOrder
+                preOrder: preOrder
             })
         }
         return res.send({
             success: true,
-            preOrders: preOrder
+            preOrder: preOrder
         })
     }
     catch (err) {
@@ -217,44 +219,122 @@ exports.updatePreOrder = async (req, res) => {
     }
 }
 
-exports.addProductionDatas = async (req, res) => {
+exports.deletePreOrder = async (req, res) => {
     const { id } = req.params
-    const { rawMattData, printData, plateData } = req.body
     try {
-        const preOrder = await PreOrder.findById(id)
-        const updated_preOrder = await PreOrder.findByIdAndUpdate(id,
-            {
-                $push: {   
-                    production: null,
-                    rawMattData : {
-                        order : preOrder.order.amount, // from pre-order
-                        type : preOrder.paper.type, // from pre-order
-                        subType: preOrder.paper.subType, // from pre-order
-
-                        gsm: rawMattData.gsm, 
-                        width: rawMattData.width,
-                        long: rawMattData.long,
-                        cut : rawMattData.cut,
-                        lay : rawMattData.lay
-                    },
-                    plateData : {
-                        colors : [preOrder.colors.front, preOrder.colors.back], // from pre-order
-                        size : plateData.size
-                    },
-                    printData : {
-                        colors : [preOrder.colors.front, preOrder.colors.back], // from pre-order
-                        order : preOrder.order.amount, // from pre-order
-                        lay : rawMattData.lay
-                    }
-                }
-            }
-        )
-        if(!updated_preOrder){
+        const preOrder = await PreOrder.findByIdAndDelete(id)
+        if(!preOrder || preOrder.length===0){
             return res.send({
-                message: 'can not update',
-                updated_preOrder: updated_preOrder
+                message: 'ไม่พบรายการ',
+                preOrders: preOrder
             })
         }
+
+        const preProductions = await PreProduction.find({
+            preOrder: id
+        })
+        if(preProductions.length > 0){
+            for(i of preProductions){
+                const preProduction = await PreProduction.findByIdAndDelete(i._id)
+                if(!preProduction){
+                    return res.send({
+                        message: 'ไม่สามารถลบรายการย่อยนี้',
+                        preProduction: preProduction
+                    })
+                }
+            } 
+        }
+
+        return res.send({
+            success: true,
+            message: 'success delete'
+        })
+    }
+    catch (err) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
+exports.getPreProductionsOfOrder = async (req, res) => {
+    const {id} = req.params
+    try {
+        const preProductions = await PreProduction.find({
+            preOrder: id
+        })
+        if(!preProductions){
+            return res.send({
+                message: 'ไม่พบรายการนี้ในระบบ',
+                preProductions: preProductions || []
+            })
+        }
+
+        return res.send({
+            message: `มีรายการทั้งหมด ${preProductions.length} รายการ`,
+            success: true,
+            preProductions: preProductions || []
+        })
+    }
+    catch (err) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+// Production -----------------------------------
+
+exports.addPreProduction = async (req, res) => {
+    const { id } = req.params
+    const { rawMattData, plateData } = req.body
+
+    try {
+        const preOrder = await PreOrder.findById(id)
+        if(!preOrder){
+            return res.send({
+                message: 'ไม่พบ pre-order นี้'
+            })
+        }
+        
+        const new_preProduction = new PreProduction({
+            production: null,
+            preOrder: id,
+            rawMattData : {
+                order : preOrder.order.amount, // from pre-order
+                type : preOrder.paper.type, // from pre-order
+                subType: preOrder.paper.subType, // from pre-order
+                gsm: rawMattData.gsm, 
+                width: rawMattData.width,
+                long: rawMattData.long,
+                cut : rawMattData.cut,
+                lay : rawMattData.lay
+            },
+            plateData : {
+                colors : [preOrder.colors.front, preOrder.colors.back], // from pre-order
+                size : plateData.size
+            },
+            printData : {
+                colors : [preOrder.colors.front, preOrder.colors.back], // from pre-order
+                order : preOrder.order.amount, // from pre-order
+                lay : rawMattData.lay
+            }
+        })
+        const saved_production = await new_preProduction.save()
+        if(!saved_production){
+            return res.send({
+                message: 'can not create',
+                saved_production: saved_production
+            })
+        }
+
+        return res.send({
+            message: 'success!',
+            preProduction: saved_production,
+            success: true
+        })
     }
     catch (err) {
         console.log(err)
@@ -263,6 +343,124 @@ exports.addProductionDatas = async (req, res) => {
         })
     }
 }
+
+exports.getPreProductions = async (req, res) => {
+    try {
+        const preProductions = await PreProduction.find()
+        if(!preProductions || preProductions.length===0){
+            return res.send({
+                message: 'ไม่พบรายการนี้ในระบบ',
+                preProductions: preProductions || []
+            })
+        }
+
+        return res.send({
+            message: `มีรายการทั้งหมด ${preProductions.length} รายการ`,
+            success: true,
+            preProductions: preProductions
+        })
+    }
+    catch (err) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+exports.getPreProduction = async (req, res) => {
+    const {id} = req.params
+    try {
+        const preProduction = await PreProduction.findById(id)
+        if(!preProduction){
+            return res.send({
+                message: 'ไม่พบรายการนี้ในระบบ',
+                preProductions: preProduction || []
+            })
+        }
+
+        return res.send({
+            success: true,
+            preProductions: preProduction
+        })
+    }
+    catch (err) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+exports.updatePreProduction = async (req, res) => {
+    const { id } = req.params
+    const { rawMattData, plateData } = req.body
+
+    try {
+        let preProduction = await PreProduction.findById(id)
+        if(!preProduction){
+            return res.send({
+                message: 'ไม่พบ pre-order นี้'
+            })
+        }
+        
+        preProduction.rawMattData.gsm = rawMattData.gsm || preProduction.rawMattData.gsm, 
+        preProduction.rawMattData.width = rawMattData.width || preProduction.rawMattData.width,
+        preProduction.rawMattData.long = rawMattData.long || preProduction.rawMattData.long,
+        preProduction.rawMattData.cut = rawMattData.cut || preProduction.rawMattData.cut,
+        preProduction.rawMattData.lay = rawMattData.lay || preProduction.rawMattData.lay
+    
+        preProduction.plateData.size = plateData.size || preProduction.plateData.size
+    
+        preProduction.printData.lay = rawMattData.lay || preProduction.printData.lay
+            
+        const updated_production = await preProduction.save()
+        if(!updated_production){
+            return res.send({
+                message: 'can not create',
+                updated_production: updated_production
+            })
+        }
+
+        return res.send({
+            message: 'success!',
+            preProduction: updated_production,
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).send({
+            message: err.message
+        })
+    }
+}
+
+exports.deletePreProduction = async (req, res) => {
+    const {id} = req.params
+    try {
+        const preProduction = await PreProduction.findByIdAndDelete(id)
+        if(!preProduction){
+            return res.send({
+                message: 'ไม่พบรายการนี้ในระบบ',
+                preProductions: preProduction || []
+            })
+        }
+
+        return res.send({
+            success: true,
+            message: 'delete success'
+        })
+    }
+    catch (err) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+// Order------------------------------------------
 
 exports.creatQuotation = async (req, res) => {
     try {

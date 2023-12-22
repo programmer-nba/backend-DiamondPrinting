@@ -59,41 +59,6 @@ const preOrderSchema = new Schema(
             }
         ],
         note: String,
-
-        response: [
-            {
-                production: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: 'Production'
-                },
-                details: [
-                    {
-                        rawMattData : {
-                            order : Number, // from pre-order
-
-                            type : String, 
-                            subType: String,
-                            gsm: Number, 
-                            width: Number,
-                            long: Number,
-                            cut : Number,
-                            lay : Number
-                        },
-                        plateData : {
-                            colors : Number, // from pre-order
-
-                            size : String
-                        },
-                        printData : {
-                            colors : [Number, Number], // from pre-order
-                            order : Number, // from pre-order
-
-                            lay : Number
-                        }
-                    }
-                ]
-            }
-        ]
     },
     {
         timestamps: true
