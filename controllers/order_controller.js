@@ -72,14 +72,14 @@ exports.addPreOrder = async (req, res) => {
                 back: colors_back || null
             },
             //pantone: pantone || null,
-            coating: {
+            /* coating: {
                 method: {
                     type: coating.method.type || null,
                     subType: coating.method.subType || null
                 },
                 spotUv: coating.spotUv || null,
                 dipOff: coating.dipOff || null
-            },
+            }, */
             hotStamp: hotStamp || null,
             emboss: emboss || null,
             dieCut: dieCut || null,
@@ -515,7 +515,7 @@ exports.creatQuotation = async (req, res) => {
         }
 
         const new_quotation = {
-            
+
         }
     }
     catch (err) {
