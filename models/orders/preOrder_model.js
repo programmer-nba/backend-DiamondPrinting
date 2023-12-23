@@ -30,6 +30,7 @@ const preOrderSchema = new Schema(
         colors: {
             front: Number,
             front_pantone: String,
+            floor: Boolean,
             back: Number,
             back_pantone: String,
         },

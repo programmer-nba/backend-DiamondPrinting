@@ -1,29 +1,31 @@
 // models
 const RawMatt = require('../models/products/rawMatt_model.js')
 const Plate = require('../models/products/plate_model.js')
-const Print = require('../models/products/print_model.js')
+const Print_2 = require('../models/products/print_2_model.js')
+const Print_4 = require('../models/products/print_4_model.js')
 const Coating = require('../models/products/coating_model.js')
 const Emboss = require('../models/products/emboss_model.js')
 const PreProduction = require('../models/orders/preProduction_model.js')
 
 exports.calAll = async (req, res) => {
     const { id } = req.params // _id of preProduction
+    const {order} = req.body
     let datas = []
     let costs = {}
     try {
 
         const preProduction = await PreProduction.findById(id)
-        console.log(preProduction)
+        
         if(!preProduction || preProduction.length===0){
             return res.send({
                 massage: 'ไม่พบรายการนี้ในระบบ'
             })
         }
 
-        const {rawMattData, plateData, printData, coatingData} = preProduction
+        const {rawMattData, plateData, print_2_Data, print_4_Data, coatingData, embossData} = preProduction
 
         if(rawMattData){
-            const rawMatt_cost = await calRawMattCost(rawMattData)
+            const rawMatt_cost = await calRawMattCost(order,rawMattData)
             datas.push({rawMatt:rawMatt_cost.data})
             costs.rawMatt = rawMatt_cost.cost
         }
@@ -34,23 +36,38 @@ exports.calAll = async (req, res) => {
             costs.plate = plate_cost.cost
         }
         
-        if(printData){
-            for (i in printData.colors) {
+        if(print_2_Data){
+            for (i in print_2_Data.colors) {
                 const sendPrint = {
-                    order: printData.order,
                     lay: printData.lay,
                     colors: printData.colors[i]
                 }
-                const print_cost = await calPrintCost(sendPrint)
-                datas.push({[`print_${i}`]:print_cost.data})
-                costs[`print${i}`] = print_cost.cost
+                const print_2_cost = await calPrint_2_Cost(order,sendPrint)
+                datas.push({[`print_2_${i}`]:print_2_cost.data})
+                costs[`print_2_${i}`] = print_2_cost.cost
             }
         }
         
         if(coatingData){
-            const coating_cost = await calCoatingCost(coatingData)
+            const coating_cost = await calCoatingCost(order,coatingData)
             datas.push({coating:coating_cost.data})
             costs.coating = coating_cost.cost
+        }
+
+        if(embossData){
+            for (em in embossData.demensions){
+                const sendEmboss = {
+                    inWidth: embossData.demensions[em].inWidth,
+                    inLong: embossData.demensions[em].inLong,
+                    plateSize: embossData.plateSize,
+                    mark: embossData.demensions[em].mark,
+                    lay: embossData.lay
+                }
+                const emboss_cost = await calEmbossCost(order, sendEmboss)
+                datas.push({[`emboss_${em}`]:emboss_cost.data})
+                costs[`emboss_${em}`] = emboss_cost.cost
+            }
+            
         }
 
         console.log(costs)
@@ -72,11 +89,11 @@ exports.calAll = async (req, res) => {
 }
 
 // calculate Raw-Material
-const calRawMattCost = async (rawMattData) => {
+const calRawMattCost = async (order, rawMattData) => {
     const {
         type, subType,
         gsm, width, long,
-        order, cut, lay 
+        cut, lay 
     } = rawMattData
 
     try {
@@ -85,10 +102,10 @@ const calRawMattCost = async (rawMattData) => {
             subType: subType,
         })
         if(!rawMatt){
-            return 0
+            return {data: 'ไม่พบ rawMatt', cost: 0}
         }
         if(rawMatt && !rawMatt.option || rawMatt && rawMatt.option.length === 0){
-            return 0
+            return {data: 'ไม่พบ rawMatt option', cost: 0}
         }
 
         const match_option = rawMatt.option.filter(item=>
@@ -97,7 +114,7 @@ const calRawMattCost = async (rawMattData) => {
             item.long === long
         )
         if(match_option.length===0){
-            return 0
+            return {data: 'ไม่พบ macth_option', cost: 0}
         }
 
         const option = match_option[0]
@@ -200,19 +217,19 @@ const calPlateCost = async (plateData) => {
 }
 
 // calculate Print
-const calPrintCost = async (printData) => {
+const calPrint_2_Cost = async (order, print_2_Data) => {
 
-    if(!printData){
+    if(!print_2_Data){
         return {cost: 0, data: null}
     }
 
     const { 
         colors,
-        order, lay
-    } = printData
+        lay
+    } = print_2_Data
 
     try {
-        const print = await Print.findOne({
+        const print = await Print_2.findOne({
             colors: parseInt(colors)
         })
         if(!print){
@@ -242,14 +259,14 @@ const calPrintCost = async (printData) => {
 }
 
 // calculate Coating
-const calCoatingCost = async (coatingData) => {
+const calCoatingCost = async (order, coatingData) => {
     if(!coatingData){
         return {cost: 0, data: null}
     }
     const { 
         method,
         width, long, cut,
-        order, lay 
+        lay 
     } = coatingData
 
     try {
@@ -293,6 +310,61 @@ const calCoatingCost = async (coatingData) => {
     catch (err) {
         res.send(`ERR : ${err.message}`)
         conbsole.log(err.message)
+    }
+}
+
+// calculate Emboss
+const calEmbossCost = async (order, embossData) => {
+    const { 
+        inWidth, inLong, plateSize, mark,
+        lay 
+    } = embossData
+
+    try {
+        const emboss = await Emboss.find()
+        if(!emboss){
+            return {cost: 0, data: 'ไม่พบ'}
+        }
+
+        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        
+        const round_option = emboss.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
+        if(round_option.length===0){
+            return {cost: 0, data: 'ไม่พบ'}
+        }
+
+        const option = round_option[0].option.filter(item=>item.plateSize===plateSize)
+
+        const emboss_option = option[0]
+
+        const emboss_cost = Math.ceil((inWidth*inLong*26)*0.01)*100
+
+        const emboss_price = lay*emboss_cost
+        console.log(`ค่าปั้ม ${emboss_cost}`)
+
+        const pumpPrice = emboss_option.pumpPrice
+
+        const total_price = emboss_price+pumpPrice
+
+        const cal_emboss = {
+            mark: mark,
+            inWidth: inWidth,
+            inLong: inLong,
+            order_lay: order_lay,
+            pumpPrice: pumpPrice,
+            emboss_price: parseFloat(emboss_price.toFixed(2)),
+            emboss_cost: emboss_cost,
+            price: parseFloat(total_price.toFixed(2))
+        }
+
+        console.log(cal_emboss.price)
+
+        return {cost: cal_emboss.price, data: cal_emboss}
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        console.log(err.message)
     }
 }
 

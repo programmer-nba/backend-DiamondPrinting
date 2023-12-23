@@ -17,6 +17,7 @@ exports.addPreOrder = async (req, res) => {
         colors_back,
         front_pantone,
         back_pantone,
+        floor,
 
         coating,
         hotStamp,
@@ -77,6 +78,7 @@ exports.addPreOrder = async (req, res) => {
             colors: {
                 front: (colors_front) ? colors_front : 0,
                 front_pantone: (front_pantone) && front_pantone,
+                floor: (floor) && floor,
                 back: (colors_back) ? colors_back : 0,
                 back_pantone: (back_pantone) && back_pantone,
             },
@@ -123,7 +125,7 @@ exports.addPreOrder = async (req, res) => {
 
 exports.getPreOrders = async (req, res) => {
     try {
-        const preOrders = await PreOrder.find()
+        const preOrders = await PreOrder.find().populate('customer', '_id nameTh nameEng taxID address contact')
         if(!preOrders || preOrders.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
@@ -147,7 +149,7 @@ exports.getPreOrders = async (req, res) => {
 exports.getPreOrder = async (req, res) => {
     const { id } = req.params
     try {
-        const preOrder = await PreOrder.findById(id)
+        const preOrder = await PreOrder.findById(id).populate('customer', '_id nameTh nameEng taxID address contact')
         if(!preOrder || preOrder.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
@@ -176,6 +178,7 @@ exports.updatePreOrder = async (req, res) => {
         colors_back,
         front_pantone,
         back_pantone,
+        floor,
         coating,
         hotStamp,
         emboss,
@@ -203,6 +206,7 @@ exports.updatePreOrder = async (req, res) => {
         preOrder.colors.back = (colors_back) ? colors_back : preOrder.colors.back
         preOrder.colors.front_pantone = (front_pantone) ? front_pantone : preOrder.colors.front_pantone
         preOrder.colors.back_pantone = (back_pantone) ? back_pantone : preOrder.colors.back_pantone
+        preOrder.colors.floor = (floor) ? floor : preOrder.colors.floor
         
         preOrder.coating.type = (coating && coating.type) ? coating.type : preOrder.coating.type
         preOrder.coating.subType = (coating && coating.subType) ? coating.subType : preOrder.coating.subType
@@ -211,7 +215,7 @@ exports.updatePreOrder = async (req, res) => {
         
         preOrder.hotStamp = (hotStamp) ? hotStamp : preOrder.hotStamp
         preOrder.emboss = (emboss) ? emboss : preOrder.emboss
-        
+
         preOrder.dieCut = (dieCut) ? dieCut : preOrder.dieCut
 
         preOrder.glue.mark = (glue && glue.mark) ? glue.mark : preOrder.glue.mark
@@ -281,6 +285,37 @@ exports.deletePreOrder = async (req, res) => {
     }
 }
 
+exports.deletePreOrders = async (req, res) => {
+    try {
+        const preOrder = await PreOrder.deleteMany()
+        if(!preOrder || preOrder.length===0){
+            return res.send({
+                message: 'ไม่พบรายการ',
+                preOrders: preOrder
+            })
+        }
+
+        const preProductions = await PreProduction.deleteMany()
+        if(!preProductions || preProductions.length===0){
+            return res.send({
+                message: 'ไม่พบรายการ',
+                preOrders: preProductions
+            })
+        }
+
+        return res.send({
+            success: true,
+            message: 'success delete'
+        })
+    }
+    catch (err) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
 exports.getPreProductionsOfOrder = async (req, res) => {
     const {id} = req.params
     try {
@@ -312,8 +347,8 @@ exports.getPreProductionsOfOrder = async (req, res) => {
 
 exports.addPreProduction = async (req, res) => {
     const { id } = req.params
-    const { userId, userName, userRole } = req.user
-    const { files } = req.files
+    //const { userId, userName, userRole } = req.user
+    //const { files } = req.files
     const { gsm, width, long, cut, lay, plateSize } = req.body
 
     try {
@@ -336,13 +371,19 @@ exports.addPreProduction = async (req, res) => {
                 cut : (cut) && cut,
                 lay : (lay) && lay
             },
+            print_4_Data : {
+                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
+                lay : (lay) && lay,
+                floor: (preOrder.colors && preOrder.colors.floor) ? preOrder.colors.floor : false
+            },
+            print_2_Data : {
+                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
+                lay : (lay) && lay,
+                floor: (preOrder.colors && preOrder.colors.floor) ? preOrder.colors.floor : false
+            },
             plateData : {
                 colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
-                size : (plateSize) && plateSize
-            },
-            printData : {
-                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
-                lay : (lay) && lay
+                size : (plateSize) && plateSize.toString()
             },
             coatingData : {
                 method: (preOrder.coating && preOrder.coating.method) ? {
@@ -353,6 +394,11 @@ exports.addPreProduction = async (req, res) => {
                 long: (long) && long, // from pre-order
                 cut: (cut) && cut,  // from pre-order
                 lay: (lay) && lay // from pre-order
+            },
+            embossData : {
+                demensions: (preOrder.emboss) ? preOrder.emboss : null,
+                plateSize: (plateSize) && plateSize.toString(),
+                lay: (lay) && lay
             }
         })
         const saved_production = await new_preProduction.save()

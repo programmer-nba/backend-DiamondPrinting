@@ -24,13 +24,17 @@ const preProductionSchema = new Schema(
             cut : Number,
             lay : Number
         },
+        print_4_Data : {
+            colors : [Number, Number], // from pre-order
+            lay : Number
+        },
+        print_2_Data : {
+            colors : [Number, Number], // from pre-order
+            lay : Number
+        },
         plateData : {
             colors : [Number, Number], // from pre-order
             size : String
-        },
-        printData : {
-            colors : [Number, Number], // from pre-order
-            lay : Number
         },
         coatingData : {
             method: {
@@ -43,6 +47,15 @@ const preProductionSchema = new Schema(
             long: Number, // from pre-order
             cut: Number,  // from pre-order
             lay: Number // from pre-order
+        },
+        embossData : {
+            demensions: [{
+                inWidth: Number,
+                inLong: Number,
+                mark: String
+            }],
+            plateSize: String,
+            lay: Number
         }
     }
 )

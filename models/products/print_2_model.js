@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const {Schema} = mongoose
 
-const printSchema = new Schema({ 
+const print_2_Schema = new Schema({ 
     code: String,
     title: {
         type: String,
@@ -20,5 +20,5 @@ const printSchema = new Schema({
     ]
 })
 
-const Print = mongoose.model('Print', printSchema)
-module.exports = Print
+const Print_2 = mongoose.model('Print_2', print_2_Schema)
+module.exports = Print_2

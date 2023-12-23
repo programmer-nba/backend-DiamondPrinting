@@ -9,6 +9,7 @@ route.get('/pre-order/:id', Order.getPreOrder)
 route.put('/pre-order/:id', Order.updatePreOrder)
 route.delete('/pre-order/:id', Order.deletePreOrder)
 route.get('/pre-productions/:id', Order.getPreProductionsOfOrder)
+route.delete('/pre-orders', Order.deletePreOrders)
 
 route.post('/pre-production/:id', Order.addPreProduction)
 route.get('/pre-productions', Order.getPreProductions)
