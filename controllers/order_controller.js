@@ -30,18 +30,20 @@ exports.addPreOrder = async (req, res) => {
     try {
         // check customer already exist? or create new one
         let curCustomer = null
-        const ExistCustomer = await Customer.findOne({
+        const allCustumers = await Customer.find()
+        const existCustomer = await Customer.findOne({
             $or: [
                 {name: customer.nameTh},
                 {taxID: customer.taxID}
             ]
         })
-        if(!ExistCustomer) {
+        if(!existCustomer) {
             const new_customer = new Customer({
                 nameTh: customer.nameTh,
-                nameEng: customer.nameEng || null,
+                nameEng: customer.nameEng || '-',
                 address: customer.address,
                 taxID: customer.taxID,
+                code: `000${allCustumers.length}`
             })
             const saved_customer = await new_customer.save()
             if(!saved_customer){
@@ -52,7 +54,7 @@ exports.addPreOrder = async (req, res) => {
             curCustomer = saved_customer
             console.log('สร้างลูกค้าใหม่สำเร็จ',saved_customer)
         } else {
-            curCustomer = ExistCustomer
+            curCustomer = existCustomer
         }
         
         // add new pre-order
@@ -209,9 +211,10 @@ exports.updatePreOrder = async (req, res) => {
         
         preOrder.hotStamp = (hotStamp) ? hotStamp : preOrder.hotStamp
         preOrder.emboss = (emboss) ? emboss : preOrder.emboss
+        
         preOrder.dieCut = (dieCut) ? dieCut : preOrder.dieCut
-        preOrder.glue.amount = (glue && glue.amount) ? glue.amount : preOrder.glue.amount
-        preOrder.glue.width = (glue && glue.width) ? glue.width : preOrder.glue.width
+
+        preOrder.glue.mark = (glue && glue.mark) ? glue.mark : preOrder.glue.mark
         preOrder.glue.long = (glue && glue.long) ? glue.long : preOrder.glue.long
         
         preOrder.note = (note) ? note : preOrder.note

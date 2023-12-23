@@ -62,7 +62,6 @@ const preOrderSchema = new Schema(
         glue: [
             {
                 mark: String,
-                width: Number,
                 long: Number
             }
         ],

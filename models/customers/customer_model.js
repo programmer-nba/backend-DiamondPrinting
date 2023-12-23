@@ -3,6 +3,7 @@ const { Schema } = mongoose
 
 const customerSchema = new Schema(
     {
+        code: String,
         nameTh: String,
         nameEng: String,
         address: String,
