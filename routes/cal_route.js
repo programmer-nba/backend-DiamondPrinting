@@ -9,5 +9,6 @@ route.post('/plate', Cal.calPlate)
 route.post('/print', Cal.calPrint)
 route.post('/coating', Cal.calCoating)
 route.post('/emboss', Cal.calEmboss)
+route.post('/stamp', Cal.calHotStamp)
 
 module.exports = route

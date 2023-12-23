@@ -7,6 +7,7 @@ const Print_2 = require('../controllers/print_2_controller.js')
 const Print_4 = require('../controllers/print_4_controller.js')
 const Coating = require('../controllers/coating_controller.js')
 const Emboss = require('../controllers/emboss_controller.js')
+const HotStamp = require('../controllers/hotStamp_controller.js')
 
 /* --------------RawMatt-------------- */
 route.post('/rawmatt', RawMatt.addRawMatt)
@@ -50,5 +51,12 @@ route.get('/embosses', Emboss.getEmbosses)
 route.put('/emboss/:id', Emboss.updateEmbossOption)
 route.delete('/emboss/:id', Emboss.deleteEmboss)
 route.delete('/emboss/:id/:option', Emboss.deleteEmbossOption)
+
+/* --------------HotStamp-------------- */
+route.post('/stamp', HotStamp.addHotStamp)
+route.get('/stamps', HotStamp.getHotStamps)
+route.get('/stamp/:id', HotStamp.getHotStamp)
+route.put('/stamp/:id', HotStamp.updateHotStamp)
+route.delete('/stamp/:id', HotStamp.deleteHotStamp)
 
 module.exports = route

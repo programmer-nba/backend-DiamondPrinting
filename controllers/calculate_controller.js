@@ -6,6 +6,7 @@ const Print_4 = require('../models/products/print_4_model.js')
 const Coating = require('../models/products/coating_model.js')
 const Emboss = require('../models/products/emboss_model.js')
 const PreProduction = require('../models/orders/preProduction_model.js')
+const HotStamp = require('../models/products/hotStamp_model.js')
 
 exports.calAll = async (req, res) => {
     const { id } = req.params // _id of preProduction
@@ -22,7 +23,7 @@ exports.calAll = async (req, res) => {
             })
         }
 
-        const {rawMattData, plateData, print_2_Data, print_4_Data, coatingData, embossData} = preProduction
+        const { rawMattData, plateData, print_2_Data, print_4_Data, coatingData, embossData, hotStampData } = preProduction
 
         if(rawMattData){
             const rawMatt_cost = await calRawMattCost(order,rawMattData)
@@ -66,8 +67,22 @@ exports.calAll = async (req, res) => {
                 const emboss_cost = await calEmbossCost(order, sendEmboss)
                 datas.push({[`emboss_${em}`]:emboss_cost.data})
                 costs[`emboss_${em}`] = emboss_cost.cost
-            }
-            
+            } 
+        }
+
+        if(hotStampData){
+            for (i in hotStampData.demensions){
+                const sendEmboss = {
+                    inWidth: embossData.demensions[em].inWidth,
+                    inLong: embossData.demensions[em].inLong,
+                    plateSize: embossData.plateSize,
+                    mark: embossData.demensions[em].mark,
+                    lay: embossData.lay
+                }
+                const emboss_cost = await calEmbossCost(order, sendEmboss)
+                datas.push({[`emboss_${em}`]:emboss_cost.data})
+                costs[`emboss_${em}`] = emboss_cost.cost
+            } 
         }
 
         console.log(costs)
@@ -360,6 +375,52 @@ const calEmbossCost = async (order, embossData) => {
         console.log(cal_emboss.price)
 
         return {cost: cal_emboss.price, data: cal_emboss}
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        console.log(err.message)
+    }
+}
+
+// calculate Hot stamp
+const calHotStamp = async (order, hotStampData) => {
+    const { 
+        block, stamp,
+    } = hotStampData
+
+    try {
+        const hotStamp = await HotStamp.findOne({
+            stamp_color: stamp.stamp_color
+        })
+        if(!hotStamp){
+            return {data: 'ไม่พบ', cost: 0}
+        }
+
+        const block_cost = Math.round((block.inWidth*block.inLong*13)*0.01)*100
+        const total_block_cost = block_cost*block.lay
+        const stamp_color_cost = ((block.inWidth*block.inLong*hotStamp.avr)+0.1)*stamp.k
+        const total_stamp_color_cost = stamp_color_cost*order
+
+        const cal_hotStamp = {
+            lay: block.lay,
+            order: order,
+            inWidth: block.inWidth,
+            inLong: block.inLong,
+            block_avr: 13,
+            block_cost: block_cost,
+            total_block_cost: total_block_cost,
+            
+            kPoint: stamp.k,
+            stamp_color: hotStamp.stamp_color,
+            stamp_avr: hotStamp.avr,
+            other_avr: 0.1,
+            stamp_color_cost: stamp_color_cost,
+            total_stamp_color_cost: total_stamp_color_cost,
+            totol_cost: total_stamp_color_cost + total_block_cost
+        }
+
+        return {data: cal_hotStamp, cost: cal_hotStamp.totol_cost}
         
     }
     catch (err) {
@@ -676,6 +737,59 @@ exports.calEmboss = async (req,res) => {
             message: 'คำนวณ ราคาปั้มนูน สำเร็จ',
             success: true,
             result: cal_emboss
+        })
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        console.log(err.message)
+    }
+}
+
+// calculate Hot stamp
+exports.calHotStamp = async (req,res) => {
+    const { 
+        block, stamp, order
+    } = req.body
+
+    try {
+        const hotStamp = await HotStamp.findOne({
+            stamp_color: stamp.stamp_color
+        })
+        if(!hotStamp){
+            return res.send({
+                message: 'ไม่พบประเภทสินค้านี้ในระบบ',
+                product: hotStamp
+            })
+        }
+
+        const block_cost = Math.round((block.inWidth*block.inLong*13)*0.01)*100
+        const total_block_cost = block_cost*block.lay
+        const stamp_color_cost = ((block.inWidth*block.inLong*hotStamp.avr)+0.1)*stamp.k
+        const total_stamp_color_cost = stamp_color_cost*order
+
+        const cal_hotStamp = {
+            lay: block.lay,
+            order: order,
+            inWidth: block.inWidth,
+            inLong: block.inLong,
+            block_avr: 13,
+            block_cost: block_cost,
+            total_block_cost: total_block_cost,
+            
+            kPoint: stamp.k,
+            stamp_color: hotStamp.stamp_color,
+            stamp_avr: hotStamp.avr,
+            other_avr: 0.1,
+            stamp_color_cost: stamp_color_cost,
+            total_stamp_color_cost: total_stamp_color_cost,
+            totol_cost: total_stamp_color_cost + total_block_cost
+        }
+
+        return res.send({
+            message: 'คำนวณ hot stamp สำเร็จ',
+            success: true,
+            result: cal_hotStamp
         })
         
     }
