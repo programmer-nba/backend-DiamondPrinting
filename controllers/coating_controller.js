@@ -10,7 +10,9 @@ exports.addCoating = async (req, res) => {
 
         const new_coating = new Coating({
             code: code,
-            type: type
+            method: {
+                type: type
+            }
         })
         const saved_coating = await new_coating.save()
         if(!saved_coating) {

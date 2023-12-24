@@ -3,12 +3,7 @@ const {Schema} = mongoose
 
 const coatingSchema = new Schema({ 
     code: String,
-    method: {
-        type: {
-            type: String
-        },
-        subType: String
-    },
+    method: String,
     title: {
         type: String,
         default: 'วิธีเคลือบ'
@@ -16,7 +11,7 @@ const coatingSchema = new Schema({
     option: [
         {
             subType: {
-                type:String,
+                type: String,
                 default: ''
             },
             avr: Number,
