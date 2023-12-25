@@ -67,8 +67,9 @@ route.post('/diecut', Diecut.addDiecut)
 route.get('/diecuts', Diecut.getDiecuts)
 route.get('/diecut/:id', Diecut.getDiecut)
 route.put('/diecut/:id', Diecut.editDiecut)
-route.put('/diecut/:id', Diecut.addDiecutOption)
 route.delete('/diecut/:id', Diecut.deleteDiecut)
-route.delete('/diecut/:id/:option', Diecut.deleteDiecutOption)
+route.put('/diecut-option/:id/:option', Diecut.editDiecutOption)
+route.put('/diecut-option/:id', Diecut.addDiecutOption)
+route.delete('/diecut-option/:id/:option', Diecut.deleteDiecutOption)
 
 module.exports = route

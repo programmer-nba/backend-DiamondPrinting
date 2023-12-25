@@ -40,12 +40,24 @@ exports.calAll = async (req, res) => {
         if(print_2_Data){
             for (i in print_2_Data.colors) {
                 const sendPrint = {
-                    lay: printData.lay,
-                    colors: printData.colors[i]
+                    lay: print_2_Data.lay,
+                    colors: print_2_Data.colors[i]
                 }
                 const print_2_cost = await calPrint_2_Cost(order,sendPrint)
                 datas.push({[`print_2_${i}`]:print_2_cost.data})
                 costs[`print_2_${i}`] = print_2_cost.cost
+            }
+        }
+
+        if(print_4_Data){
+            for (i in print_4_Data.colors) {
+                const sendPrint = {
+                    lay: print_4_Data.lay,
+                    colors: print_4_Data.colors[i]
+                }
+                const print_4_cost = await calPrint_4_Cost(order,sendPrint)
+                datas.push({[`print_4_${i}`]:print_4_cost.data})
+                costs[`print_4_${i}`] = print_4_cost.cost
             }
         }
         
@@ -71,17 +83,21 @@ exports.calAll = async (req, res) => {
         }
 
         if(hotStampData){
-            for (i in hotStampData.demensions){
-                const sendEmboss = {
-                    inWidth: embossData.demensions[em].inWidth,
-                    inLong: embossData.demensions[em].inLong,
-                    plateSize: embossData.plateSize,
-                    mark: embossData.demensions[em].mark,
-                    lay: embossData.lay
+            for (i in hotStampData.block){
+                const sendStamp = {
+                    block: {
+                        inWidth: hotStampData.block[i].inWidth,
+                        inLong: hotStampData.block[i].inLong,
+                        lay: hotStampData.lay, 
+                    },
+                    stamp: {
+                        stamp_color: hotStampData.block[i].color,
+                        k: hotStampData.k
+                    }
                 }
-                const emboss_cost = await calEmbossCost(order, sendEmboss)
-                datas.push({[`emboss_${em}`]:emboss_cost.data})
-                costs[`emboss_${em}`] = emboss_cost.cost
+                const stamp_cost = await calHotStamp(order, sendStamp)
+                datas.push({[`stamp_${i}`]:stamp_cost.data})
+                costs[`stamp_${i}`] = stamp_cost.cost
             } 
         }
 
@@ -231,7 +247,7 @@ const calPlateCost = async (plateData) => {
     }
 }
 
-// calculate Print
+// calculate Print2
 const calPrint_2_Cost = async (order, print_2_Data) => {
 
     if(!print_2_Data){
@@ -245,6 +261,48 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
 
     try {
         const print = await Print_2.findOne({
+            colors: parseInt(colors)
+        })
+        if(!print){
+            return {cost: 0, data: 'ไม่พบ'}
+        }
+
+        const order_lay = parseInt(order)/parseInt(lay)
+        
+        const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
+        if(option.length!==1){
+            return {cost: 0, data: 'ไม่พบ'}
+        }
+
+        const cal_print = {
+            order_lay: order_lay,
+            round: option[0].round.join,
+            price: (option[0].round.start >= 10001)
+            ? option[0].price*order_lay : option[0].price
+        }
+
+        return {cost: cal_print.price, data: cal_print}
+        
+    }
+    catch (err) {
+        return {cost: 0, data: 'ไม่พบ'}
+    }
+}
+
+// calculate Print4
+const calPrint_4_Cost = async (order, print_4_Data) => {
+
+    if(!print_4_Data){
+        return {cost: 0, data: null}
+    }
+
+    const { 
+        colors,
+        lay
+    } = print_4_Data
+
+    try {
+        const print = await Print_4.findOne({
             colors: parseInt(colors)
         })
         if(!print){
@@ -386,7 +444,7 @@ const calEmbossCost = async (order, embossData) => {
 // calculate Hot stamp
 const calHotStamp = async (order, hotStampData) => {
     const { 
-        block, stamp,
+        block, stamp
     } = hotStampData
 
     try {

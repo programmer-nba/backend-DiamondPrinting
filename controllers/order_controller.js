@@ -349,7 +349,7 @@ exports.addPreProduction = async (req, res) => {
     const { id } = req.params
     //const { userId, userName, userRole } = req.user
     //const { files } = req.files
-    const { gsm, width, long, cut, lay, plateSize } = req.body
+    const { gsm, width, long, cut, lay, plateSize, k } = req.body
 
     try {
         const preOrder = await PreOrder.findById(id)
@@ -399,7 +399,13 @@ exports.addPreProduction = async (req, res) => {
                 demensions: (preOrder.emboss) ? preOrder.emboss : null,
                 plateSize: (plateSize) && plateSize.toString(),
                 lay: (lay) && lay
+            },
+            hotStampData : {
+                block : (preOrder.hotStamp) ? preOrder.hotStamp : null,
+                lay: (lay) && lay,
+                k: (k) && k
             }
+            
         })
         const saved_production = await new_preProduction.save()
         if(!saved_production){

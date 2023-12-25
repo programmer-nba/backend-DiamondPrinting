@@ -56,6 +56,18 @@ const preProductionSchema = new Schema(
             }],
             plateSize: String,
             lay: Number
+        },
+        hotStampData : {
+            block : [
+                {
+                    inWidth: Number,
+                    inLong: Number,
+                    color: String,
+                    mark: String
+                }
+            ],
+            lay: Number,
+            k: Number   
         }
     }
 )
