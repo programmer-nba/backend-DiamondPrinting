@@ -8,6 +8,7 @@ const Print_4 = require('../controllers/print_4_controller.js')
 const Coating = require('../controllers/coating_controller.js')
 const Emboss = require('../controllers/emboss_controller.js')
 const HotStamp = require('../controllers/hotStamp_controller.js')
+const Diecut = require('../controllers/diecut_controller.js')
 
 /* --------------RawMatt-------------- */
 route.post('/rawmatt', RawMatt.addRawMatt)
@@ -60,5 +61,14 @@ route.get('/stamps', HotStamp.getHotStamps)
 route.get('/stamp/:id', HotStamp.getHotStamp)
 route.put('/stamp/:id', HotStamp.updateHotStamp)
 route.delete('/stamp/:id', HotStamp.deleteHotStamp)
+
+/* --------------Diecut-------------- */
+route.post('/diecut', Diecut.addDiecut)
+route.get('/diecuts', Diecut.getDiecuts)
+route.get('/diecut/:id', Diecut.getDiecut)
+route.put('/diecut/:id', Diecut.editDiecut)
+route.put('/diecut/:id', Diecut.addDiecutOption)
+route.delete('/diecut/:id', Diecut.deleteRawMatt)
+route.delete('/diecut/:id/:option', Diecut.deleteRawMattOption)
 
 module.exports = route

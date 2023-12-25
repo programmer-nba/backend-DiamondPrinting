@@ -212,7 +212,7 @@ exports.getRawMattOptions = async (req, res) => {
 exports.updateRawMattOption = async (req, res) => {
     const { id } = req.params
     const { option } = req.body //gsm, width, long, pkg
-    console.log(option)
+    
     let rawMatt_list = []
     try {
         for(item of option) {
