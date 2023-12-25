@@ -576,34 +576,35 @@ exports.calPlate = async (req,res) => {
 }
 
 // calculate Print
-exports.calPrint = async (req,res) => {
+exports.calPrint2 = async (req,res) => {
     const { 
         colors,
         order, lay 
     } = req.body
 
     try {
-        const print = await Print.findOne({
+        const print2 = await Print_2.findOne({
             colors: parseInt(colors)
         })
-        if(!print){
-            return res.status(404).send({
+        if(!print2){
+            return res.send({
                 message: 'ไม่พบประเภทสินค้านี้ในระบบ',
-                product: print
+                product: print2
             })
         }
-
+        console.log(print2)
         const order_lay = parseInt(order)/parseInt(lay)
         
-        const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
+        const option = print2.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
+        console.log(option)
         if(option.length!==1){
-            return res.status(404).send({
+            return res.send({
                 message: 'ไม่พบเรทราคาในช่วงเลเอาท์นี้',
                 option: option
             })
         }
 
-        const cal_print = {
+        const cal_print2 = {
             order_lay: order_lay,
             round: option[0].round.join,
             price: (option[0].round.start >= 10001)
@@ -613,7 +614,55 @@ exports.calPrint = async (req,res) => {
         return res.send({
             message: 'คำนวณ ราคาปรินท์ สำเร็จ',
             success: true,
-            result: cal_print
+            result: cal_print2
+        })
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        conbsole.log(err.message)
+    }
+}
+
+// calculate Print
+exports.calPrint4 = async (req,res) => {
+    const { 
+        colors,
+        order, lay 
+    } = req.body
+
+    try {
+        const print4 = await Print_4.findOne({
+            colors: parseInt(colors)
+        })
+        if(!print4){
+            return res.send({
+                message: 'ไม่พบประเภทสินค้านี้ในระบบ',
+                product: print4
+            })
+        }
+
+        const order_lay = parseInt(order)/parseInt(lay)
+        
+        const option = print4.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
+        if(option.length!==1){
+            return res.status(404).send({
+                message: 'ไม่พบเรทราคาในช่วงเลเอาท์นี้',
+                option: option
+            })
+        }
+
+        const cal_print4 = {
+            order_lay: order_lay,
+            round: option[0].round.join,
+            price: (option[0].round.start >= 10001)
+            ? option[0].price*order_lay : option[0].price
+        }
+
+        return res.send({
+            message: 'คำนวณ ราคาปรินท์ สำเร็จ',
+            success: true,
+            result: cal_print4
         })
         
     }

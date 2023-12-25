@@ -34,6 +34,38 @@ exports.addPrint_4_Color = async (req, res) => {
     }
 }
 
+// get print-4 options
+exports.getPrint_4_Options = async (req, res) => {
+    const { color } = req.body
+    
+    try {
+       const print4 = await Print_4.findOne({ colors: color })
+        if(!print4 || print4.length===0){
+            return res.send({
+                message: 'ไม่พบสินค้าประเภทนี้',
+                rawMatts: print4 || []
+            })
+        }
+
+        const round = print4.option.map(option => option.round.join)
+        const unique_round = new Set(round)
+    
+        return res.send({
+            round: [...unique_round],
+            success: true
+        })
+
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูตัวเลือกได้',
+            err: err.message
+        })
+    }
+}
+
 // get all print colors
 exports.getPrint_4_Colors = async (req, res) => {
     try {

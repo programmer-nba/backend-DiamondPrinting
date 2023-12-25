@@ -69,6 +69,68 @@ exports.getRawMatts = async (req, res) => {
     }
 }
 
+// get rawMatt
+exports.getRawMatt = async (req, res) => {
+    const { id } = req.params
+    try {
+        const rawMatt = await RawMatt.findById(id)
+        if(!rawMatt){
+            return res.send({
+                message: 'ไม่พบสินค้าในระบบ',
+                products: rawMatt
+            })
+        }
+
+        return res.send({
+            success: true,
+            products: rawMatt
+        })
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูสินค้าทั้งหมดได้',
+            err: err.message
+        })
+    }
+}
+
+// edit rawMatt type
+exports.editRawMattType = async (req, res) => {
+    const { id } = req.params
+    const { type, subType } = req.body
+    try {
+        const prev_rawMatt = await RawMatt.findById(id)
+        if(!prev_rawMatt){
+            return res.send({
+                message: 'ไม่พบสินค้าในระบบ',
+                products: prev_rawMatt
+            })
+        }
+        const rawMatt = await RawMatt.findByIdAndUpdate(id, {
+            $set: {
+                type: (type && type!==null || type && type.trim()!=='') ? type : prev_rawMatt.type,
+                subType: (subType && subType!==null || subType && subType.trim()!=='') ? subType : prev_rawMatt.subType
+            }
+        }, {new:true})
+        
+
+        return res.send({
+            success: true,
+            products: rawMatt
+        })
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูสินค้าทั้งหมดได้',
+            err: err.message
+        })
+    }
+}
+
 // get rawMatt types&&subTypes
 exports.getRawMattTypes = async (req, res) => {
     try {

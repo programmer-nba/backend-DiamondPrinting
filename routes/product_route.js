@@ -12,7 +12,8 @@ const HotStamp = require('../controllers/hotStamp_controller.js')
 /* --------------RawMatt-------------- */
 route.post('/rawmatt', RawMatt.addRawMatt)
 route.get('/rawmatts', RawMatt.getRawMatts)
-//route.get('/:id', RawMatt.getProduct)
+route.get('/rawmatt/:id', RawMatt.getRawMatt)
+route.put('/rawmatt/:id', RawMatt.editRawMattType)
 route.put('/rawmatt/:id', RawMatt.updateRawMattOption)
 route.delete('/rawmatt/:id', RawMatt.deleteRawMatt)
 route.delete('/rawmatt/:id/:option', RawMatt.deleteRawMattOption)
@@ -43,6 +44,7 @@ route.delete('/print-4/:id', Print_4.deletePrint_4)
 route.post('/coating', Coating.addCoating)
 route.get('/coatings', Coating.getCoatings)
 route.put('/coating/:id', Coating.updateCoatingOption)
+route.delete('/coating/:id', Coating.deleteCoating)
 route.delete('/coating/:id/:option', Coating.deleteCoatingOption)
 
 /* --------------Emboss-------------- */

@@ -68,6 +68,60 @@ exports.getCoatings = async (req, res) => {
     }
 }
 
+// get a coating
+exports.getCoating = async (req, res) => {
+    const { id } = req.params
+    try {
+        const coating = await Coating.findById(id)
+        if(!coating){
+            return res.send({
+                message: 'ไม่พบสินค้าในระบบ',
+                products: coating
+            })
+        }
+
+        return res.send({
+            success: true,
+            products: coating
+        })
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูสินค้าทั้งหมดได้',
+            err: err.message
+        })
+    }
+}
+
+// delete a coating
+exports.deleteCoating = async (req, res) => {
+    const { id } = req.params
+    try {
+        const coating = await Coating.findByIdAndDelete(id)
+        if(!coating){
+            return res.send({
+                message: 'ไม่พบสินค้าในระบบ',
+                products: coating
+            })
+        }
+
+        return res.send({
+            message: 'ลบสำเร็จ',
+            success: true
+        })
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูสินค้าทั้งหมดได้',
+            err: err.message
+        })
+    }
+}
+
 // get coating types
 exports.getCoatingTypes = async (req, res) => {
     try {
