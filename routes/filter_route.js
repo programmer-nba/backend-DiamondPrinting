@@ -7,8 +7,9 @@ const Print_4 = require('../controllers/print_4_controller.js')
 const Coating = require('../controllers/coating_controller.js')
 const Customer = require('../controllers/customer_controller.js')
 
-route.get('/rawMatt-type', RawMatt.getRawMattTypes)
-route.get('/rawMatt-option', RawMatt.getRawMattOptions)
+route.get('/rawmatt-type', RawMatt.getRawMattTypes)
+route.get('/rawmatt-subtype/:type', RawMatt.getRawMattSubTypes)
+route.get('/rawmatt-option', RawMatt.getRawMattOptions)
 
 route.get('/print-2-color', Print_2.getPrint_2_Colors)
 route.get('/print-2-option', Print_2.getPrint_2_Options)

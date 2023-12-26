@@ -40,11 +40,22 @@ exports.addPreOrder = async (req, res) => {
         })
         if(!existCustomer) {
             const new_customer = new Customer({
-                nameTh: customer.nameTh,
-                nameEng: customer.nameEng || '-',
-                address: customer.address,
-                taxID: customer.taxID,
-                code: `000${allCustumers.length}`
+                nameTh: (customer.nameTh) ? customer.nameTh : '-',
+                nameEng: (customer.nameEng) ? customer.nameEng : '-',
+                address: {
+                    houseNo: (customer.address && customer.address.houseNo) ? customer.address.houseNo : '-',
+                    province: (customer.address && customer.address.province) ? customer.address.province : '-',
+                    district: (customer.address && customer.address.district) ? customer.address.district : '-',
+                    subdistrict: (customer.address && customer.address.subdistrict) ? customer.address.subdistrict : '-',
+                    street: (customer.address && customer.address.street) ? customer.address.street : '-',
+                    postcode: (customer.address && customer.address.postcode) ? customer.address.postcode : '-'
+                },
+                taxID: (customer.taxID) ? customer.taxID : '-',
+                code: `000${allCustumers.length}`,
+                contact: {
+                    name: (customer.contact && customer.contact.name) ? customer.contact.name : '-',
+                    tel: (customer.contact && customer.contact.tel) ? customer.contact.tel : '-'
+                }
             })
             const saved_customer = await new_customer.save()
             if(!saved_customer){
@@ -53,7 +64,6 @@ exports.addPreOrder = async (req, res) => {
                 })
             }
             curCustomer = saved_customer
-            console.log('สร้างลูกค้าใหม่สำเร็จ',saved_customer)
         } else {
             curCustomer = existCustomer
         }

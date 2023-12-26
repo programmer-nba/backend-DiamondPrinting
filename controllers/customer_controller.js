@@ -31,3 +31,62 @@ exports.customersSearch = async (req, res) => {
         console.log(err)
     }
 }
+
+exports.getCustomers = async (req, res) => {
+    try {
+        const customers = await Customer.find()
+        if(!customers) {
+            return res.send({
+                message: 'ไม่พบข้อมลูลูกค้า',
+                customers: customers
+            })
+        }
+        if(customers && customers.length===0) {
+            return res.send({
+                message: 'ยังไม่มีลูกค้าในระบบ',
+                customers: customers || []
+            })
+        }
+
+        return res.send({
+            message: `มีลูกค้าทั้งหมด ${customers.length} รายการ`,
+            customers: customers
+        })
+    }
+    catch( err ) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+exports.getCustomer = async (req, res) => {
+    const { id } = req.params
+    try {
+        const customer = await Customer.findOne({
+            $or: [
+                {_id: id},
+                {taxID: id},
+                {nameTh: id},
+                {nameEng: id}
+            ]
+        })
+        if(!customer) {
+            return res.send({
+                message: 'ไม่พบข้อมลูลูกค้า',
+                customer: customer
+            })
+        }
+
+        return res.send({
+            customer: customer
+        })
+    }
+    catch( err ) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}

@@ -131,7 +131,7 @@ exports.editRawMattType = async (req, res) => {
     }
 }
 
-// get rawMatt types&&subTypes
+// get rawMatt types
 exports.getRawMattTypes = async (req, res) => {
     try {
         const rawMatts = await RawMatt.find()
@@ -150,13 +150,49 @@ exports.getRawMattTypes = async (req, res) => {
 
         const type = rawMatts.map(m => m.type)
         const uniqueType = new Set(type)
-        const subType = rawMatts.map(m => m.subType) 
-        const uniqueSubType = new Set(subType)
 
         return res.send({
             success: true,
             rawMatt_types: [...uniqueType],
-            rawMatt_subTypes: [...uniqueSubType],
+            success: true
+        })
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูประเภทได้',
+            err: err.message
+        })
+    }
+}
+
+// get rawMatt sub-types
+exports.getRawMattSubTypes = async (req, res) => {
+    const { type } = req.params
+    try {
+        const rawMatts = await RawMatt.find({
+            type: type
+        })
+        if(!rawMatts){
+            return res.send({
+                message: 'ไม่พบสินค้าในระบบ',
+                products: rawMatts
+            })
+        } else if (rawMatts && rawMatts.length===0) {
+            return res.send({
+                message: 'สินค้าในระบบมี 0 รายการ',
+                products: rawMatts || [],
+                success: true
+            })
+        }
+
+        const subType = rawMatts.map(m => m.subType)
+        const uniquesubType = new Set(subType)
+
+        return res.send({
+            success: true,
+            subTypes: [...uniquesubType],
             success: true
         })
         

@@ -15,7 +15,7 @@ exports.calAll = async (req, res) => {
     let costs = {}
     try {
 
-        const preProduction = await PreProduction.findById(id)
+        const preProduction = await PreProduction.findById(id).populate('preOrder', 'colors')
         
         if(!preProduction || preProduction.length===0){
             return res.send({
@@ -38,6 +38,7 @@ exports.calAll = async (req, res) => {
         }
         
         if(print_2_Data){
+            const isfloor = (preProduction.colors.floor) ? 2 : 1
             for (i in print_2_Data.colors) {
                 const sendPrint = {
                     lay: print_2_Data.lay,
@@ -45,11 +46,13 @@ exports.calAll = async (req, res) => {
                 }
                 const print_2_cost = await calPrint_2_Cost(order,sendPrint)
                 datas.push({[`print_2_${i}`]:print_2_cost.data})
-                costs[`print_2_${i}`] = print_2_cost.cost
+                datas.push({print_2_floor:preProduction.colors.floor})
+                costs[`print_2_${i}`] = print_2_cost.cost*isfloor
             }
         }
 
         if(print_4_Data){
+            const isfloor = (preProduction.colors.floor) ? 2 : 1
             for (i in print_4_Data.colors) {
                 const sendPrint = {
                     lay: print_4_Data.lay,
@@ -57,7 +60,8 @@ exports.calAll = async (req, res) => {
                 }
                 const print_4_cost = await calPrint_4_Cost(order,sendPrint)
                 datas.push({[`print_4_${i}`]:print_4_cost.data})
-                costs[`print_4_${i}`] = print_4_cost.cost
+                datas.push({print_4_floor:preProduction.colors.floor})
+                costs[`print_4_${i}`] = print_4_cost.cost*isfloor
             }
         }
         

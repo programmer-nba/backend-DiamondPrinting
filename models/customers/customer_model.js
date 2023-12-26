@@ -6,7 +6,14 @@ const customerSchema = new Schema(
         code: String,
         nameTh: String,
         nameEng: String,
-        address: String,
+        address: {
+            houseNo: String,
+            province: String,
+            district: String,
+            subdistrict: String,
+            street: String,
+            postcode: String
+        },
         taxID: String,
         contact: [
             {
