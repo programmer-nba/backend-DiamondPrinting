@@ -414,6 +414,11 @@ exports.addPreProduction = async (req, res) => {
                 block : (preOrder.hotStamp) ? preOrder.hotStamp : null,
                 lay: (lay) && lay,
                 k: (k) && k
+            },
+            diecutData : {
+                force: (preOrder.dieCut) ? preOrder.dieCut : null,
+                plateSize: (plateSize) ? plateSize : null,
+                lay: (lay) && lay
             }
             
         })

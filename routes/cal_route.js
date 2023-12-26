@@ -11,5 +11,6 @@ route.post('/print-4', Cal.calPrint4)
 route.post('/coating', Cal.calCoating)
 route.post('/emboss', Cal.calEmboss)
 route.post('/stamp', Cal.calHotStamp)
+route.post('/diecut', Cal.calDiecut)
 
 module.exports = route

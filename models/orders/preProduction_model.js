@@ -26,11 +26,13 @@ const preProductionSchema = new Schema(
         },
         print_4_Data : {
             colors : [Number, Number], // from pre-order
-            lay : Number
+            lay : Number,
+            floor: Boolean
         },
         print_2_Data : {
             colors : [Number, Number], // from pre-order
-            lay : Number
+            lay : Number,
+            floor: Boolean
         },
         plateData : {
             colors : [Number, Number], // from pre-order
@@ -68,6 +70,10 @@ const preProductionSchema = new Schema(
             ],
             lay: Number,
             k: Number   
+        },
+        diecutData : {
+            plateSize: String,
+            lay: Number
         }
     }
 )

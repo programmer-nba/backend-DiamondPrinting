@@ -7,111 +7,126 @@ const Coating = require('../models/products/coating_model.js')
 const Emboss = require('../models/products/emboss_model.js')
 const PreProduction = require('../models/orders/preProduction_model.js')
 const HotStamp = require('../models/products/hotStamp_model.js')
+const Diecut = require('../models/products/diecut_model.js')
 
 exports.calAll = async (req, res) => {
     const { id } = req.params // _id of preProduction
-    const {order} = req.body
-    let datas = []
-    let costs = {}
+    const {orders} = req.body
+    let costs_list = {}
     try {
 
-        const preProduction = await PreProduction.findById(id).populate('preOrder', 'colors')
-        
-        if(!preProduction || preProduction.length===0){
-            return res.send({
-                massage: 'ไม่พบรายการนี้ในระบบ'
-            })
-        }
+        for (let order of orders) {
+            let datas = []
+            let costs = {}
 
-        const { rawMattData, plateData, print_2_Data, print_4_Data, coatingData, embossData, hotStampData } = preProduction
-
-        if(rawMattData){
-            const rawMatt_cost = await calRawMattCost(order,rawMattData)
-            datas.push({rawMatt:rawMatt_cost.data})
-            costs.rawMatt = rawMatt_cost.cost
-        }
-        
-        if(plateData){
-            const plate_cost = await calPlateCost(plateData)
-            datas.push({plate:plate_cost.data})
-            costs.plate = plate_cost.cost
-        }
-        
-        if(print_2_Data){
-            const isfloor = (preProduction.colors.floor) ? 2 : 1
-            for (i in print_2_Data.colors) {
-                const sendPrint = {
-                    lay: print_2_Data.lay,
-                    colors: print_2_Data.colors[i]
-                }
-                const print_2_cost = await calPrint_2_Cost(order,sendPrint)
-                datas.push({[`print_2_${i}`]:print_2_cost.data})
-                datas.push({print_2_floor:preProduction.colors.floor})
-                costs[`print_2_${i}`] = print_2_cost.cost*isfloor
+            const preProduction = await PreProduction.findById(id).populate('preOrder', 'colors')
+            
+            if(!preProduction || preProduction.length===0){
+                return res.send({
+                    massage: 'ไม่พบรายการนี้ในระบบ'
+                })
             }
-        }
 
-        if(print_4_Data){
-            const isfloor = (preProduction.colors.floor) ? 2 : 1
-            for (i in print_4_Data.colors) {
-                const sendPrint = {
-                    lay: print_4_Data.lay,
-                    colors: print_4_Data.colors[i]
-                }
-                const print_4_cost = await calPrint_4_Cost(order,sendPrint)
-                datas.push({[`print_4_${i}`]:print_4_cost.data})
-                datas.push({print_4_floor:preProduction.colors.floor})
-                costs[`print_4_${i}`] = print_4_cost.cost*isfloor
+            const { rawMattData, plateData, print_2_Data, print_4_Data, coatingData, embossData, hotStampData, diecutData, glueData } = preProduction
+
+            if(rawMattData){
+                const rawMatt_cost = await calRawMattCost(order,rawMattData)
+                datas.push({rawMatt:rawMatt_cost.data})
+                costs.rawMatt = rawMatt_cost.cost
             }
-        }
-        
-        if(coatingData){
-            const coating_cost = await calCoatingCost(order,coatingData)
-            datas.push({coating:coating_cost.data})
-            costs.coating = coating_cost.cost
-        }
-
-        if(embossData){
-            for (em in embossData.demensions){
-                const sendEmboss = {
-                    inWidth: embossData.demensions[em].inWidth,
-                    inLong: embossData.demensions[em].inLong,
-                    plateSize: embossData.plateSize,
-                    mark: embossData.demensions[em].mark,
-                    lay: embossData.lay
-                }
-                const emboss_cost = await calEmbossCost(order, sendEmboss)
-                datas.push({[`emboss_${em}`]:emboss_cost.data})
-                costs[`emboss_${em}`] = emboss_cost.cost
-            } 
-        }
-
-        if(hotStampData){
-            for (i in hotStampData.block){
-                const sendStamp = {
-                    block: {
-                        inWidth: hotStampData.block[i].inWidth,
-                        inLong: hotStampData.block[i].inLong,
-                        lay: hotStampData.lay, 
-                    },
-                    stamp: {
-                        stamp_color: hotStampData.block[i].color,
-                        k: hotStampData.k
+            
+            if(plateData){
+                const plate_cost = await calPlateCost(plateData)
+                datas.push({plate:plate_cost.data})
+                costs.plate = plate_cost.cost
+            }
+            
+            if(print_2_Data){
+                const isfloor = (print_2_Data.floor) ? 2 : 1
+                for (i in print_2_Data.colors) {
+                    const sendPrint = {
+                        lay: print_2_Data.lay,
+                        colors: print_2_Data.colors[i]
                     }
+                    const print_2_cost = await calPrint_2_Cost(order,sendPrint)
+                    datas.push({[`print_2_${i}`]:print_2_cost.data})
+                    datas.push({print_2_floor:print_2_Data.floor})
+                    costs[`print_2_${i}`] = print_2_cost.cost*isfloor
                 }
-                const stamp_cost = await calHotStamp(order, sendStamp)
-                datas.push({[`stamp_${i}`]:stamp_cost.data})
-                costs[`stamp_${i}`] = stamp_cost.cost
-            } 
+            }
+
+            if(print_4_Data){
+                const isfloor = (print_4_Data.floor) ? 2 : 1
+                for (i in print_4_Data.colors) {
+                    const sendPrint = {
+                        lay: print_4_Data.lay,
+                        colors: print_4_Data.colors[i]
+                    }
+                    const print_4_cost = await calPrint_4_Cost(order,sendPrint)
+                    datas.push({[`print_4_${i}`]:print_4_cost.data})
+                    datas.push({print_4_floor:print_4_Data.floor})
+                    costs[`print_4_${i}`] = print_4_cost.cost*isfloor
+                }
+            }
+            
+            if(coatingData){
+                const coating_cost = await calCoatingCost(order,coatingData)
+                datas.push({coating:coating_cost.data})
+                costs.coating = coating_cost.cost
+            }
+
+            if(embossData){
+                for (em in embossData.demensions){
+                    const sendEmboss = {
+                        inWidth: embossData.demensions[em].inWidth,
+                        inLong: embossData.demensions[em].inLong,
+                        plateSize: embossData.plateSize,
+                        mark: embossData.demensions[em].mark,
+                        lay: embossData.lay
+                    }
+                    const emboss_cost = await calEmbossCost(order, sendEmboss)
+                    datas.push({[`emboss_${em}`]:emboss_cost.data})
+                    costs[`emboss_${em}`] = emboss_cost.cost
+                } 
+            }
+
+            if(hotStampData){
+                for (i in hotStampData.block){
+                    const sendStamp = {
+                        block: {
+                            inWidth: hotStampData.block[i].inWidth,
+                            inLong: hotStampData.block[i].inLong,
+                            lay: hotStampData.lay, 
+                        },
+                        stamp: {
+                            stamp_color: hotStampData.block[i].color,
+                            k: hotStampData.k
+                        }
+                    }
+                    const stamp_cost = await calHotStampCost(order, sendStamp)
+                    datas.push({[`stamp_${i}`]:stamp_cost.data})
+                    costs[`stamp_${i}`] = stamp_cost.cost
+                } 
+            }
+
+            if(diecutData.force!==null){
+                const diecut_cost = await calDiecutCost(order, diecutData)
+                datas.push({diecut:diecut_cost.data})
+                costs.diecut = diecut_cost.cost
+            }
+
+            console.log(costs)
+            const costIncosts = Object.values(costs)
+            const sumCost = costIncosts.reduce( (a, b)=> a + b )
+            costs_list[`${order}`] = {
+                datas: datas,
+                costDetails: costs,
+                sumCost: sumCost
+            }
         }
 
-        console.log(costs)
-        const costIncosts = Object.values(costs)
-        const sumCost = costIncosts.reduce( (a, b)=> a + b )
         return res.send({
-            datas: datas,
-            costDetails: costs,
-            sumCost: sumCost
+            costs_list: costs_list
         })
     }
     catch(err) {
@@ -446,7 +461,7 @@ const calEmbossCost = async (order, embossData) => {
 }
 
 // calculate Hot stamp
-const calHotStamp = async (order, hotStampData) => {
+const calHotStampCost = async (order, hotStampData) => {
     const { 
         block, stamp
     } = hotStampData
@@ -486,8 +501,53 @@ const calHotStamp = async (order, hotStampData) => {
         
     }
     catch (err) {
-        res.send(`ERR : ${err.message}`)
         console.log(err.message)
+        return {data: 'ไม่พบ', cost: 0}
+    }
+}
+
+// calculate Diecut
+const calDiecutCost = async (order, diecutData) => {
+    const { 
+        plateSize,
+        lay,
+        force
+    } = diecutData
+
+    try {
+        const diecuts = await Diecut.find()
+        if(!diecuts){
+            return {data: 'ไม่พบไดคัต', cost: 0}
+        }
+
+        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        
+        const diecut = diecuts.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
+        const option = diecut[0].option.filter(option=>option.plateSize===plateSize)
+        if(!option || option.length===0){
+            return {data: 'ไม่พบตัวเลือกไดคัต', cost: 0}
+        }
+        const diecut_option = option[0]
+        const diecut_pumpPrice = diecut_option.pumpPrice
+
+        const cal_diecut = {
+            order: order,
+            lay: lay,
+            force: force,
+            order_lay: order_lay,
+            blockSize: diecut_option.plateSize || plateSize,
+            blockPrice: diecut_option.blockPrice,
+            diecutRound : diecut[0].round.join,
+            pumpPrice: diecut_pumpPrice,
+            totalPrice: diecut_pumpPrice + diecut_option.blockPrice
+        }
+
+        return {data: cal_diecut, cost: cal_diecut.totalPrice}
+        
+    }
+    catch (err) {
+        console.log(err)
+        return {data: 'ไม่พบ', cost: 0}
     }
 }
 
@@ -907,5 +967,57 @@ exports.calHotStamp = async (req,res) => {
     catch (err) {
         res.send(`ERR : ${err.message}`)
         console.log(err.message)
+    }
+}
+
+// calculate Diecut
+exports.calDiecut = async (req,res) => {
+    const { 
+        plateSize,
+        order, lay 
+    } = req.body
+
+    try {
+        const diecuts = await Diecut.find()
+        if(!diecuts){
+            return res.send({
+                message: 'ไม่พบประเภทสินค้านี้ในระบบ',
+                product: diecuts
+            })
+        }
+
+        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        
+        const diecut = diecuts.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
+        const option = diecut[0].option.filter(option=>option.plateSize===plateSize)
+        if(!option || option.length===0){
+            return res.send({
+                message: 'ไม่พบตัวเลือกขนาดเพลตนี้'
+            })
+        }
+        const diecut_option = option[0]
+        const diecut_pumpPrice = diecut_option.pumpPrice
+
+        const cal_diecut = {
+            order: order,
+            lay: lay,
+            order_lay: order_lay,
+            blockSize: diecut_option.plateSize || plateSize,
+            blockPrice: diecut_option.blockPrice,
+            diecutRound : diecut[0].round.join,
+            pumpPrice: diecut_pumpPrice,
+            totalPrice: diecut_pumpPrice + diecut_option.blockPrice
+        }
+
+        return res.send({
+            message: 'คำนวณ ราคา diecut สำเร็จ',
+            success: true,
+            result: cal_diecut
+        })
+        
+    }
+    catch (err) {
+        res.send(`ERR : ${err.message}`)
+        console.log(err)
     }
 }

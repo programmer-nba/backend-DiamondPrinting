@@ -5,7 +5,7 @@ exports.addDiecut = async (req, res) => {
     const { start, end } = req.body
     try {
         const diecut = await Diecut.find()
-        const code = `emboss-${diecut.length}`
+        const code = `diecut-${diecut.length}`
 
         const new_diecut = new Diecut({
             code: code,
@@ -212,8 +212,7 @@ exports.editDiecutOption = async (req, res) => {
             })
         }
         
-        const index = prev_diecut.option.findIndex(item=>item._id===option)
-
+        const index = prev_diecut.option.findIndex(item=>item._id.toString()===option.trim())
         prev_diecut.option[index].plateSize = plateSize
         prev_diecut.option[index].pumpPrice = pumpPrice
         prev_diecut.option[index].blockPrice = blockPrice
