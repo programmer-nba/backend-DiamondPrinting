@@ -132,7 +132,8 @@ exports.calAll = async (req, res) => {
                 order: order,
                 datas: datas,
                 costDetails: costs,
-                sumCost: sumCost
+                sumCost: sumCost,
+                costperOrder: sumCost/order
             })
         }
 
