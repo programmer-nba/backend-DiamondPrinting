@@ -12,9 +12,23 @@ const quotationSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Sale'
         },
-        details: {
-            
-        }
+        preOrder: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'preOrder'
+        },
+        price: [
+            {
+                order: Number,
+                normal: {
+                    total: Number,
+                    unit: Number
+                },
+                special: {
+                    total: Number,
+                    unit: Number
+                }
+            }
+        ]
     },
     {
         timestamps: true

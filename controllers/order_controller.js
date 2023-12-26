@@ -1,6 +1,7 @@
 const Customer = require('../models/customers/customer_model.js')
 const PreOrder = require('../models/orders/preOrder_model.js')
 const PreProduction = require('../models/orders/preProduction_model.js')
+const Quotation = require('../models/orders/quotation_model.js')
 
 // Sale ----------------------------------------
 
@@ -67,9 +68,13 @@ exports.addPreOrder = async (req, res) => {
         } else {
             curCustomer = existCustomer
         }
+
+        const prev_preOrder = await PreOrder.find()
+        const code = `00${prev_preOrder.length}`
         
         // add new pre-order
         const new_preOrder = new PreOrder({
+            code: code,
             customer: curCustomer._id,
             name: (name) && name,
             brand: (brand) && brand,
@@ -571,34 +576,106 @@ exports.deletePreProduction = async (req, res) => {
 // Order------------------------------------------
 
 exports.creatQuotation = async (req, res) => {
-    const { id } = req.params
-    const { userId, userRole, userName } = req.user
-    const { datas, costDetails, sumCost } = req.body
+    const { preOrderId, calOrder  } = req.body
     try {
-        const preProduction = await PreProduction.findById(id)
-        if(!preProduction || preProduction.length===0){
+        const preOrder = await PreOrder.findById(preOrderId)
+        .populate('customer', 'code nameTh nameEng contact address _id')
+        .populate('sale', 'code name phone_number email _id')
+        if(!preOrder){
             return res.send({
-                message: 'ไม่พบรายการนี้ในระบบ',
-                preProduction: preProduction
-            })
-        }
-
-        const preOrder = await PreOrder.findById(preProduction.preOrder).populate('customer', 'nameTh nameEng taxID contact')
-        if(!preOrder || preOrder.length===0){
-            return res.send({
-                message: 'ไม่พบรายการนี้ในระบบ',
+                message: 'ไม่พบ preOrderId นี้',
                 preOrder: preOrder
             })
         }
+        const length_Quotation = await Quotation.find()
+        const code = `DM-${preOrder.customer.code}-${preOrder.code}-000${length_Quotation.length}`
 
-        const new_quotation = {
-
+        const new_quotation = new Quotation({
+            code: code,
+            customer: preOrder.customer._id,
+            sale: preOrder.customer._id,
+            preOrder: preOrder._id,
+            price: calOrder
+        })
+        const saved_quotation = await new_quotation.save()
+        if(!saved_quotation){
+            return res.send({
+                message: 'ไม่่สามารถบันทึกใบเสนอราคา',
+                saved_quotation: saved_quotation
+            })
         }
+
+        return res.send({
+            message: 'สร้างใบเสนอราคาสำเร็จ',
+            success: true,
+            quotation: saved_quotation
+        })
     }
     catch (err) {
         res.status(500).send({
             message: 'ไม่สามารถสร้างใบเสนอราคาได้',
             
+        })
+        console.log(err)
+    }
+}
+
+exports.getQuotations = async (req, res) => {
+    try {
+        const quotations = await Quotation.find()
+        if(!quotations){
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotations || []
+            })
+        } else if (quotations.length === 0) {
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotations || []
+            })
+        }
+
+        return res.send({
+            success: true,
+            message: `มีใบเสนอราคาทั้งหมด ${quotations.length}`,
+            quotations: quotations
+        })
+    }
+    catch (err) {
+        res.send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
+exports.getQuotationOfpreOrder = async (req, res) => {
+    const { id } = req.params
+    try {
+        const quotations = await Quotation.find({
+            preOrder: id
+        })
+        if(!quotations){
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotations || []
+            })
+        } else if (quotations.length === 0) {
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotations || []
+            })
+        }
+
+        return res.send({
+            success: true,
+            message: `มีใบเสนอราคาทั้งหมด ${quotations.length}`,
+            quotations: quotations
+        })
+    }
+    catch (err) {
+        res.send({
+            message: err.message
         })
         console.log(err)
     }

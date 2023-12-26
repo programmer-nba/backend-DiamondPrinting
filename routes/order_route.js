@@ -17,4 +17,8 @@ route.get('/pre-production/:id', Order.getPreProduction)
 route.put('/pre-production/:id', Order.updatePreProduction)
 route.delete('/pre-production/:id', Order.deletePreProduction)
 
+route.post('/quotation', Order.creatQuotation)
+route.get('/quotations', Order.getQuotations)
+route.get('/quotations/:id', Order.getQuotationOfpreOrder)
+
 module.exports = route
