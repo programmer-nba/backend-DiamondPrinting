@@ -135,7 +135,7 @@ exports.addPreOrder = async (req, res) => {
 
 exports.getPreOrders = async (req, res) => {
     try {
-        const preOrders = await PreOrder.find().populate('customer', '_id nameTh nameEng taxID address contact')
+        const preOrders = await PreOrder.find().populate('customer', '_id nameTh nameEng taxID address contact').populate('sale', '_id name phone_number email')
         if(!preOrders || preOrders.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
@@ -159,7 +159,7 @@ exports.getPreOrders = async (req, res) => {
 exports.getPreOrder = async (req, res) => {
     const { id } = req.params
     try {
-        const preOrder = await PreOrder.findById(id).populate('customer', '_id nameTh nameEng taxID address contact')
+        const preOrder = await PreOrder.findById(id).populate('customer', '_id nameTh nameEng taxID address contact').populate('sale', '_id name phone_number email')
         if(!preOrder || preOrder.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
@@ -370,6 +370,8 @@ exports.addPreProduction = async (req, res) => {
         }
         
         const new_preProduction = new PreProduction({
+            customer: preOrder.customer,
+            sale: preOrder.sale,
             production: null,
             preOrder: id,
             rawMattData : {
@@ -419,7 +421,8 @@ exports.addPreProduction = async (req, res) => {
                 force: (preOrder.dieCut) ? preOrder.dieCut : null,
                 plateSize: (plateSize) ? plateSize : null,
                 lay: (lay) && lay
-            }
+            },
+            glueData : (preOrder.glue) ? preOrder.glue : null
             
         })
         const saved_production = await new_preProduction.save()
@@ -446,13 +449,16 @@ exports.addPreProduction = async (req, res) => {
 
 exports.getPreProductions = async (req, res) => {
     try {
-        const preProductions = await PreProduction.find()
+        const preProductions = await PreProduction.find().populate('customer', 'nameTh nameEng taxID contact address').populate('preOrder', 'name brand').populate('sale', '_id code name phone_number email')
         if(!preProductions || preProductions.length===0){
             return res.send({
                 message: 'ไม่พบรายการนี้ในระบบ',
                 preProductions: preProductions || []
             })
         }
+
+        console.log(preProductions[0].preOrder)
+        
 
         return res.send({
             message: `มีรายการทั้งหมด ${preProductions.length} รายการ`,
@@ -471,7 +477,7 @@ exports.getPreProductions = async (req, res) => {
 exports.getPreProduction = async (req, res) => {
     const {id} = req.params
     try {
-        const preProduction = await PreProduction.findById(id)
+        const preProduction = await PreProduction.findById(id).populate('customer', 'nameTh nameEng taxID contact address').populate('sale', '_id code name phone_number email')
         if(!preProduction){
             return res.send({
                 message: 'ไม่พบรายการนี้ในระบบ',
@@ -494,8 +500,8 @@ exports.getPreProduction = async (req, res) => {
 
 exports.updatePreProduction = async (req, res) => {
     const { id } = req.params
-    const { userId, userName, userRole } = req.user
-    const { files } = req.files
+    //const { userId, userName, userRole } = req.user
+    //const { files } = req.files
     const { gsm, width, long, cut, lay, plateSize } = req.body
 
     try {

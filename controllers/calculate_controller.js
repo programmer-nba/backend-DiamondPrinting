@@ -8,11 +8,12 @@ const Emboss = require('../models/products/emboss_model.js')
 const PreProduction = require('../models/orders/preProduction_model.js')
 const HotStamp = require('../models/products/hotStamp_model.js')
 const Diecut = require('../models/products/diecut_model.js')
+const Glue = require('../models/products/glue_model.js')
 
 exports.calAll = async (req, res) => {
     const { id } = req.params // _id of preProduction
     const {orders} = req.body
-    let costs_list = {}
+    let costs_list = []
     try {
 
         for (let order of orders) {
@@ -91,6 +92,7 @@ exports.calAll = async (req, res) => {
             }
 
             if(hotStampData){
+                console.log(hotStampData.k)
                 for (i in hotStampData.block){
                     const sendStamp = {
                         block: {
@@ -109,20 +111,29 @@ exports.calAll = async (req, res) => {
                 } 
             }
 
-            if(diecutData.force!==null){
+            if(diecutData && diecutData.force!==null){
                 const diecut_cost = await calDiecutCost(order, diecutData)
                 datas.push({diecut:diecut_cost.data})
                 costs.diecut = diecut_cost.cost
             }
 
+            if(glueData){
+                for (g in glueData) {
+                    const glue_cost = await calGlueCost(order, glueData[g])
+                    datas.push({[`glue_${g}`]:glue_cost.data})
+                    costs[`glue_${g}`] = glue_cost.cost
+                }
+            }
+
             console.log(costs)
             const costIncosts = Object.values(costs)
             const sumCost = costIncosts.reduce( (a, b)=> a + b )
-            costs_list[`${order}`] = {
+            costs_list.push({
+                order: order,
                 datas: datas,
                 costDetails: costs,
                 sumCost: sumCost
-            }
+            })
         }
 
         return res.send({
@@ -455,8 +466,8 @@ const calEmbossCost = async (order, embossData) => {
         
     }
     catch (err) {
-        res.send(`ERR : ${err.message}`)
         console.log(err.message)
+        return {cost: 0, data: 'ไม่พบ'}
     }
 }
 
@@ -473,6 +484,8 @@ const calHotStampCost = async (order, hotStampData) => {
         if(!hotStamp){
             return {data: 'ไม่พบ', cost: 0}
         }
+
+        console.log(stamp)
 
         const block_cost = Math.round((block.inWidth*block.inLong*13)*0.01)*100
         const total_block_cost = block_cost*block.lay
@@ -494,8 +507,10 @@ const calHotStampCost = async (order, hotStampData) => {
             other_avr: 0.1,
             stamp_color_cost: stamp_color_cost,
             total_stamp_color_cost: total_stamp_color_cost,
-            totol_cost: total_stamp_color_cost + total_block_cost
+            totol_cost: (total_stamp_color_cost + total_block_cost !== NaN) ? total_stamp_color_cost + total_block_cost : 0
         }
+        console.log(total_stamp_color_cost)
+        console.log(total_block_cost)
 
         return {data: cal_hotStamp, cost: cal_hotStamp.totol_cost}
         
@@ -547,6 +562,30 @@ const calDiecutCost = async (order, diecutData) => {
     }
     catch (err) {
         console.log(err)
+        return {data: 'ไม่พบ', cost: 0}
+    }
+}
+
+const calGlueCost = async (order, glue) => {
+    const { long, mark } = glue
+    try {
+        const gluebase = await Glue.find()
+        if(!gluebase){
+            return {data: 'ไม่พบ', cost: 0}
+        }
+
+        const avr = gluebase[0].avr
+        const glue_cost = avr*long
+        const gluedata = {
+            avr: avr,
+            cost: glue_cost,
+            total: glue_cost*order,
+            mark: mark
+        }
+
+        return {data: gluedata, cost: gluedata.total}
+    }
+    catch (err) {
         return {data: 'ไม่พบ', cost: 0}
     }
 }

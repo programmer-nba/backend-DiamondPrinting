@@ -4,6 +4,15 @@ const { Schema } = mongoose
 const preProductionSchema = new Schema(
     {
         code: String,
+        customer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Customer'
+        },
+        sale: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Sale',
+            default: null
+        },
         production: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Production',
@@ -69,12 +78,19 @@ const preProductionSchema = new Schema(
                 }
             ],
             lay: Number,
-            k: Number   
+            k: {
+                type: Number,
+                default: 1
+            }   
         },
         diecutData : {
             plateSize: String,
             lay: Number
-        }
+        },
+        glueData : [{
+            long: Number,
+            mark: String
+        }]
     }
 )
 

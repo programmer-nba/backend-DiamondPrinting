@@ -9,6 +9,7 @@ const Coating = require('../controllers/coating_controller.js')
 const Emboss = require('../controllers/emboss_controller.js')
 const HotStamp = require('../controllers/hotStamp_controller.js')
 const Diecut = require('../controllers/diecut_controller.js')
+const Glue = require('../controllers/glue_controller.js')
 
 /* --------------RawMatt-------------- */
 route.post('/rawmatt', RawMatt.addRawMatt)
@@ -71,5 +72,10 @@ route.delete('/diecut/:id', Diecut.deleteDiecut)
 route.put('/diecut-option/:id/:option', Diecut.editDiecutOption)
 route.put('/diecut-option/:id', Diecut.addDiecutOption)
 route.delete('/diecut-option/:id/:option', Diecut.deleteDiecutOption)
+
+/* --------------Glue-------------- */
+route.post('/glue', Glue.addGlue)
+route.get('/glues', Glue.getGlues)
+route.delete('/glue/:id', Glue.deleteGlue)
 
 module.exports = route
