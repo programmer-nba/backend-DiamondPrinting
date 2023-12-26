@@ -92,7 +92,6 @@ exports.calAll = async (req, res) => {
             }
 
             if(hotStampData){
-                console.log(hotStampData.k)
                 for (i in hotStampData.block){
                     const sendStamp = {
                         block: {
@@ -125,7 +124,6 @@ exports.calAll = async (req, res) => {
                 }
             }
 
-            console.log(costs)
             const costIncosts = Object.values(costs)
             const sumCost = costIncosts.reduce( (a, b)=> a + b )
             costs_list.push({
@@ -133,7 +131,17 @@ exports.calAll = async (req, res) => {
                 datas: datas,
                 costDetails: costs,
                 sumCost: sumCost,
-                costperOrder: sumCost/order
+                costperOrder: sumCost/order,
+                normal: {
+                    percent: `24.00%`,
+                    total_price: (24.00*sumCost)/100,
+                    unit_price: ((24.00*sumCost)/100)/order
+                },
+                special: {
+                    percent: `21.50%`,
+                    total_price: (21.50*sumCost)/100,
+                    unit_price: ((21.50*sumCost)/100)/order
+                }
             })
         }
 
@@ -486,8 +494,6 @@ const calHotStampCost = async (order, hotStampData) => {
             return {data: 'ไม่พบ', cost: 0}
         }
 
-        console.log(stamp)
-
         const block_cost = Math.round((block.inWidth*block.inLong*13)*0.01)*100
         const total_block_cost = block_cost*block.lay
         const stamp_color_cost = ((block.inWidth*block.inLong*hotStamp.avr)+0.1)*stamp.k
@@ -510,8 +516,6 @@ const calHotStampCost = async (order, hotStampData) => {
             total_stamp_color_cost: total_stamp_color_cost,
             totol_cost: (total_stamp_color_cost + total_block_cost !== NaN) ? total_stamp_color_cost + total_block_cost : 0
         }
-        console.log(total_stamp_color_cost)
-        console.log(total_block_cost)
 
         return {data: cal_hotStamp, cost: cal_hotStamp.totol_cost}
         

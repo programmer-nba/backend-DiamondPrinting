@@ -8,6 +8,13 @@ const quotationSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customer'
         },
+        sale: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Sale'
+        },
+        details: {
+            
+        }
     },
     {
         timestamps: true
