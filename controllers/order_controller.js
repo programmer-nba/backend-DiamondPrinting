@@ -18,13 +18,16 @@ exports.addPreOrder = async (req, res) => {
         colors_back,
         front_pantone,
         back_pantone,
-        floor,
+        floor_front,
+        floor_back,
 
         coating,
         hotStamp,
         emboss,
         dieCut,
         glue,
+        glue2,
+        glue_dot,
 
         note
     } = req.body
@@ -95,15 +98,17 @@ exports.addPreOrder = async (req, res) => {
             
             paper: {
                 type: (paper && paper.type) && paper.type,
-                subType: (paper && paper.subType) && paper.subType
+                subType: (paper && paper.subType) && paper.subType,
+                gsm: (paper && paper.gsm) && paper.gsm
             },
 
             colors: {
                 front: (colors_front) ? colors_front : 0,
                 front_pantone: (front_pantone) && front_pantone,
-                floor: (floor) && floor,
+                floor_front: (floor_front) && floor_front,
                 back: (colors_back) ? colors_back : 0,
                 back_pantone: (back_pantone) && back_pantone,
+                floor_back: (floor_back) && floor_back,
             },
 
             coating: {
@@ -111,7 +116,7 @@ exports.addPreOrder = async (req, res) => {
                     type: coating.method.type || null,
                     subType: coating.method.subType || null
                 } : null,
-                spotUv: (coating && coating.spotUv) ? coating.spotUv : null,
+                spotUv: (coating && coating.spotUv!=='' && coating.spotUv!==null) ? coating.spotUv : null,
                 dipOff: (coating && coating.dipOff) ? coating.dipOff : null
             },
 
