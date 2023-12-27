@@ -25,8 +25,8 @@ route.get('/stamp-color', HotStamp.getHotStampColors)
 route.get('/coating-type', Coating.getCoatingTypes)
 route.get('/coating-option/:type', Coating.getCoatingOptions)
 
-route.get('/customers-name-tax', Customer.customersSearch)
-route.get('/customer/:id', Customer.getCustomer)
+route.get('/customers-name', Customer.customersSearch)
+route.get('/customer', Customer.getCustomer)
 route.get('/customers', Customer.getCustomers)
 
 module.exports = route

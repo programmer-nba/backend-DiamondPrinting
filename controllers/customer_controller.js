@@ -20,8 +20,8 @@ exports.customersSearch = async (req, res) => {
         return res.send({
             message: `มีลูกค้าทั้งหมด ${customers.length}`,
             customersName: [...uniqueCustomersName],
-            customersTaxID: [...uniqueCustomersTaxID],
-            customersNameTax: [...uniqueCustomersNameTax]
+            //customersTaxID: [...uniqueCustomersTaxID],
+            //customersNameTax: [...uniqueCustomersNameTax]
         })
     }
     catch (err) {
@@ -62,13 +62,14 @@ exports.getCustomers = async (req, res) => {
 }
 
 exports.getCustomer = async (req, res) => {
-    const { tax, nameTh, nameEng } = req.body
+    const { nameTh, tax, code } = req.body
     try {
         const customer = await Customer.findOne({
             $or: [
-                {taxID: tax},
+                //{taxID: tax},
                 {nameTh: nameTh},
-                {nameEng: nameEng}
+                //{nameEng: nameEng},
+                //{code: code}
             ]
         })
         if(!customer) {
