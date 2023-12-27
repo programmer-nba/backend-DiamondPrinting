@@ -16,7 +16,7 @@ route.post('/rawmatt', RawMatt.addRawMatt)
 route.get('/rawmatts', RawMatt.getRawMatts)
 route.get('/rawmatt/:id', RawMatt.getRawMatt)
 route.put('/rawmatt/:id', RawMatt.editRawMattType)
-route.put('/rawmatt/:id', RawMatt.updateRawMattOption)
+route.put('/rawmatt-option/:id', RawMatt.updateRawMattOption)
 route.delete('/rawmatt/:id', RawMatt.deleteRawMatt)
 route.delete('/rawmatt/:id/:option', RawMatt.deleteRawMattOption)
 
