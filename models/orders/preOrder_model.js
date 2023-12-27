@@ -67,6 +67,19 @@ const preOrderSchema = new Schema(
             }
         ],
         note: String,
+        status: [
+            {
+                name: String,
+                text: String,
+                ref: String,
+                sender: {
+                    name: String,
+                    code: String,
+                    _id: mongoose.Schema.Types.ObjectId
+                },
+                createAt: Date
+            }
+        ]
     },
     {
         timestamps: true

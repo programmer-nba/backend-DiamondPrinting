@@ -28,6 +28,12 @@ exports.addPreOrder = async (req, res) => {
 
         note
     } = req.body
+
+    const userName = req.user.name
+    const userId = req.user.id
+    const userCode = req.user.code
+    const userRole = req.user.role.main
+    const userPhone = req.user.phone_number
     
     try {
         // check customer already exist? or create new one
@@ -84,6 +90,8 @@ exports.addPreOrder = async (req, res) => {
                 long: demensions.long,
                 height: demensions.height
             },
+
+            sale: userId,
             
             paper: {
                 type: (paper && paper.type) && paper.type,
@@ -114,6 +122,17 @@ exports.addPreOrder = async (req, res) => {
 
             glue: (glue) ? glue : null,
 
+            status: {
+                name: 'new',
+                text: 'พรีออร์เดอร์ใหม่',
+                sender: {
+                    name: `${userName.first} ${userName.last}`,
+                    code: userCode,
+                    _id: userId,
+                },
+                createAt: new Date()
+            },
+            
             note: (note) ? note : ''
         })
         const saved_preOrder = await new_preOrder.save()
@@ -201,6 +220,11 @@ exports.updatePreOrder = async (req, res) => {
         glue,
         note
     } = req.body
+
+    const userId = req.user.id
+    const userName = req.user.name
+    const userCode = req.user.code
+
     try {
         let preOrder = await PreOrder.findById(id)
         if(!preOrder || preOrder.length===0){
@@ -235,6 +259,19 @@ exports.updatePreOrder = async (req, res) => {
 
         preOrder.glue.mark = (glue && glue.mark) ? glue.mark : preOrder.glue.mark
         preOrder.glue.long = (glue && glue.long) ? glue.long : preOrder.glue.long
+
+        preOrder.status.push(
+            {
+                name: 'edit',
+                text: 'แก้ไขข้อมูลพรีออร์เดอร์',
+                sender: {
+                    name: `${userName.first} ${userName.last}`,
+                    code: userCode,
+                    _id: userId
+                },
+                createAt: new Date()
+            }
+        )
         
         preOrder.note = (note) ? note : preOrder.note
 
@@ -336,7 +373,7 @@ exports.getPreProductionsOfOrder = async (req, res) => {
     try {
         const preProductions = await PreProduction.find({
             preOrder: id
-        })
+        }).populate('customer', 'nameTh nameEng taxID contact address _id').poppulate('production', 'name code _id email')
         if(!preProductions){
             return res.send({
                 message: 'ไม่พบรายการนี้ในระบบ',
@@ -362,22 +399,26 @@ exports.getPreProductionsOfOrder = async (req, res) => {
 
 exports.addPreProduction = async (req, res) => {
     const { id } = req.params
-    //const { userId, userName, userRole } = req.user
+    const userId = req.user.id
+    const userCode = req.user.code
+    const userName = req.user.name
     //const { files } = req.files
-    const { gsm, width, long, cut, lay, plateSize, k } = req.body
+    const { gsm, width, long, cut, lay, plateSize, k, print } = req.body
 
     try {
-        const preOrder = await PreOrder.findById(id)
+        let preOrder = await PreOrder.findById(id)
         if(!preOrder){
             return res.send({
                 message: 'ไม่พบ pre-order นี้'
             })
         }
-        
+        const prev_preProduction = await PreProduction.find()
+        const code = `00${prev_preProduction.length}`
         const new_preProduction = new PreProduction({
+            code: code,
             customer: preOrder.customer,
             sale: preOrder.sale,
-            production: null,
+            production: userId,
             preOrder: id,
             rawMattData : {
                 type : (preOrder.paper && preOrder.paper.type) && preOrder.paper.type, // from pre-order
@@ -388,16 +429,16 @@ exports.addPreProduction = async (req, res) => {
                 cut : (cut) && cut,
                 lay : (lay) && lay
             },
-            print_4_Data : {
+            print_4_Data : (print && print==="4") ? {
                 colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
                 lay : (lay) && lay,
                 floor: (preOrder.colors && preOrder.colors.floor) ? preOrder.colors.floor : false
-            },
-            print_2_Data : {
+            } : null,
+            print_2_Data : (print && print==="2") ? {
                 colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
                 lay : (lay) && lay,
                 floor: (preOrder.colors && preOrder.colors.floor) ? preOrder.colors.floor : false
-            },
+            } : null,
             plateData : {
                 colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
                 size : (plateSize) && plateSize.toString()
@@ -427,8 +468,17 @@ exports.addPreProduction = async (req, res) => {
                 plateSize: (plateSize) ? plateSize : null,
                 lay: (lay) && lay
             },
-            glueData : (preOrder.glue) ? preOrder.glue : null
-            
+            glueData : (preOrder.glue) ? preOrder.glue : null,
+            status: {
+                name: 'new',
+                text: 'พรีโพรดักชันใหม่',
+                sender: {
+                    name: `${userName.first} ${userName.last}`,
+                    _id: userId,
+                    code: userCode
+                },
+                createAt: new Date()
+            }
         })
         const saved_production = await new_preProduction.save()
         if(!saved_production){
@@ -437,6 +487,20 @@ exports.addPreProduction = async (req, res) => {
                 saved_production: saved_production
             })
         }
+
+        preOrder.status.push({
+            name: 'filled',
+            text: 'กราฟฟิคเพิ่มข้อมูลแล้ว',
+            ref: code,
+            sender: {
+                name: `${userName.first} ${userName.last}`,
+                _id: userId,
+                code: userCode
+            },
+            createAt: new Date()
+        })
+
+        await preOrder.save()
 
         return res.send({
             message: 'success!',
@@ -505,7 +569,9 @@ exports.getPreProduction = async (req, res) => {
 
 exports.updatePreProduction = async (req, res) => {
     const { id } = req.params
-    //const { userId, userName, userRole } = req.user
+    const userId = req.user.id
+    const userCode = req.user.code
+    const userName = req.user.name
     //const { files } = req.files
     const { gsm, width, long, cut, lay, plateSize } = req.body
 
@@ -525,7 +591,19 @@ exports.updatePreProduction = async (req, res) => {
     
         preProduction.plateData.size = plateSize || preProduction.plateData.size
     
-        preProduction.printData.lay = lay || preProduction.printData.lay
+        preProduction.print_2_Data.lay = lay || preProduction.print_2_Data.lay
+        preProduction.print_4_Data.lay = lay || preProduction.print_4_Data.lay
+
+        preProduction.status.push({
+            name: 'edit-new',
+            text: 'แก้ไขรายละเอียดพรีโปดักชั่น',
+            sender: {
+                name: `${userName.first} ${userName.last}`,
+                code: userCode,
+                _id: userId
+            },
+            createAt: new Date()
+        })
             
         const updated_production = await preProduction.save()
         if(!updated_production){
@@ -550,13 +628,40 @@ exports.updatePreProduction = async (req, res) => {
 }
 
 exports.deletePreProduction = async (req, res) => {
-    const {id} = req.params
+    const { id } = req.params
+    const userId = req.user.id
+    const userName = req.user.name
+    const userCode = req.user.code
     try {
         const preProduction = await PreProduction.findByIdAndDelete(id)
         if(!preProduction){
             return res.send({
                 message: 'ไม่พบรายการนี้ในระบบ',
                 preProductions: preProduction || []
+            })
+        }
+
+        const preOrder = await PreOrder.findByIdAndUpdate(preProduction.preOrder,
+            {
+                status: {
+                    $push: {
+                        name: 'del-production',
+                        text: 'ฟรีโปรดักชั่นถูกลบ',
+                        ref: preProduction.code,
+                        sender: {
+                            name: `${userName.first} ${userName.last}`,
+                            code: userCode,
+                            _id: userId
+                        },
+                        createAt: new Date()
+                    }
+                }
+            }
+        )
+        if(!preOrder){
+            return res.send({
+                success: true,
+                message: 'delete success but can not update status of preOrder'
             })
         }
 
@@ -575,10 +680,14 @@ exports.deletePreProduction = async (req, res) => {
 
 // Order------------------------------------------
 
+// create new quotation
 exports.creatQuotation = async (req, res) => {
     const { preOrderId, calOrder  } = req.body
+    const userId = req.user.id
+    const userName = req.user.name
+    const userCode = req.user.code
     try {
-        const preOrder = await PreOrder.findById(preOrderId)
+        let preOrder = await PreOrder.findById(preOrderId)
         .populate('customer', 'code nameTh nameEng contact address _id')
         .populate('sale', 'code name phone_number email _id')
         if(!preOrder){
@@ -588,7 +697,7 @@ exports.creatQuotation = async (req, res) => {
             })
         }
         const length_Quotation = await Quotation.find()
-        const code = `DM-${preOrder.customer.code}-${preOrder.code}-000${length_Quotation.length}`
+        const code = `DM-${preOrder.customer.code}-${preOrder.code}-00${length_Quotation.length}`
 
         const new_quotation = new Quotation({
             code: code,
@@ -605,6 +714,20 @@ exports.creatQuotation = async (req, res) => {
             })
         }
 
+        preOrder.status.push({
+            name: 'got-quotation',
+            text: 'เพิ่มในใบเสนอราคาแล้ว',
+            ref: code,
+            sender: {
+                name: `${userName.first} ${userName.last}`,
+                code: userCode,
+                _id: userId
+            },
+            createAt: new Date()
+        })
+
+        const saved_preOrder = await preOrder.save()
+
         return res.send({
             message: 'สร้างใบเสนอราคาสำเร็จ',
             success: true,
@@ -620,9 +743,10 @@ exports.creatQuotation = async (req, res) => {
     }
 }
 
+// get all quotations
 exports.getQuotations = async (req, res) => {
     try {
-        const quotations = await Quotation.find()
+        const quotations = await Quotation.find().poppulate('customer', 'nameTh nameEng taxID contact _id code').poppulate('sale', 'name phone_number code')
         if(!quotations){
             return res.send({
                 message: 'ไม่พบใบเสนอราคา',
@@ -649,12 +773,13 @@ exports.getQuotations = async (req, res) => {
     }
 }
 
+// get all quotations of specific pre-order
 exports.getQuotationOfpreOrder = async (req, res) => {
     const { id } = req.params
     try {
         const quotations = await Quotation.find({
             preOrder: id
-        })
+        }).poppulate('customer', 'nameTh nameEng taxID contact _id code').poppulate('sale', 'name phone_number code')
         if(!quotations){
             return res.send({
                 message: 'ไม่พบใบเสนอราคา',
@@ -671,6 +796,56 @@ exports.getQuotationOfpreOrder = async (req, res) => {
             success: true,
             message: `มีใบเสนอราคาทั้งหมด ${quotations.length}`,
             quotations: quotations
+        })
+    }
+    catch (err) {
+        res.send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
+// get a quotation
+exports.getQuotation = async (req, res) => {
+    const { id } = req.params
+    try {
+        const quotation = await Quotation.findById(id).poppulate('customer', 'nameTh nameEng taxID contact _id code').poppulate('sale', 'name phone_number code')
+        if(!quotation){
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotation || []
+            })
+        }
+
+        return res.send({
+            success: true,
+            quotation: quotation
+        })
+    }
+    catch (err) {
+        res.send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
+// delete a quotation
+exports.deleteQuotation = async (req, res) => {
+    const { id } = req.params
+    try {
+        const quotation = await Quotation.findByIdAndDelete(id)
+        if(!quotation){
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotation || []
+            })
+        }
+
+        return res.send({
+            success: true,
+            message: 'ลบใบเสนอราคาสำเร็จ'
         })
     }
     catch (err) {

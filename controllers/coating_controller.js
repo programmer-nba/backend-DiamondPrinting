@@ -10,7 +10,7 @@ exports.addCoating = async (req, res) => {
 
         const new_coating = new Coating({
             code: code,
-            method: type
+            type: type
         })
         const saved_coating = await new_coating.save()
         if(!saved_coating) {
@@ -173,6 +173,7 @@ exports.getCoatingOptions = async (req, res) => {
         const unique_subTypes = new Set(subTypes)
 
         return res.send({
+            type: type,
             subTypes: [...unique_subTypes],
             success: true
         })

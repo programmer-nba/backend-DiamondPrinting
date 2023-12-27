@@ -68,6 +68,42 @@ exports.getPlates = async (req, res) => {
     }
 }
 
+// get all plates size
+exports.getPlatesSize = async (req, res) => {
+    try {
+        const plates = await Plate.find()
+        if(!plates){
+            return res.send({
+                message: 'ไม่พบสินค้าในระบบ',
+                products: plates
+            })
+        } else if (plates && plates.length===0) {
+            return res.send({
+                message: 'สินค้าในระบบมี 0 รายการ',
+                products: plates || [],
+                success: true
+            })
+        }
+
+        const platesSize = plates.map(m=>m.size)
+        const unique_size = new Set(platesSize)
+
+        return res.send({
+            success: true,
+            plate_size: [...unique_size],
+            title: 'เพลทตัด'
+        })
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูสินค้าทั้งหมดได้',
+            err: err.message
+        })
+    }
+}
+
 // edit plate price
 exports.updatePlatePrice = async (req, res) => {
     const { id } = req.params

@@ -193,7 +193,7 @@ exports.getRawMattSubTypes = async (req, res) => {
         return res.send({
             success: true,
             subTypes: [...uniquesubType],
-            success: true
+            type: type
         })
         
     }

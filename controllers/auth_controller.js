@@ -597,6 +597,7 @@ exports.login = async (req, res) => {
             code: sale.code,
             role: sale.role,
             name: sale.name,
+            phone_number: sale.phone_number
         } 
         : (admin) ? {
             id: admin._id ,

@@ -68,6 +68,42 @@ exports.getHotStamps = async (req, res) => {
     }
 }
 
+// get all hot stamp colors
+exports.getHotStampColors = async (req, res) => {
+    try {
+        const hotStamps = await HotStamp.find()
+        if(!hotStamps){
+            return res.send({
+                message: 'ไม่พบสินค้าในระบบ',
+                products: hotStamps
+            })
+        } else if (hotStamps && hotStamps.length===0) {
+            return res.send({
+                message: 'สินค้าในระบบมี 0 รายการ',
+                products: hotStamps || [],
+                success: true
+            })
+        }
+
+        const colors = hotStamps.map(m=>m.stamp_color)
+        const unique_color = new Set(colors)
+
+        return res.send({
+            title: 'สีปั้มฟลอย',
+            success: true,
+            colors: [...unique_color]
+        })
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูสินค้าทั้งหมดได้',
+            err: err.message
+        })
+    }
+}
+
 // get all hot stamp
 exports.getHotStamp = async (req, res) => {
     const { id } = req.params

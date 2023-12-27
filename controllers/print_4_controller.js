@@ -36,7 +36,7 @@ exports.addPrint_4_Color = async (req, res) => {
 
 // get print-4 options
 exports.getPrint_4_Options = async (req, res) => {
-    const { color } = req.body
+    const { color } = req.params
     
     try {
        const print4 = await Print_4.findOne({ colors: color })
@@ -52,7 +52,8 @@ exports.getPrint_4_Options = async (req, res) => {
     
         return res.send({
             round: [...unique_round],
-            success: true
+            success: true,
+            color: color
         })
 
         
@@ -86,9 +87,13 @@ exports.getPrint_4_Colors = async (req, res) => {
         const allColors = prints_4.map(p=>p.colors)
 
         return res.send({
-            message: `มีจำนวณสีทั้งหมด ${prints_4.length} รายการ`,
+            title: `เครื่องปริ้นท์ตัด 4`,
             success: true,
-            colors: allColors
+            colors: allColors.sort((a, b) => {
+                if (a === 10) return 1
+                if (b === 10) return -1
+                return a - b
+            })
         })
         
     }

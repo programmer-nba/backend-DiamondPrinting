@@ -54,9 +54,13 @@ exports.getPrint_2_Colors = async (req, res) => {
         const allColors = prints_2.map(p=>p.colors)
 
         return res.send({
-            message: `มีจำนวณสีทั้งหมด ${prints_2.length} รายการ`,
+            title: 'เครื่องปริ้นท์ตัด 2',
             success: true,
-            colors: allColors
+            colors: allColors.sort((a, b) => {
+                if (a === 10) return 1
+                if (b === 10) return -1
+                return a - b
+            })
         })
         
     }
@@ -71,7 +75,7 @@ exports.getPrint_2_Colors = async (req, res) => {
 
 // get print 2 options
 exports.getPrint_2_Options = async (req, res) => {
-    const { color } = req.body
+    const { color } = req.params
     
     try {
        const print2 = await Print_2.findOne({ colors: color })
@@ -86,6 +90,7 @@ exports.getPrint_2_Options = async (req, res) => {
         const unique_round = new Set(round)
     
         return res.send({
+            color: color,
             round: [...unique_round],
             success: true
         })

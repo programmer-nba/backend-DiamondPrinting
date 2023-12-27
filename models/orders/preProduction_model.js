@@ -90,7 +90,19 @@ const preProductionSchema = new Schema(
         glueData : [{
             long: Number,
             mark: String
-        }]
+        }],
+        status: [
+            {
+                name: String,
+                text: String,
+                sender: {
+                    name: String,
+                    code: String,
+                    _id: mongoose.Schema.Types.ObjectId
+                },
+                createAt: Date
+            }
+        ]
     }
 )
 
