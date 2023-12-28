@@ -3,6 +3,15 @@ const PreOrder = require('../models/orders/preOrder_model.js')
 const PreProduction = require('../models/orders/preProduction_model.js')
 const Quotation = require('../models/orders/quotation_model.js')
 
+const genCode = (curLength) => {
+    const result = 
+        (curLength>999) ? `${curLength}`
+        : (curLength>99 && curLength<1000) ? `0${curLength}`
+        : (curLength>9 && curLength<100) ? `00${curLength}`
+        : `000${curLength}`
+    return result
+}
+
 // Sale ----------------------------------------
 
 exports.addPreOrder = async (req, res) => {
@@ -61,10 +70,11 @@ exports.addPreOrder = async (req, res) => {
                     postcode: (customer.address && customer.address.postcode) ? customer.address.postcode : '-'
                 },
                 taxID: (customer.taxID) ? customer.taxID : '-',
-                code: `000${allCustumers.length}`,
+                code: genCode(allCustumers.length),
                 contact: {
                     name: (customer.contact && customer.contact.name) ? customer.contact.name : '-',
-                    tel: (customer.contact && customer.contact.tel) ? customer.contact.tel : '-'
+                    tel: (customer.contact && customer.contact.tel) ? customer.contact.tel : '-',
+                    createAt: new Date()
                 }
             })
             const saved_customer = await new_customer.save()
@@ -75,11 +85,31 @@ exports.addPreOrder = async (req, res) => {
             }
             curCustomer = saved_customer
         } else {
-            curCustomer = existCustomer
+            if(existCustomer.contact[existCustomer.contact.length-1].name!==customer.contact.name || existCustomer.contact[existCustomer.contact.length-1].tel!==customer.contact.tel){
+                const updated_customer = await Customer.findByIdAndUpdate(existCustomer._id,
+                    {
+                        $push: {
+                            contact: {
+                                name: customer.contact.name,
+                                tel: customer.contact.tel,
+                                createAt: new Date()
+                            }
+                        }
+                    }, {new:true}
+                )
+                if(!updated_customer){
+                    return res.send({
+                        message: 'อัพเดทข้อมูลผู้ติดต่อไม่สำเร็จ'
+                    })
+                }
+                curCustomer = updated_customer
+            } else {
+                curCustomer = existCustomer
+            }
         }
 
         const prev_preOrder = await PreOrder.find()
-        const code = `00${prev_preOrder.length}`
+        const code = genCode(prev_preOrder.length)
         
         // add new pre-order
         const new_preOrder = new PreOrder({
@@ -426,8 +456,9 @@ exports.addPreProduction = async (req, res) => {
                 message: 'ไม่พบ pre-order นี้'
             })
         }
+        
         const prev_preProduction = await PreProduction.find()
-        const code = `${preOrder.code}-00${prev_preProduction.length}`
+        const code = `${preOrder.code}-${genCode(prev_preProduction.length)}`
         const new_preProduction = new PreProduction({
             code: code,
             customer: preOrder.customer,
@@ -717,7 +748,7 @@ exports.creatQuotation = async (req, res) => {
             })
         }
         const length_Quotation = await Quotation.find()
-        const code = `DM-${preOrder.customer.code}-${preOrder.code}-00${length_Quotation.length}`
+        const code = `DM-${preOrder.customer.code}-${preOrder.code}-${genCode(length_Quotation.length)}`
 
         const new_quotation = new Quotation({
             code: code,
@@ -766,7 +797,7 @@ exports.creatQuotation = async (req, res) => {
 // get all quotations
 exports.getQuotations = async (req, res) => {
     try {
-        const quotations = await Quotation.find().poppulate('customer', 'nameTh nameEng taxID contact _id code').poppulate('sale', 'name phone_number code')
+        const quotations = await Quotation.find().populate('customer', 'nameTh nameEng taxID contact _id code').populate('sale', 'name phone_number code')
         if(!quotations){
             return res.send({
                 message: 'ไม่พบใบเสนอราคา',
@@ -782,7 +813,7 @@ exports.getQuotations = async (req, res) => {
         return res.send({
             success: true,
             message: `มีใบเสนอราคาทั้งหมด ${quotations.length}`,
-            quotations: quotations
+            quotations: quotations.reverse()
         })
     }
     catch (err) {
@@ -830,7 +861,7 @@ exports.getQuotationOfpreOrder = async (req, res) => {
 exports.getQuotation = async (req, res) => {
     const { id } = req.params
     try {
-        const quotation = await Quotation.findById(id).poppulate('customer', 'nameTh nameEng taxID contact _id code').poppulate('sale', 'name phone_number code')
+        const quotation = await Quotation.findById(id).populate('customer', 'nameTh nameEng taxID contact _id code').populate('sale', 'name phone_number code')
         if(!quotation){
             return res.send({
                 message: 'ไม่พบใบเสนอราคา',
@@ -840,7 +871,8 @@ exports.getQuotation = async (req, res) => {
 
         return res.send({
             success: true,
-            quotation: quotation
+            quotation: quotation,
+            contact: quotation.customer.contact[quotation.customer.contact.length-1]
         })
     }
     catch (err) {
