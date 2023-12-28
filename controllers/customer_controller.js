@@ -62,11 +62,11 @@ exports.getCustomers = async (req, res) => {
 }
 
 exports.getCustomer = async (req, res) => {
-    const { nameTh, tax, code } = req.body
+    const { nameTh } = req.params
     try {
         const customer = await Customer.findOne({
             $or: [
-                {taxID: tax},
+                //{taxID: tax},
                 {nameTh: nameTh},
                 //{nameEng: nameEng},
                 //{code: code}
