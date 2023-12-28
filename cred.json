@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "diamond-test-409510",
+  "private_key_id": "4ba312eb80df6f01593e6b2bcb8fdc222afd9e4b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCvXzBkOjn/0biO\n+psb0c/bLFVgrUsQ2KND/pWGdlhXh9cHRkx5y+THI/AB8LFOi2v+78mUzYQhh3XE\n5Xzb0QxTq45p0Trkge3KVaCT9XNhGpzmAUK2I8C49KI1GNHTe6ahRHAXEgdjJUrJ\n9RyRL+vAf08W9MlPoSbM8+vrXRMUtnUmYpYkGvTUU4l44wk5FpScCpiv0T+CMY0G\nYnw8KdKAkL9T2E5jmM1XGyDmas6TpQF32zSN+DPXnCJJDnovRWy72OXApM6Kcpdu\n2v8BOGcAu/xBrXsSfaSemomVchApO6jvb0Mz3dfMWavz8YvPWfO8S2u1dt+y53E8\n+WxRBZSRAgMBAAECgf8/ql73A+xqYsiNn40P3GuJNd8I6eCGjR84YAQIfI41uKrn\niS3aSZsUcIeBLNAxo4vhUUvtKW7+fR7UDDv30TyYY3+gCsVGj6Sz/8H79O+eIPs0\nxOBjHzen7ae1fv0tuYYUpbPLrE/iPneYOdPVIYCEsbMUsmki724WmbbcCz4SFk/Y\nCFeGXCyy8uz5blX2eWRyEIfXvznbW+kc1uSheZ6PI3qlIcX3cQ2f7J1gVbu5A34L\n5AxP2EDy9bmi0wA0MnCXdeO47QqxgtDUZYI/vh0rh6MhyJWX8gHUWiiwSJ1pWMq8\nLeK/XDKBaaaEl3DqUE6bPj/yDrfTfoQjNshwjCECgYEA8jmD0PeIQUbtrHO6moiR\neWE+S4Osz+qGGrM4VjdxT8RwDSgYfVZ9G9bHk/M9r8lpGh9jDQI1/YM9MBT3afGc\nkbFb1mPZ+0VEXb29UkMrHdbnQKA1ssBmGj064F1838jTQE1T0B6ANKvCn3O2GKcX\ne8f8GKqoevhgu9vuv7JrPXECgYEAuVhhnZdxnS5ezkDyjaBYDjHK0U0e6Nm3cxds\n7iYja75YBpuw5DvcHL7hyGCiv0FgU0u1Aql+M3RSEiIMs4rCHIbjt+soyPTPKycm\nCf7zqtiFNcMVvqyQzqiwx5QMdIfD9Ac+aMiYJq6pjn/o7TLrmsc89IYWE8pL65cn\neLiMuSECgYAQYmWRL/0udS7EeHuJ0m0MqdA96WU6FyIFElRgOJXYkHAH48tsRvpl\ndKzBTDXC+zu5wZ/AlIK0aDkuVGy75NTzYezVXqGzBmduc9QniVWUSiIQVAXt1mfR\npIyj+o7k0D/B3LkrnbSMW4XppTkPB9Zl0Aw0Wu7UipJ4gpLuspHgcQKBgQC49127\ngtZsUUlltmUZN6qIx+IrDDbLk/LC1d7sr3zr2nJIbfmTW7WnrkruyJnCGkFB/yyu\ncm2ydeQtmnNofhKHm4oIEpOKMN3Kp/ALS7bqidgutfiuZ9K/mpOJKNNhO9gvYUdE\nFOPavrYRss7GYOnFdg37zRCdQWaQvzEyBaLSYQKBgQDaPfUR6K9ZCp/ukcFBK+CZ\n5ovbAH1s10L1jFzQUJU8k9EnPYCBE54BJUiqpoXhbPpO5ejk8bfO8hRjt2OHMrrM\n6c6U+EodrJrrgo8Ts/Ksa12qYft5flxdiBQczqRrAdzGdBKqxREHltk3DAeVLQfW\njluQ4xLA439KIoQFfP5apA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "diamond-test@diamond-test-409510.iam.gserviceaccount.com",
+  "client_id": "114896395962989932744",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/diamond-test%40diamond-test-409510.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

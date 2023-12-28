@@ -2,9 +2,13 @@ const route = require('express').Router()
 
 // middlewares
 const verifyToken = require('../middlewares/verifyToken.js')
+const upload = require('../middlewares/uploadFiles.js')
 
 // controllers
 const Order = require('../controllers/order_controller.js')
+const File = require('../controllers/upload_controller.js')
+
+route.post('/upload', upload.single('file'), File.fileUpload)
 
 route.post('/pre-order', verifyToken, Order.addPreOrder)
 route.get('/pre-orders', Order.getPreOrders)
