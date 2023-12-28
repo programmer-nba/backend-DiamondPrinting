@@ -228,8 +228,8 @@ exports.getRawMattOptions = async (req, res) => {
 
         return res.send({
             gsm: [...unique_gsm],
-            width: [...unique_width],
-            long: [...unique_long],
+            //width: [...unique_width],
+            //long: [...unique_long],
             success: true
         })
 
