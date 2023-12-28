@@ -1,15 +1,17 @@
 const Glue = require('../models/products/glue_model.js')
 
 exports.addGlue = async (req, res) => {
-    const { avr } = req.body
+    const { glueAvr, glueDot } = req.body
     try {
         const glue = await Glue.find()
         const code = `glue-${glue.length}`
 
         const new_glue = new Glue({
             code: code,
-            avr: avr
+            glueAvr: glueAvr,
+            glueDot: glueDot
         })
+        await Glue.deleteMany()
         const saved_glue = await new_glue.save()
         if(!saved_glue){
             return res.send({

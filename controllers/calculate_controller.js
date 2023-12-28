@@ -20,11 +20,12 @@ exports.calAll = async (req, res) => {
             let datas = []
             let costs = {}
 
-            const preProduction = await PreProduction.findById(id).populate('preOrder', 'colors')
+            const preProduction = await PreProduction.findById(id).populate('preOrder')
             
             if(!preProduction || preProduction.length===0){
                 return res.send({
-                    massage: 'ไม่พบรายการนี้ในระบบ'
+                    massage: 'ไม่พบรายการนี้ในระบบ',
+                    preProduction: preProduction || []
                 })
             }
 
@@ -42,38 +43,59 @@ exports.calAll = async (req, res) => {
                 costs.plate = plate_cost.cost
             }
             
-            if(print_2_Data){
-                const isfloor = (print_2_Data.floor) ? 2 : 1
+            if(print_2_Data && print_2_Data.colors.length!==0){
                 for (i in print_2_Data.colors) {
                     const sendPrint = {
                         lay: print_2_Data.lay,
-                        colors: print_2_Data.colors[i]
+                        colors: print_2_Data.colors[i],
+                        floor: 
+                            (i===0 && print_2_Data.colors.floor_front) ? 2
+                            : (i===0 && !print_2_Data.colors.floor_front) ? 1
+                            : (i===1 && print_2_Data.colors.floor_back) ? 2
+                            : (i===1 && !print_2_Data.colors.floor_back) ? 1
+                            : 1
                     }
                     const print_2_cost = await calPrint_2_Cost(order,sendPrint)
                     datas.push({[`print_2_${i}`]:print_2_cost.data})
-                    datas.push({print_2_floor:print_2_Data.floor})
-                    costs[`print_2_${i}`] = print_2_cost.cost*isfloor
+                    datas.push({print_2_Ffloor:print_2_Data.colors.floor_front})
+                    datas.push({print_2_Bfloor:print_2_Data.colors.floor_back})
+                    costs[`print_2_${i}`] = print_2_cost.cost
                 }
             }
 
-            if(print_4_Data){
-                const isfloor = (print_4_Data.floor) ? 2 : 1
+            if(print_4_Data && print_4_Data.colors.length!==0){
                 for (i in print_4_Data.colors) {
                     const sendPrint = {
                         lay: print_4_Data.lay,
-                        colors: print_4_Data.colors[i]
+                        colors: print_4_Data.colors[i],
+                        floor: 
+                            (i===0 && print_4_Data.colors.floor_front) ? 2
+                            : (i===0 && !print_4_Data.colors.floor_front) ? 1
+                            : (i===1 && print_4_Data.colors.floor_back) ? 2
+                            : (i===1 && !print_4_Data.colors.floor_back) ? 1
+                            : 1
                     }
                     const print_4_cost = await calPrint_4_Cost(order,sendPrint)
                     datas.push({[`print_4_${i}`]:print_4_cost.data})
-                    datas.push({print_4_floor:print_4_Data.floor})
-                    costs[`print_4_${i}`] = print_4_cost.cost*isfloor
+                    datas.push({print_4_Ffloor:print_4_Data.colors.floor_front})
+                    datas.push({print_4_Bfloor:print_4_Data.colors.floor_back})
+                    costs[`print_4_${i}`] = print_4_cost.cost
                 }
             }
             
-            if(coatingData){
-                const coating_cost = await calCoatingCost(order,coatingData)
-                datas.push({coating:coating_cost.data})
-                costs.coating = coating_cost.cost
+            if(coatingData && coatingData.methods && coatingData.methods.length!==0){
+                for (m of coatingData.methods){
+                    const sendCoating = {
+                        method: m.method,
+                        width: coatingData.width,
+                        long: coatingData.long,
+                        cut: coatingData.cut,
+                        lay: coatingData.lay
+                    }
+                    const coating_cost = await calCoatingCost(order, sendCoating)
+                    datas.push({[`${m.method.type}`]:coating_cost.data})
+                    costs[`${m.method.type}`] = coating_cost.cost
+                }
             }
 
             if(embossData){
@@ -110,18 +132,35 @@ exports.calAll = async (req, res) => {
                 } 
             }
 
-            if(diecutData && diecutData.force!==null){
+            if(diecutData){
                 const diecut_cost = await calDiecutCost(order, diecutData)
                 datas.push({diecut:diecut_cost.data})
                 costs.diecut = diecut_cost.cost
             }
 
             if(glueData){
-                for (g in glueData) {
-                    const glue_cost = await calGlueCost(order, glueData[g])
-                    datas.push({[`glue_${g}`]:glue_cost.data})
-                    costs[`glue_${g}`] = glue_cost.cost
+                if(glueData.glue && glueData.glue.length!==0){
+                    for (g in glueData.glue) {
+                        const glue_cost = await calGlueCost(order, glueData.glue[g].long)
+                        datas.push({[`glue_${g}`]:glue_cost.data})
+                        costs[`glue_${g}`] = glue_cost.cost
+                    }
                 }
+                
+                if(glueData.glue2 && glueData.glue2.length!==0){
+                    for (g in glueData.glue2) {
+                        const glue2_cost = await calGlue2Cost(order, glueData.glue2[g].long)
+                        datas.push({[`glue2_${g}`]:glue2_cost.data})
+                        costs[`glue2_${g}`] = glue2_cost.cost
+                    }
+                }
+                
+                if(glueData.glue_dot && glueData.glue_dot.length!==0){
+                    const glueDot_cost = await calGlueDotCost(order, glueData.glue_dot.length)
+                    datas.push({[`glueDot`]:glueDot_cost.data})
+                    costs[`glueDot`] = glueDot_cost.cost
+                }
+                
             }
 
             const costIncosts = Object.values(costs)
@@ -295,7 +334,8 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
 
     const { 
         colors,
-        lay
+        lay,
+        floor
     } = print_2_Data
 
     try {
@@ -303,14 +343,14 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
             colors: parseInt(colors)
         })
         if(!print){
-            return {cost: 0, data: 'ไม่พบ'}
+            return {cost: 0, data: 'ไม่พบจำนวนสีในระบบ'}
         }
 
         const order_lay = parseInt(order)/parseInt(lay)
         
         const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         if(option.length!==1){
-            return {cost: 0, data: 'ไม่พบ'}
+            return {cost: 0, data: 'ไม่พบช่วงการพิมพ์ในระบบ'}
         }
 
         const cal_print = {
@@ -320,7 +360,7 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
             ? option[0].price*order_lay : option[0].price
         }
 
-        return {cost: cal_print.price, data: cal_print}
+        return {cost: cal_print.price*floor, data: cal_print}
         
     }
     catch (err) {
@@ -337,7 +377,8 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
 
     const { 
         colors,
-        lay
+        lay,
+        floor
     } = print_4_Data
 
     try {
@@ -362,7 +403,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             ? option[0].price*order_lay : option[0].price
         }
 
-        return {cost: cal_print.price, data: cal_print}
+        return {cost: cal_print.price*floor, data: cal_print}
         
     }
     catch (err) {
@@ -380,20 +421,24 @@ const calCoatingCost = async (order, coatingData) => {
         width, long, cut,
         lay 
     } = coatingData
-
+    
     try {
+
         const coating = await Coating.findOne({
             type: method.type
         })
         if(!coating){
             return {cost: 0, data: 'ไม่พบ'}
         }
-
+        
         const order_lay = Math.floor(parseInt(order)/parseInt(lay))
         const inWidth = width/cut
         const inLong = long/cut
-        
-        const option = coating.option.filter(item=>item.subType === method.subType)
+
+        const option = 
+            (method.type!=='spot-uv' || method.type!=='dip-off') ? coating.option.filter(item=>item.subType === method.subType)
+            : coating.option.filter(item=>item.subType.trim() === "")
+
         if(option.length!==1){
             return {cost: 0, data: 'ไม่พบ'}
         }
@@ -401,9 +446,9 @@ const calCoatingCost = async (order, coatingData) => {
         const coating_option = option[0]
 
         const coating_price = 
-            (method.type==='spot-uv' && coating_option.avr*inWidth*inLong < 1.2) ? 1.2
-            : (method.type==='dip-off') ? 5
-            : coating_option.avr*inWidth*inLong
+        (method.type==='spot-uv' && coating_option.avr*inWidth*inLong < 1.2) ? 1.2
+        : (method.type==='dip-off') ? 5
+        : coating_option.avr*inWidth*inLong
         const total_price = coating_price*(order/lay)
 
         const cal_coating = {
@@ -452,7 +497,6 @@ const calEmbossCost = async (order, embossData) => {
         const emboss_cost = Math.ceil((inWidth*inLong*26)*0.01)*100
 
         const emboss_price = lay*emboss_cost
-        console.log(`ค่าปั้ม ${emboss_cost}`)
 
         const pumpPrice = emboss_option.pumpPrice
 
@@ -468,8 +512,6 @@ const calEmbossCost = async (order, embossData) => {
             emboss_cost: emboss_cost,
             price: parseFloat(total_price.toFixed(2))
         }
-
-        console.log(cal_emboss.price)
 
         return {cost: cal_emboss.price, data: cal_emboss}
         
@@ -530,8 +572,7 @@ const calHotStampCost = async (order, hotStampData) => {
 const calDiecutCost = async (order, diecutData) => {
     const { 
         plateSize,
-        lay,
-        force
+        lay
     } = diecutData
 
     try {
@@ -553,7 +594,6 @@ const calDiecutCost = async (order, diecutData) => {
         const cal_diecut = {
             order: order,
             lay: lay,
-            force: force,
             order_lay: order_lay,
             blockSize: diecut_option.plateSize || plateSize,
             blockPrice: diecut_option.blockPrice,
@@ -571,21 +611,63 @@ const calDiecutCost = async (order, diecutData) => {
     }
 }
 
-const calGlueCost = async (order, glue) => {
-    const { long, mark } = glue
+const calGlueCost = async (order, long) => {
     try {
         const gluebase = await Glue.find()
         if(!gluebase){
             return {data: 'ไม่พบ', cost: 0}
         }
 
-        const avr = gluebase[0].avr
+        const avr = gluebase[0].glueAvr
         const glue_cost = avr*long
         const gluedata = {
             avr: avr,
             cost: glue_cost,
             total: glue_cost*order,
-            mark: mark
+        }
+
+        return {data: gluedata, cost: gluedata.total}
+    }
+    catch (err) {
+        return {data: 'ไม่พบ', cost: 0}
+    }
+}
+
+const calGlue2Cost = async (order, long) => {
+    try {
+        const gluebase = await Glue.find()
+        if(!gluebase){
+            return {data: 'ไม่พบ', cost: 0}
+        }
+
+        const avr = gluebase[0].glueAvr
+        const glue_cost = avr*long
+        const gluedata = {
+            avr: avr,
+            cost: glue_cost*2,
+            total: glue_cost*2*order,
+        }
+
+        return {data: gluedata, cost: gluedata.total}
+    }
+    catch (err) {
+        return {data: 'ไม่พบ', cost: 0}
+    }
+}
+
+const calGlueDotCost = async (order, amount) => {
+    try {
+        const gluebase = await Glue.find()
+        if(!gluebase){
+            return {data: 'ไม่พบ', cost: 0}
+        }
+
+        const dot = gluebase[0].glueDot
+        const glue_cost = dot*amount
+        const gluedata = {
+            dotPrice: dot,
+            cost: glue_cost,
+            total: glue_cost*order,
         }
 
         return {data: gluedata, cost: gluedata.total}

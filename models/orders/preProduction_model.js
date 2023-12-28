@@ -36,24 +36,21 @@ const preProductionSchema = new Schema(
         print_4_Data : {
             colors : [Number, Number], // from pre-order
             lay : Number,
-            floor: Boolean
+            floor_front: Boolean,
+            floor_back: Boolean
         },
         print_2_Data : {
             colors : [Number, Number], // from pre-order
             lay : Number,
-            floor: Boolean
+            floor_front: Boolean,
+            floor_back: Boolean
         },
         plateData : {
             colors : [Number, Number], // from pre-order
             size : String
         },
         coatingData : {
-            method: {
-                type: {
-                    type: String
-                },
-                subType: String
-            },
+            methods: Array,
             width: Number, // from pre-order
             long: Number, // from pre-order
             cut: Number,  // from pre-order
@@ -87,10 +84,11 @@ const preProductionSchema = new Schema(
             plateSize: String,
             lay: Number
         },
-        glueData : [{
-            long: Number,
-            mark: String
-        }],
+        glueData : {
+            glue: Array,
+            glue2: Array,
+            glue_dot: Array
+        },
         status: [
             {
                 name: String,
@@ -102,7 +100,8 @@ const preProductionSchema = new Schema(
                 },
                 createAt: Date
             }
-        ]
+        ],
+        down: Number
     }
 )
 

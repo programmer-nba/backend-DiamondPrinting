@@ -25,25 +25,32 @@ const preOrderSchema = new Schema(
             type: {
                 type: String
             },
-            subType: String
+            subType: String,
+            gsm: Number
         },
         colors: {
             front: Number,
             front_pantone: String,
-            floor: Boolean,
+            floor_front: Boolean,
             back: Number,
             back_pantone: String,
+            floor_back: Boolean,
         },
-        coating: {
-            method: {
-                type: {
+        coating: [
+            {
+                method: {
+                    type: {
+                        type: String
+                    },
+                    subType: String
+                },
+                mark: String
+                /* spotUv: {
                     type: String
                 },
-                subType: String
-            },
-            spotUv: Boolean,
-            dipOff: Boolean
-        },
+                dipOff: Boolean */
+            }
+        ],
         hotStamp: [
             {
                 inWidth: Number,
@@ -59,11 +66,30 @@ const preOrderSchema = new Schema(
                 mark: String
             }   
         ],
-        dieCut: String,
+        dieCut: {
+            percent: String,
+            notice: String,
+            detail: {
+                type: String,
+                default: '-' // ปรุ, หน้าต่าง
+            }
+        },
         glue: [
             {
                 mark: String,
                 long: Number
+            }
+        ],
+        glue2: [
+            {
+                mark: String,
+                long: Number,
+                notice: String
+            }
+        ],
+        glue_dot: [
+            {
+                type: String
             }
         ],
         note: String,

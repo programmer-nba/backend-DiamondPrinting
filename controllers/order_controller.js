@@ -35,8 +35,8 @@ exports.addPreOrder = async (req, res) => {
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
-    const userRole = req.user.role.main
-    const userPhone = req.user.phone_number
+    //const userRole = req.user.role.main
+    //const userPhone = req.user.phone_number
     
     try {
         // check customer already exist? or create new one
@@ -111,21 +111,20 @@ exports.addPreOrder = async (req, res) => {
                 floor_back: (floor_back) && floor_back,
             },
 
-            coating: {
-                method: (coating && coating.method) ? {
-                    type: coating.method.type || null,
-                    subType: coating.method.subType || null
-                } : null,
-                spotUv: (coating && coating.spotUv!=='' && coating.spotUv!==null) ? coating.spotUv : null,
-                dipOff: (coating && coating.dipOff) ? coating.dipOff : null
-            },
+            coating: (coating && coating.length!==0) ? coating : null,
 
-            hotStamp: (hotStamp) ? hotStamp : null,
-            emboss: (emboss) ? emboss : null,
+            hotStamp: (hotStamp && hotStamp.length!==0) ? hotStamp : null,
+            emboss: (emboss && emboss.length!==0) ? emboss : null,
 
-            dieCut: (dieCut) ? dieCut : null,
+            dieCut: (dieCut) ? {
+                percent: (dieCut.percent) ? dieCut.percent : null,
+                notice: (dieCut.notice) ? dieCut.notice : null,
+                detail: (dieCut.detail) ? dieCut.detail : null
+            } : null,
 
-            glue: (glue) ? glue : null,
+            glue: (glue && glue.length!==0) ? glue : null,
+            glue2: (glue2 && glue2.length!==0) ? glue2 : null,
+            glue_dot: (glue_dot && glue_dot.length!==0) ? glue_dot : null,
 
             status: {
                 name: 'new',
@@ -168,13 +167,13 @@ exports.getPreOrders = async (req, res) => {
         if(!preOrders || preOrders.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
-                preOrders: preOrders
+                preOrders: preOrders || []
             })
         }
         return res.send({
             success: true,
             message: `มีรายการทั้งหมด ${preOrders.length} รายการ`,
-            preOrders: preOrders
+            preOrders: preOrders.reverse()
         })
     }
     catch (err) {
@@ -217,12 +216,15 @@ exports.updatePreOrder = async (req, res) => {
         colors_back,
         front_pantone,
         back_pantone,
-        floor,
+        floor_front,
+        floor_back,
         coating,
         hotStamp,
         emboss,
         dieCut,
         glue,
+        glue2,
+        glue_dot,
         note
     } = req.body
 
@@ -245,25 +247,32 @@ exports.updatePreOrder = async (req, res) => {
             
         preOrder.paper.type = (paper && paper.type) ? paper.type : preOrder.paper.type
         preOrder.paper.subType = (paper && paper.subType) ? paper.subType : preOrder.paper.subType
+        preOrder.paper.gsm = (paper && paper.gsm) ? paper.gsm : preOrder.paper.gsm
        
         preOrder.colors.front = (colors_front) ? colors_front : preOrder.colors.front
         preOrder.colors.back = (colors_back) ? colors_back : preOrder.colors.back
         preOrder.colors.front_pantone = (front_pantone) ? front_pantone : preOrder.colors.front_pantone
         preOrder.colors.back_pantone = (back_pantone) ? back_pantone : preOrder.colors.back_pantone
-        preOrder.colors.floor = (floor) ? floor : preOrder.colors.floor
+        preOrder.colors.floor_front = (floor_front) ? floor_front : preOrder.colors.floor_front
+        preOrder.colors.floor_back = (floor_back) ? floor_back : preOrder.colors.floor_back
         
         preOrder.coating.type = (coating && coating.type) ? coating.type : preOrder.coating.type
         preOrder.coating.subType = (coating && coating.subType) ? coating.subType : preOrder.coating.subType
         preOrder.coating.spotUv = (coating && coating.spotUv) ? coating.spotUv : preOrder.coating.spotUv
         preOrder.coating.dipOff = (coating && coating.dipOff) ? coating.dipOff : preOrder.coating.dipOff
         
-        preOrder.hotStamp = (hotStamp) ? hotStamp : preOrder.hotStamp
-        preOrder.emboss = (emboss) ? emboss : preOrder.emboss
+        preOrder.hotStamp = (hotStamp && hotStamp.length!==0) ? hotStamp : preOrder.hotStamp
+        preOrder.emboss = (emboss && emboss.length!==0) ? emboss : preOrder.emboss
 
-        preOrder.dieCut = (dieCut) ? dieCut : preOrder.dieCut
+        preOrder.dieCut.percent = (dieCut && dieCut.percent) ? dieCut.percent : preOrder.dieCut.percent
+        preOrder.dieCut.notice = (dieCut && dieCut.notice) ? dieCut.notice : preOrder.dieCut.notice
+        preOrder.dieCut.detail = (dieCut && dieCut.detail) ? dieCut.detail : preOrder.dieCut.detail
 
-        preOrder.glue.mark = (glue && glue.mark) ? glue.mark : preOrder.glue.mark
-        preOrder.glue.long = (glue && glue.long) ? glue.long : preOrder.glue.long
+        preOrder.glue = (glue && glue.length!==0) ? glue : preOrder.glue
+
+        preOrder.glue2 = (glue2 && glue2.length!==0) ? glue2 : preOrder.glue2
+
+        preOrder.glue_dot = (glue_dot && glue_dot.length!==0) ? glue_dot : preOrder.glue_dot
 
         preOrder.status.push(
             {
@@ -408,7 +417,7 @@ exports.addPreProduction = async (req, res) => {
     const userCode = req.user.code
     const userName = req.user.name
     //const { files } = req.files
-    const { gsm, width, long, cut, lay, plateSize, k, print } = req.body
+    const { width, long, cut, lay, plateSize, k } = req.body
 
     try {
         let preOrder = await PreOrder.findById(id)
@@ -418,7 +427,7 @@ exports.addPreProduction = async (req, res) => {
             })
         }
         const prev_preProduction = await PreProduction.find()
-        const code = `00${prev_preProduction.length}`
+        const code = `${preOrder.code}-00${prev_preProduction.length}`
         const new_preProduction = new PreProduction({
             code: code,
             customer: preOrder.customer,
@@ -428,31 +437,32 @@ exports.addPreProduction = async (req, res) => {
             rawMattData : {
                 type : (preOrder.paper && preOrder.paper.type) && preOrder.paper.type, // from pre-order
                 subType: (preOrder.paper && preOrder.paper.subType) &&  preOrder.paper.subType, // from pre-order
-                gsm: (gsm) && gsm, 
+                gsm: (preOrder.paper && preOrder.paper.gsm) && preOrder.paper.gsm, 
                 width: (width) && width,
                 long: (long) && long,
                 cut : (cut) && cut,
                 lay : (lay) && lay
             },
-            print_4_Data : (print && print==="4") ? {
-                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
+            print_4_Data : (plateSize && plateSize==="4") ? {
+                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0],
                 lay : (lay) && lay,
-                floor: (preOrder.colors && preOrder.colors.floor) ? preOrder.colors.floor : false
+                floor_front: (preOrder.colors && preOrder.colors.floor_front) ? preOrder.colors.floor_front : false,
+                floor_back: (preOrder.colors && preOrder.colors.floor_back) ? preOrder.colors.floor_back : false
             } : null,
-            print_2_Data : (print && print==="2") ? {
-                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
+            print_2_Data : (plateSize && plateSize==="2") ? {
+                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0],
                 lay : (lay) && lay,
-                floor: (preOrder.colors && preOrder.colors.floor) ? preOrder.colors.floor : false
+                floor_front: (preOrder.colors && preOrder.colors.floor_front) ? preOrder.colors.floor_front : false,
+                floor_back: (preOrder.colors && preOrder.colors.floor_back) ? preOrder.colors.floor_back : false
             } : null,
             plateData : {
                 colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
                 size : (plateSize) && plateSize.toString()
             },
             coatingData : {
-                method: (preOrder.coating && preOrder.coating.method) ? {
-                    type: preOrder.coating.method.type, // from pre-order
-                    subType: preOrder.coating.method.subType // from pre-order
-                } : {type: null, subTypes: null},
+                methods: (preOrder.coating && preOrder.coating.length!==0) ? preOrder.coating : null,
+                //spotUv: (preOrder.coating && preOrder.coating.spotUv.trim() !=='' || preOrder.coating.spotUv !==null) ? true : false,
+                //dipOff: (preOrder.coating && preOrder.coating.dipOff) ? true : false,
                 width: (width) && width, // from pre-order
                 long: (long) && long, // from pre-order
                 cut: (cut) && cut,  // from pre-order
@@ -466,14 +476,18 @@ exports.addPreProduction = async (req, res) => {
             hotStampData : {
                 block : (preOrder.hotStamp) ? preOrder.hotStamp : null,
                 lay: (lay) && lay,
-                k: (k) && k
+                k: (k) ? k : 1
             },
             diecutData : {
                 force: (preOrder.dieCut) ? preOrder.dieCut : null,
                 plateSize: (plateSize) ? plateSize : null,
                 lay: (lay) && lay
             },
-            glueData : (preOrder.glue) ? preOrder.glue : null,
+            glueData : {
+                glue: (preOrder.glue && preOrder.glue.length!==0) ? preOrder.glue : null,
+                glue2: (preOrder.glue2 && preOrder.glue2.length!==0) ? preOrder.glue2 : null,
+                glue_dot: (preOrder.glue_dot && preOrder.glue_dot.length!==0) ? preOrder.glue_dot : null
+            },
             status: {
                 name: 'new',
                 text: 'พรีโพรดักชันใหม่',
@@ -483,7 +497,8 @@ exports.addPreProduction = async (req, res) => {
                     code: userCode
                 },
                 createAt: new Date()
-            }
+            },
+            down: (cut && lay) ? cut*lay : null
         })
         const saved_production = await new_preProduction.save()
         if(!saved_production){

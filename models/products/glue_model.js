@@ -3,7 +3,8 @@ const {Schema} = mongoose
 
 const glueSchema = new Schema({ 
     code: String,
-    avr: Number
+    glueAvr: Number,
+    glueDot: Number
 })
 
 const Glue = mongoose.model('Glue', glueSchema)
