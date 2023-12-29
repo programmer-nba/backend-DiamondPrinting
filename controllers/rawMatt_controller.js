@@ -206,7 +206,7 @@ exports.getRawMattSubTypes = async (req, res) => {
     }
 }
 
-// get rawMatt options
+// get rawMatt options (gsm)
 exports.getRawMattOptions = async (req, res) => {
     const { type, subType } = req.body
     
@@ -230,6 +230,81 @@ exports.getRawMattOptions = async (req, res) => {
             gsm: [...unique_gsm],
             //width: [...unique_width],
             //long: [...unique_long],
+            success: true
+        })
+
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูตัวเลือกได้',
+            err: err.message
+        })
+    }
+}
+
+// get rawMatt options (width)
+exports.getRawMattWidths = async (req, res) => {
+    const { type, subType, gsm } = req.body
+    
+    try {
+       const rawMatts = await RawMatt.findOne({ type: type , subType: subType })
+        if(!rawMatts || rawMatts.length===0){
+            return res.status(404).send({
+                message: 'ไม่พบสินค้าประเภทนี้',
+                rawMatts: rawMatts || []
+            })
+        }
+
+        const options = rawMatts.option.filter(fil=>fil.gsm === gsm)
+        console.log(options)
+        const widths = options.map(i => i.width)
+        const unique_width = new Set(widths)
+        //const longs = rawMatts.option.map(option => option.long)
+        //const unique_long = new Set(longs)
+
+        return res.send({
+            //gsm: [...unique_gsm],
+            width: [...unique_width],
+            //long: [...unique_long],
+            success: true
+        })
+
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถดูตัวเลือกได้',
+            err: err.message
+        })
+    }
+}
+
+exports.getRawMattLongs = async (req, res) => {
+    const { type, subType, gsm, width } = req.body
+    
+    try {
+       const rawMatts = await RawMatt.findOne({ type: type , subType: subType })
+        if(!rawMatts || rawMatts.length===0){
+            return res.status(404).send({
+                message: 'ไม่พบสินค้าประเภทนี้',
+                rawMatts: rawMatts || []
+            })
+        }
+
+        const options = rawMatts.option.filter(fil=>fil.gsm === gsm && fil.width === width)
+
+        //const widths = option.option.map(option => option.width)
+        //const unique_width = new Set(widths)
+        const longs = options.map(option => option.long)
+        const unique_long = new Set(longs)
+
+        return res.send({
+            //gsm: [...unique_gsm],
+            //width: [...unique_width],
+            long: [...unique_long],
             success: true
         })
 
