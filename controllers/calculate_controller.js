@@ -173,13 +173,13 @@ exports.calAll = async (req, res) => {
                 costperOrder: sumCost/order,
                 normal: {
                     percent: `24.00%`,
-                    total_price: (24.00*sumCost)/100,
-                    unit_price: ((24.00*sumCost)/100)/order
+                    total_price: ((24.00*sumCost)/100)+sumCost,
+                    unit_price: (((24.00*sumCost)/100)+sumCost)/order
                 },
                 special: {
                     percent: `21.50%`,
-                    total_price: (21.50*sumCost)/100,
-                    unit_price: ((21.50*sumCost)/100)/order
+                    total_price: ((21.50*sumCost)/100)+sumCost,
+                    unit_price: (((21.50*sumCost)/100)+sumCost)/order
                 }
             })
         }
