@@ -788,7 +788,7 @@ exports.creatQuotation = async (req, res) => {
     catch (err) {
         res.status(500).send({
             message: 'ไม่สามารถสร้างใบเสนอราคาได้',
-            
+            err: err
         })
         console.log(err)
     }
