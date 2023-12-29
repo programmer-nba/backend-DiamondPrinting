@@ -107,12 +107,13 @@ exports.getPlatesSize = async (req, res) => {
 // edit plate price
 exports.updatePlatePrice = async (req, res) => {
     const { id } = req.params
-    const { price } = req.body
+    const { price, size } = req.body
 
     try {
         const plate = await Plate.findByIdAndUpdate(id, {
             $set:{
-                price: price
+                price: price,
+                size: size
             }
         },{new:true})
         if(!plate) {
