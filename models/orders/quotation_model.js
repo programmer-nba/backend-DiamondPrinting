@@ -14,7 +14,7 @@ const quotationSchema = new Schema(
         },
         preOrder: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'preOrder'
+            ref: 'PreOrder'
         },
         price: [
             {
