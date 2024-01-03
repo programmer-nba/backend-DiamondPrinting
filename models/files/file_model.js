@@ -3,9 +3,16 @@ const {Schema} = mongoose
 
 const fileSchema = new Schema(
     { 
-        name: String,
+        fileName: String,
         code: String,
-        fileId: String
+        fileId: String,
+        sender: {
+            _id: String,
+            name: String,
+            role: String,
+            code: String
+        },
+        preOrderId: String
     },
     {
         timestamps: true
