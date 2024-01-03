@@ -753,7 +753,7 @@ exports.creatQuotation = async (req, res) => {
         const new_quotation = new Quotation({
             code: code,
             customer: preOrder.customer._id,
-            sale: preOrder.customer._id,
+            sale: preOrder.sale._id,
             preOrder: preOrder._id,
             price: calOrder,
             expire: curdate

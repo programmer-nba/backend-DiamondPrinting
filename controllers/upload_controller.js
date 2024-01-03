@@ -25,7 +25,8 @@ exports.fileUpload = async (req, res) => {
                 },
                 preOrderId: file.preOrderId,
                 fileName: file.fileName,
-                fileId: file.fileId
+                fileId: file.fileId,
+                fileType: file.type
             })
             if(!new_file) {
                 return res.send({

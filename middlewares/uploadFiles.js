@@ -52,7 +52,7 @@ const uploadFiles = async (req, res, next) => {
     }
     // upload each file to drive
     if(files){
-      for(let f=0 ; f<files.length ; f++){
+      for(let f=0 ; f < files.length ; f++){
         const data = await uploadtoDrive(files[f], name)
         if(!data){
           console.log(`upload failed`)
