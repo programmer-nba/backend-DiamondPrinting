@@ -16,6 +16,7 @@ const quotationSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PreOrder'
         },
+        expire: Date,
         price: [
             {
                 order: Number,

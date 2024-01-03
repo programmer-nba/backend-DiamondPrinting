@@ -749,13 +749,14 @@ exports.creatQuotation = async (req, res) => {
         }
         const length_Quotation = await Quotation.find()
         const code = `DM-${preOrder.customer.code}-${preOrder.code}-${genCode(length_Quotation.length)}`
-
+        const curdate = new Date()
         const new_quotation = new Quotation({
             code: code,
             customer: preOrder.customer._id,
             sale: preOrder.customer._id,
             preOrder: preOrder._id,
-            price: calOrder
+            price: calOrder,
+            expire: curdate
         })
         const saved_quotation = await new_quotation.save()
         if(!saved_quotation){
