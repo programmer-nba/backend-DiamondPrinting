@@ -7,6 +7,7 @@ exports.fileUpload = async (req, res) => {
         const userCode = req.user.code
         const userName = req.user.name || 'anonymus'
         const files = req.dataIds
+       
         if(!files || files.length===0) {
             res.send({
                 message: 'ไม่พบไฟล์ที่แนบมา',
@@ -26,7 +27,7 @@ exports.fileUpload = async (req, res) => {
                 preOrderId: file.preOrderId,
                 fileName: file.fileName,
                 fileId: file.fileId,
-                fileType: file.type
+                fileType: file.fileType
             })
             if(!new_file) {
                 return res.send({

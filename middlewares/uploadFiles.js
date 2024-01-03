@@ -62,7 +62,8 @@ const uploadFiles = async (req, res, next) => {
         dataIds.push({
           fileId: data.id,
           fileName: name,
-          preOrderId: preOrderId
+          preOrderId: preOrderId,
+          fileType: files[f].mimetype
         })
         //console.log(`dataIds = ${dataIds.length}`)
         //console.log(dataIds)

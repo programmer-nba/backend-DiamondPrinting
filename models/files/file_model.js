@@ -6,6 +6,7 @@ const fileSchema = new Schema(
         fileName: String,
         code: String,
         fileId: String,
+        fileType: String,
         sender: {
             _id: String,
             name: String,
