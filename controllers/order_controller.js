@@ -797,7 +797,7 @@ exports.creatQuotation = async (req, res) => {
 // get all quotations
 exports.getQuotations = async (req, res) => {
     try {
-        const quotations = await Quotation.find().populate('customer', 'nameTh nameEng taxID contact _id code').populate('sale', 'name phone_number code').populate('preOrder')
+        const quotations = await Quotation.find().populate('customer', 'nameTh nameEng taxID contact _id code address').populate('sale', 'name phone_number code').populate('preOrder')
         if(!quotations){
             return res.send({
                 message: 'ไม่พบใบเสนอราคา',
@@ -830,7 +830,7 @@ exports.getQuotationOfpreOrder = async (req, res) => {
     try {
         const quotations = await Quotation.find({
             preOrder: id
-        }).poppulate('customer', 'nameTh nameEng taxID contact _id code').poppulate('sale', 'name phone_number code').populate('preOrder')
+        }).poppulate('customer', 'nameTh nameEng taxID contact _id code address').poppulate('sale', 'name phone_number code').populate('preOrder')
         if(!quotations){
             return res.send({
                 message: 'ไม่พบใบเสนอราคา',
@@ -861,7 +861,7 @@ exports.getQuotationOfpreOrder = async (req, res) => {
 exports.getQuotation = async (req, res) => {
     const { id } = req.params
     try {
-        const quotation = await Quotation.findById(id).populate('customer', 'nameTh nameEng taxID contact _id code').populate('sale', 'name phone_number code').populate('preOrder')
+        const quotation = await Quotation.findById(id).populate('customer', 'nameTh nameEng taxID contact _id code address').populate('sale', 'name phone_number code').populate('preOrder')
         if(!quotation){
             return res.send({
                 message: 'ไม่พบใบเสนอราคา',
