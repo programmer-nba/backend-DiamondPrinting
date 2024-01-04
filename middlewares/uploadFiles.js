@@ -43,8 +43,6 @@ const uploadFiles = async (req, res, next) => {
   const name = body.fileName || time
   const preOrderId = body.preOrderId
   const dataIds = []
-  //console.log(`name : ${name}`)
-  //console.log(`files:${req.files}`)
 
   try{
     if(!files){
@@ -65,9 +63,6 @@ const uploadFiles = async (req, res, next) => {
           preOrderId: preOrderId,
           fileType: files[f].mimetype
         })
-        //console.log(`dataIds = ${dataIds.length}`)
-        //console.log(dataIds)
-        //console.log(`----------------------------`)
       }
     }
   
@@ -123,8 +118,6 @@ const uploadtoDrive = async (fileObjects, name) => {
       console.log(`upload file fail!`)
       return null
     }
-    //console.log(`----------------------------`)
-    //console.log(`Upload file to drive success`)
     return data // return data to uploadPicture function
 
   }
