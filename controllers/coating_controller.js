@@ -35,6 +35,38 @@ exports.addCoating = async (req, res) => {
     }
 }
 
+// edit coating type
+exports.editCoating = async (req, res) => {
+    const { id } = req.params
+    const { type } = req.body
+    try {
+        const coating = await Coating.findByIdAndUpdate(id,{
+            $set: {
+                type: type
+            }
+        }, { new: true })
+        if(!coating) {
+            return res.send({
+                message: 'ไม่สามารถบันทึกสินค้า',
+                coating: coating
+            })
+        }
+
+        return res.send({
+            message: 'บันทึกสินค้าสำเร็จ',
+            success: true,
+            coating: coating
+        })
+    }
+    catch (err) {
+        console.log(err.message)
+        res.send({
+            message: 'ไม่สามารถแก้ไขสินค้าได้',
+            err: err.message
+        })
+    }
+}
+
 // get all coatings
 exports.getCoatings = async (req, res) => {
     try {
@@ -189,8 +221,8 @@ exports.getCoatingOptions = async (req, res) => {
     }
 }
 
-// edit Coating option
-exports.updateCoatingOption = async (req, res) => {
+// add Coating option
+exports.addCoatingOption = async (req, res) => {
     const { id } = req.params
     const { subType, avr, minPrice } = req.body
 
@@ -214,6 +246,42 @@ exports.updateCoatingOption = async (req, res) => {
             message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
             success: true,
             product: coating
+        })
+
+    }
+    catch (err) {
+        res.send({
+            message: 'ไม่สามารถอัพเดทข้อมูลสินค้า',
+            err: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+// edit Coating option
+exports.editCoatingOption = async (req, res) => {
+    const { id, option } = req.params
+    const { subType, avr, minPrice } = req.body
+
+    try {
+        const coating = await Coating.updateOne(
+            { _id: id, 'option._id': option }, {
+            $set:{
+                'option.$.subType' : subType,
+                'option.$.avr' : avr,
+                'option.$.minPrice' : minPrice,
+            }
+        })
+        if(!coating) {
+            return res.send({
+                message: 'ไม่พบสินค้านี้ในระบบ',
+            })
+        }
+
+        return res.send({
+            message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
+            success: true,
+            coating: coating
         })
 
     }

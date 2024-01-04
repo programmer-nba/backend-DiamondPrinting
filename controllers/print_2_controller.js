@@ -34,6 +34,39 @@ exports.addPrint_2_Color = async (req, res) => {
     }
 }
 
+// edit print color
+exports.editPrint_2_Color = async (req, res) => {
+    const { id } = req.params
+    const { colors } = req.body
+    try {
+
+        const print_2 = await Print_2.findByIdAndUpdate(id,{
+            $set: {
+                colors: colors
+            }
+        }, { new: true })
+        if(!print_2) {
+            return res.send({
+                message: 'ไม่สามารถบันทึกสินค้า',
+                print_2: print_2
+            })
+        }
+
+        return res.send({
+            message: 'บันทึกสินค้าสำเร็จ',
+            success: true,
+            print_2: print_2
+        })
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถแก้ไขสินค้าได้',
+            err: err.message
+        })
+    }
+}
+
 // get all print colors
 exports.getPrint_2_Colors = async (req, res) => {
     try {
@@ -106,8 +139,8 @@ exports.getPrint_2_Options = async (req, res) => {
     }
 }
 
-// edit plate price
-exports.updatePrint_2_Option = async (req, res) => {
+// add print price
+exports.addPrint_2_Option = async (req, res) => {
     const { id } = req.params
     const { option } = req.body //start, end, price
     let print_2_list = []
@@ -138,6 +171,45 @@ exports.updatePrint_2_Option = async (req, res) => {
             message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
             success: true,
             product: print_2_list
+        })
+
+    }
+    catch (err) {
+        res.send({
+            message: 'ไม่สามารถอัพเดทข้อมูลสินค้า',
+            err: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+// edit print price
+exports.editPrint_2_Option = async (req, res) => {
+    const { id, option } = req.params
+    const { start, end, price } = req.body //start, end, price
+    
+    try {
+        
+        const print_2 = await Print_2.updateOne(
+            { _id: id, 'option._id': option },
+            {
+                $set: {
+                    'option.$.round.start' : start,
+                    'option.$.round.end' : end,
+                    'option.$.round.join' : `${start}-${end}`,
+                    'option.$.price' : price
+                }
+            }
+        )
+        if(!print_2) {
+            return res.status(404).send({
+                message: 'ไม่พบสินค้านี้ในระบบ',
+            })
+        }       
+
+        return res.send({
+            message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
+            success: true,
         })
 
     }

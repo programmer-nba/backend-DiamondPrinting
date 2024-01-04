@@ -131,6 +131,56 @@ exports.editRawMattType = async (req, res) => {
     }
 }
 
+// edit rawMatt option
+exports.editRawMattOption = async (req, res) => {
+    const { id, option } = req.params
+    const { gsm, width, long, pkg } = req.body
+    try {
+        const prev_rawMatt = await RawMatt.findById(id)
+        if(!prev_rawMatt){
+            return res.send({
+                message: 'ไม่พบสินค้าในระบบ',
+                products: prev_rawMatt
+            })
+        }
+        
+        const psheet = Math.ceil((gsm*width*long*pkg/3100)/500) 
+        const rawMatt = await RawMatt.updateOne(
+            { _id: id, 'option._id': option },
+            {
+                $set: {
+                    'option.$.gsm' : gsm,
+                    'option.$.width' : width,
+                    'option.$.long' : long,
+                    'option.$.pkg' : pkg,
+                    'option.$.psheet' : psheet
+                }
+            },
+            { new : true }
+        )
+        if(!rawMatt){
+            return res.send({
+                message: 'ไม่พบ id ของ option นี้',
+                rawMatt: rawMatt
+            })
+        }
+        
+
+        return res.send({
+            success: true,
+            message: 'update success'
+        })
+        
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถอัพเดทรายการ option นี้ได้',
+            err: err.message
+        })
+    }
+}
+
 // get rawMatt types
 exports.getRawMattTypes = async (req, res) => {
     try {
@@ -319,63 +369,13 @@ exports.getRawMattLongs = async (req, res) => {
     }
 }
 
-// edit RawMatt option
-exports.updateRawMattOption = async (req, res) => {
-    const { id } = req.params
-    const { option } = req.body //gsm, width, long, pkg
-    console.log(req.body)
-    console.log(req.params)
-    let rawMatt_list = []
-    try {
-        for(item of option) {
-            console.log(item)
-            console.log(item.gsm)
-            const psheet = Math.ceil((item.gsm*item.width*item.long*item.pkg/3100)/500)
-            const rawMatt = await RawMatt.findByIdAndUpdate(id, {
-                $push:{
-                    option: {
-                        gsm: item.gsm,
-                        width: item.width,
-                        long: item.long,
-                        pkg: item.pkg,
-                        psheet: psheet
-                    },
-                }
-            },{new:true})
-            if(!rawMatt) {
-                return res.status(404).send({
-                    message: 'ไม่พบสินค้านี้ในระบบ',
-                })
-            }
-            rawMatt_list.push(rawMatt)
-        }
-
-        return res.send({
-            message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
-            success: true,
-            product: rawMatt_list
-        })
-
-    }
-    catch (err) {
-        res.send({
-            message: 'ไม่สามารถอัพเดทข้อมูลสินค้า',
-            err: err.message
-        })
-        console.log(err.message)
-    }
-}
-
-// edit RawMatt option
+// add RawMatt option
 exports.addRawMattOption = async (req, res) => {
     const { id } = req.params
     const { option } = req.body //gsm, width, long, pkg
-    
     let rawMatt_list = []
     try {
         for(item of option) {
-            console.log(item)
-            console.log(item.gsm)
             const psheet = Math.ceil((item.gsm*item.width*item.long*item.pkg/3100)/500)
             const rawMatt = await RawMatt.findByIdAndUpdate(id, {
                 $push:{

@@ -134,12 +134,13 @@ exports.getHotStamp = async (req, res) => {
 // edit hot stamp avr
 exports.updateHotStamp = async (req, res) => {
     const { id } = req.params
-    const { avr } = req.body
+    const { avr, stamp_color } = req.body
 
     try {
         const hotStamp = await HotStamp.findByIdAndUpdate(id, {
             $set:{
-                avr: avr
+                avr: avr,
+                stamp_color: stamp_color
             }
         },{new:true})
         if(!hotStamp) {

@@ -38,6 +38,41 @@ exports.addEmboss = async (req, res) => {
     }
 }
 
+// edit emboss
+exports.editEmboss = async (req, res) => {
+    const { id } = req.params
+    const { start, end } = req.body
+    try {
+        const emboss = await Emboss.findByIdAndUpdate(id, {
+            $set: {
+                'round.start': start,
+                'round.end': end,
+                'round.join': `${start.toLocaleString()}-${end.toLocaleString()}`,
+            }
+        }, { new: true })
+
+        if(!emboss) {
+            return res.send({
+                message: 'ไม่สามารถบันทึกสินค้า',
+                emboss: emboss
+            })
+        }
+
+        return res.send({
+            message: 'บันทึกสินค้าสำเร็จ',
+            success: true,
+            emboss: emboss
+        })
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถเพิ่มสินค้าได้',
+            err: err.message
+        })
+    }
+}
+
 // get all embosses
 exports.getEmbosses = async (req, res) => {
     try {
@@ -71,11 +106,10 @@ exports.getEmbosses = async (req, res) => {
     }
 }
 
-// edit emboss option
-exports.updateEmbossOption = async (req, res) => {
+// add emboss option
+exports.addEmbossOption = async (req, res) => {
     const { id } = req.params
     const { pumpPrice, plateSize } = req.body
-    console.log(req.body)
 
     try {
         const emboss = await Emboss.findByIdAndUpdate(id, {
@@ -96,6 +130,42 @@ exports.updateEmbossOption = async (req, res) => {
             message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
             success: true,
             product: emboss
+        })
+
+    }
+    catch (err) {
+        res.send({
+            message: 'ไม่สามารถอัพเดทข้อมูลสินค้า',
+            err: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+// edit emboss option
+exports.editEmbossOption = async (req, res) => {
+    const { id, option } = req.params
+    const { pumpPrice, plateSize } = req.body
+
+    try {
+        const emboss = await Emboss.updateOne(
+            { _id: id, 'option._id': option },
+            {
+                $set: {
+                    'option.$.pumpPrice': pumpPrice,
+                    'option.$.plateSize': plateSize
+                }
+            }
+        )
+        if(!emboss) {
+            return res.send({
+                message: 'ไม่พบสินค้านี้ในระบบ',
+            })
+        }
+
+        return res.send({
+            message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
+            success: true,
         })
 
     }

@@ -34,6 +34,39 @@ exports.addPrint_4_Color = async (req, res) => {
     }
 }
 
+// edit print color
+exports.editPrint_4_Color = async (req, res) => {
+    const { id } = req.params
+    const { colors } = req.body
+    try {
+
+        const print_4 = await Print_4.findByIdAndUpdate(id,{
+            $set: {
+                colors: colors
+            }
+        }, { new: true })
+        if(!print_4) {
+            return res.send({
+                message: 'ไม่สามารถบันทึกสินค้า',
+                print_4: print_4
+            })
+        }
+
+        return res.send({
+            message: 'บันทึกสินค้าสำเร็จ',
+            success: true,
+            print_4: print_4
+        })
+    }
+    catch (err) {
+        console.log(err.message)
+        res.status(500).send({
+            message: 'ไม่สามารถแก้ไขสินค้าได้',
+            err: err.message
+        })
+    }
+}
+
 // get print-4 options
 exports.getPrint_4_Options = async (req, res) => {
     const { color } = req.params
@@ -106,8 +139,47 @@ exports.getPrint_4_Colors = async (req, res) => {
     }
 }
 
-// edit plate price
-exports.updatePrint_4_Option = async (req, res) => {
+// edit print price
+exports.editPrint_4_Option = async (req, res) => {
+    const { id, option } = req.params
+    const { start, end, price } = req.body //start, end, price
+    
+    try {
+        
+        const print_4 = await Print_4.updateOne(
+            { _id: id, 'option._id': option },
+            {
+                $set: {
+                    'option.$.round.start' : start,
+                    'option.$.round.end' : end,
+                    'option.$.round.join' : `${start}-${end}`,
+                    'option.$.price' : price
+                }
+            }
+        )
+        if(!print_4) {
+            return res.status(404).send({
+                message: 'ไม่พบสินค้านี้ในระบบ',
+            })
+        }       
+
+        return res.send({
+            message: 'อัพเดทข้อมูลสินค้าสำเร็จ',
+            success: true,
+        })
+
+    }
+    catch (err) {
+        res.send({
+            message: 'ไม่สามารถอัพเดทข้อมูลสินค้า',
+            err: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+// add print price
+exports.addPrint_4_Option = async (req, res) => {
     const { id } = req.params
     const { option } = req.body //start, end, price
     let print_4_list = []
