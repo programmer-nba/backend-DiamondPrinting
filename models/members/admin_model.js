@@ -20,6 +20,16 @@ const adminSchema = new Schema({
             ip: String,
         }
     ],
+    name: {
+        first: {
+            type: String,
+            default: ''
+        },
+        last: {
+            type: String,
+            default: ''
+        }
+    }
 })
 
 const Admin = mongoose.model('Admin', adminSchema)

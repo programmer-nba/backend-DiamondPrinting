@@ -147,7 +147,7 @@ const validateDuplicate = async (data) => {
 // register -admin-
 exports.adminRegister = async (req, res) => {
     const {
-        username, password, phone_number, email
+        username, password, phone_number, email, first_name, last_name
     } = req.body
     try {
 
@@ -178,6 +178,10 @@ exports.adminRegister = async (req, res) => {
                 time: new Date(),
                 ip: ipAddress,
             },
+            name: {
+                first: first_name || '',
+                last: last_name || ''
+            }
         })
 
         const saved_admin = await new_admin.save()
@@ -603,6 +607,7 @@ exports.login = async (req, res) => {
             id: admin._id ,
             code: admin.code,
             role: admin.role,
+            name: admin.name,
         }
         : (account) ? {
             id: account._id ,
