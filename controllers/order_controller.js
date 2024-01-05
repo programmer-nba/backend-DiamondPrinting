@@ -569,7 +569,7 @@ exports.addPreProduction = async (req, res) => {
 
 exports.getPreProductions = async (req, res) => {
     try {
-        const preProductions = await PreProduction.find().populate('customer', 'nameTh nameEng taxID contact address').populate('preOrder', 'name brand').populate('sale', '_id code name phone_number email')
+        const preProductions = await PreProduction.find().populate('customer', 'nameTh nameEng taxID contact address').populate('preOrder').populate('sale', '_id code name phone_number email')
         if(!preProductions || preProductions.length===0){
             return res.send({
                 message: 'ไม่พบรายการนี้ในระบบ',
