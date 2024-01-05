@@ -541,7 +541,7 @@ const calHotStampCost = async (order, hotStampData) => {
             return {data: 'ไม่พบ', cost: 0}
         }
 
-        const block_cost = Math.round((block.inWidth*block.inLong*13)*0.01)*100
+        const block_cost = Math.ceil((block.inWidth*block.inLong*13)*0.01)*100
         const total_block_cost = block_cost*block.lay
         const stamp_color_cost = ((block.inWidth*block.inLong*hotStamp.avr)+0.1)*stamp.k
         const total_stamp_color_cost = stamp_color_cost*order
