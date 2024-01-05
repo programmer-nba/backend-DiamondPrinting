@@ -404,7 +404,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             price: (option[0].round.start >= 10001)
             ? option[0].price*order_lay : option[0].price
         }
-
+        console.log(floor)
         return {cost: cal_print.price*floor, data: cal_print}
         
     }
