@@ -589,6 +589,7 @@ const calDiecutCost = async (order, diecutData) => {
         const order_lay = Math.floor(parseInt(order)/parseInt(lay))
         
         const diecut = diecuts.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
+        console.log(diecut)
         const option = diecut[0].option.filter(option=>option.plateSize===plateSize)
         if(!option || option.length===0){
             return {data: 'ไม่พบตัวเลือกไดคัต', cost: 0}
