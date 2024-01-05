@@ -432,8 +432,8 @@ const calCoatingCost = async (order, coatingData) => {
         }
         
         const order_lay = Math.floor(parseInt(order)/parseInt(lay))
-        const inWidth = width/cut
-        const inLong = long/cut
+        const inWidth = width/(cut/2)
+        const inLong = long/(cut/2)
 
         const option = 
             (method.type!=='spot-uv' || method.type!=='dip-off') ? coating.option.filter(item=>item.subType === method.subType)
@@ -449,7 +449,7 @@ const calCoatingCost = async (order, coatingData) => {
         (method.type==='spot-uv' && coating_option.avr*inWidth*inLong < 1.2) ? 1.2
         : (method.type==='dip-off') ? 5
         : coating_option.avr*inWidth*inLong
-        const total_price = coating_price*(order/lay)
+        const total_price = coating_price*(order/lay)*order
 
         const cal_coating = {
             inWidth: inWidth,
@@ -598,7 +598,7 @@ const calDiecutCost = async (order, diecutData) => {
             blockSize: diecut_option.plateSize || plateSize,
             blockPrice: diecut_option.blockPrice,
             diecutRound : diecut[0].round.join,
-            pumpPrice: diecut_pumpPrice,
+            pumpPrice: (diecut[0].round.start>5000) ? diecut_pumpPrice*order : diecut_pumpPrice,
             totalPrice: diecut_pumpPrice + diecut_option.blockPrice
         }
 
@@ -1131,7 +1131,7 @@ exports.calDiecut = async (req,res) => {
             blockSize: diecut_option.plateSize || plateSize,
             blockPrice: diecut_option.blockPrice,
             diecutRound : diecut[0].round.join,
-            pumpPrice: diecut_pumpPrice,
+            //pumpPrice: (diecut[0].round.start > 5000) ?  :diecut_pumpPrice,
             totalPrice: diecut_pumpPrice + diecut_option.blockPrice
         }
 
