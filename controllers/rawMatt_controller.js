@@ -144,7 +144,7 @@ exports.editRawMattOption = async (req, res) => {
             })
         }
         
-        const psheet = Math.ceil((gsm*width*long*pkg/3100)/500) 
+        const psheet = Math.ceil((parseInt(gsm)*parseInt(width)*parseInt(long)*parseInt(pkg)/3100)/500) 
         const rawMatt = await RawMatt.updateOne(
             { _id: id, 'option._id': option },
             {
@@ -176,6 +176,7 @@ exports.editRawMattOption = async (req, res) => {
         console.log(err.message)
         res.status(500).send({
             message: 'ไม่สามารถอัพเดทรายการ option นี้ได้',
+            req: req.body,
             err: err.message
         })
     }
