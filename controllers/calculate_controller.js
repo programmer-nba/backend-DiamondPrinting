@@ -458,7 +458,7 @@ const calCoatingCost = async (order, coatingData) => {
             avr: coating_option.avr,
             coating_price: parseFloat(coating_price.toFixed(2)),
             price: (total_price < coating_option.minPrice)
-            ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
+            ? coating_option.minPrice : total_price.toFixed(2)
         }
 
         return {cost: cal_coating.price, data: cal_coating}
