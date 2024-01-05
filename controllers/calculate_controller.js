@@ -419,7 +419,8 @@ const calCoatingCost = async (order, coatingData) => {
     const { 
         method,
         width, long, cut,
-        lay 
+        lay,
+        inWidth, inLong
     } = coatingData
     
     try {
@@ -432,8 +433,8 @@ const calCoatingCost = async (order, coatingData) => {
         }
         
         const order_lay = Math.floor(parseInt(order)/parseInt(lay))
-        const inWidth = width/(cut/2)
-        const inLong = long/(cut/2)
+        //const inWidth = inWidth
+        //const inLong = inLong
 
         const option = 
             (method.type!=='spot-uv' || method.type!=='dip-off') ? coating.option.filter(item=>item.subType === method.subType)
@@ -446,9 +447,9 @@ const calCoatingCost = async (order, coatingData) => {
         const coating_option = option[0]
 
         const coating_price = 
-        (method.type==='spot-uv' && coating_option.avr*inWidth*inLong < 1.2) ? 1.2
+        (method.type==='spot-uv' && coating_option.avr*parseFloat(inWidth)*parseFloat(inLong) < 1.2) ? 1.2
         : (method.type==='dip-off') ? 5
-        : coating_option.avr*inWidth*inLong
+        : coating_option.avr*parseFloat(inWidth)*parseFloat(inLong)
         const total_price = parseFloat(coating_price.toFixed(2))*Math.floor(parseInt(order)/parseInt(lay))
         console.log(parseFloat(coating_price.toFixed(2)))
         console.log(order_lay)
