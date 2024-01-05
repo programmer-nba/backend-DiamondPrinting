@@ -447,7 +447,7 @@ exports.addPreProduction = async (req, res) => {
     const userCode = req.user.code
     const userName = req.user.name
     //const { files } = req.files
-    const { width, long, cut, lay, plateSize, k } = req.body
+    const { width, long, cut, lay, plateSize, k, inWidth, inLong } = req.body
 
     try {
         let preOrder = await PreOrder.findById(id)
@@ -495,6 +495,8 @@ exports.addPreProduction = async (req, res) => {
                 //spotUv: (preOrder.coating && preOrder.coating.spotUv.trim() !=='' || preOrder.coating.spotUv !==null) ? true : false,
                 //dipOff: (preOrder.coating && preOrder.coating.dipOff) ? true : false,
                 width: (width) && width, // from pre-order
+                inWidth: (inWidth) && inWidth, // from pre-order
+                inLong: (inLong) && inLong, // from pre-order
                 long: (long) && long, // from pre-order
                 cut: (cut) && cut,  // from pre-order
                 lay: (lay) && lay // from pre-order

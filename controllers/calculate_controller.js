@@ -88,7 +88,9 @@ exports.calAll = async (req, res) => {
                     const sendCoating = {
                         method: m.method,
                         width: coatingData.width,
+                        inWidth: coatingData.inWidth,
                         long: coatingData.long,
+                        inLong: coatingData.inLong,
                         cut: coatingData.cut,
                         lay: coatingData.lay
                     }
