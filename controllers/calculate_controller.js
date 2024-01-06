@@ -44,6 +44,7 @@ exports.calAll = async (req, res) => {
             }
             
             if(print_2_Data && print_2_Data.colors.length!==0){
+                let prints = []
                 for (i in print_2_Data.colors) {
                     const sendPrint = {
                         lay: print_2_Data.lay,
@@ -56,11 +57,13 @@ exports.calAll = async (req, res) => {
                             : 1
                     }
                     const print_2_cost = await calPrint_2_Cost(order,sendPrint)
+                    prints.push(print_2_cost.cost)
                     datas.push({[`print_2_${i}`]:print_2_cost.data})
                     datas.push({print_2_Ffloor:print_2_Data.floor_front})
                     datas.push({print_2_Bfloor:print_2_Data.floor_back})
-                    costs[`print_2_${i}`] = print_2_cost.cost
                 }
+                const print = (prints.length > 0) ? prints.reduce((a,b)=>a+b) : 0
+                costs.print = Math.ceil(print)
             }
 
             if(print_4_Data && print_4_Data.colors.length!==0){
@@ -83,7 +86,7 @@ exports.calAll = async (req, res) => {
                     datas.push({print_4_Bfloor:print_4_Data.floor_back})
                 }
                 const print = (prints.length > 0) ? prints.reduce((a,b)=>a+b) : 0
-                costs.print = print
+                costs.print = Math.ceil(print)
             }
 
             if(diecutData){
