@@ -608,7 +608,7 @@ const calHotStampCost = async (order, hotStampData) => {
             stamp_avr: hotStamp.avr,
             other_avr: 0.1,
             stamp_color_cost: parseFloat(stamp_color_cost.toFixed(2)),
-            total_stamp_color_cost: parseFloat(total_stamp_color_cost.toFixed(2)),
+            total_stamp_color_cost: total_stamp_color_cost,
             totol_cost: (total_stamp_color_cost + total_block_cost !== NaN) ? parseFloat((total_stamp_color_cost + total_block_cost).toFixed(2)) : 0,
 
             details: {
