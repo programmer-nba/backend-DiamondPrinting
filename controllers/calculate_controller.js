@@ -137,6 +137,7 @@ exports.calAll = async (req, res) => {
 
             if(hotStampData){
                 let blocks_k = []
+                let costs_k = []
                 for (i in hotStampData.block){
                     const sendStamp = {
                         block: {
@@ -152,9 +153,12 @@ exports.calAll = async (req, res) => {
                     const stamp_cost = await calHotStampCost(order, sendStamp)
                     datas.push({[`stamp_${i}`]:stamp_cost.data})
                     blocks_k.push(stamp_cost.data.total_block_cost)
+                    costs_k.push(stamp_cost.data.total_stamp_color_cost)
                 } 
-                const block_k =(blocks_k.length > 0) ? blocks_k.reduce((a,b)=>a+b) : 0
+                const block_k = (blocks_k.length > 0) ? blocks_k.reduce((a,b)=>a+b) : 0
+                const cost_k = (costs_k.length > 0) ? costs_k.reduce((a,b)=>a+b) : 0
                 costs.block_k = block_k
+                costs.cost_k = cost_k
             }
 
             if(glueData){
