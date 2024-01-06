@@ -195,13 +195,13 @@ exports.calAll = async (req, res) => {
                 costperOrder: sumCost/order,
                 normal: {
                     percent: `24.00%`,
-                    total_price: Math.ceil(((24.00*sumCost)/100)+sumCost),
-                    unit_price:  Math.ceil((((24.00*sumCost)/100)+sumCost)/order)
+                    total_price: parseFloat((((24.00*sumCost)/100)+sumCost).toFixed(2)),
+                    unit_price:  parseFloat(((((24.00*sumCost)/100)+sumCost)/order).toFixed(2))
                 },
                 special: {
                     percent: `21.50%`,
-                    total_price:  Math.ceil(((21.50*sumCost)/100)+sumCost),
-                    unit_price:  Math.ceil((((21.50*sumCost)/100)+sumCost)/order)
+                    total_price:  parseFloat((((21.50*sumCost)/100)+sumCost).toFixed(2)),
+                    unit_price:  parseFloat(((((21.50*sumCost)/100)+sumCost)/order).toFixed(2))
                 }
             })
         }
