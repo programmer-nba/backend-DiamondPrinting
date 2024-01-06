@@ -49,16 +49,16 @@ exports.calAll = async (req, res) => {
                         lay: print_2_Data.lay,
                         colors: print_2_Data.colors[i],
                         floor: 
-                            (i===0 && print_2_Data.colors.floor_front) ? 2
-                            : (i===0 && !print_2_Data.colors.floor_front) ? 1
-                            : (i===1 && print_2_Data.colors.floor_back) ? 2
-                            : (i===1 && !print_2_Data.colors.floor_back) ? 1
+                            (i==='0' && print_2_Data.floor_front) ? 2
+                            : (i==='0' && !print_2_Data.floor_front) ? 1
+                            : (i==='1' && print_2_Data.floor_back) ? 2
+                            : (i==='1' && !print_2_Data.floor_back) ? 1
                             : 1
                     }
                     const print_2_cost = await calPrint_2_Cost(order,sendPrint)
                     datas.push({[`print_2_${i}`]:print_2_cost.data})
-                    datas.push({print_2_Ffloor:print_2_Data.colors.floor_front})
-                    datas.push({print_2_Bfloor:print_2_Data.colors.floor_back})
+                    datas.push({print_2_Ffloor:print_2_Data.floor_front})
+                    datas.push({print_2_Bfloor:print_2_Data.floor_back})
                     costs[`print_2_${i}`] = print_2_cost.cost
                 }
             }
@@ -69,16 +69,16 @@ exports.calAll = async (req, res) => {
                         lay: print_4_Data.lay,
                         colors: print_4_Data.colors[i],
                         floor: 
-                            (i===0 && print_4_Data.colors.floor_front) ? 2
-                            : (i===0 && !print_4_Data.colors.floor_front) ? 1
-                            : (i===1 && print_4_Data.colors.floor_back) ? 2
-                            : (i===1 && !print_4_Data.colors.floor_back) ? 1
+                            (i==='0' && print_4_Data.floor_front) ? 2
+                            : (i==='0' && !print_4_Data.floor_front) ? 1
+                            : (i==='1' && print_4_Data.floor_back) ? 2
+                            : (i==='1' && !print_4_Data.floor_back) ? 1
                             : 1
                     }
                     const print_4_cost = await calPrint_4_Cost(order,sendPrint)
                     datas.push({[`print_4_${i}`]:print_4_cost.data})
-                    datas.push({print_4_Ffloor:print_4_Data.colors.floor_front})
-                    datas.push({print_4_Bfloor:print_4_Data.colors.floor_back})
+                    datas.push({print_4_Ffloor:print_4_Data.floor_front})
+                    datas.push({print_4_Bfloor:print_4_Data.floor_back})
                     costs[`print_4_${i}`] = print_4_cost.cost
                 }
             }
@@ -95,8 +95,8 @@ exports.calAll = async (req, res) => {
                         lay: coatingData.lay
                     }
                     const coating_cost = await calCoatingCost(order, sendCoating)
-                    datas.push({[`${m.method.type}`]:coating_cost.data})
-                    costs[`${m.method.type}`] = coating_cost.cost
+                    datas.push({[`coating_${m.method.type}`]:coating_cost.data})
+                    costs[`coating_${m.method.type}`] = coating_cost.cost
                 }
             }
 
@@ -348,7 +348,7 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
             return {cost: 0, data: 'ไม่พบจำนวนสีในระบบ'}
         }
 
-        const order_lay = parseInt(order)/parseInt(lay)
+        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         
         const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         if(option.length!==1){
@@ -359,10 +359,16 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
             order_lay: order_lay,
             round: option[0].round.join,
             price: (option[0].round.start >= 10001)
-            ? option[0].price*order_lay : option[0].price
+            ? option[0].price*order_lay*floor : option[0].price*floor,
+            details: {
+                ออร์เดอร์ต่อเล : order_lay,
+                รอบการพิมพ์ : option[0].round.join,
+                เทพื้น : (floor>1) ? 'เทพื้น' : 'ไม่เทพื้น',
+                ค่าพิมพ์ : (option[0].round.start >= 10001)
+                ? option[0].price*order_lay*floor : option[0].price*floor
+            }
         }
-
-        return {cost: cal_print.price*floor, data: cal_print}
+        return {cost: cal_print.price, data: cal_print}
         
     }
     catch (err) {
@@ -391,7 +397,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             return {cost: 0, data: 'ไม่พบ'}
         }
 
-        const order_lay = parseInt(order)/parseInt(lay)
+        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         
         const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         if(option.length!==1){
@@ -402,10 +408,16 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             order_lay: order_lay,
             round: option[0].round.join,
             price: (option[0].round.start >= 10001)
-            ? option[0].price*order_lay : option[0].price
+            ? option[0].price*order_lay*floor : option[0].price*floor,
+            details: {
+                ออร์เดอร์ต่อเล : order_lay,
+                รอบการพิมพ์ : option[0].round.join,
+                เทพื้น : (floor>1) ? 'เทพื้น' : 'ไม่เทพื้น',
+                ค่าพิมพ์ : (option[0].round.start >= 10001)
+                ? option[0].price*order_lay*floor : option[0].price*floor
+            }
         }
-        console.log(floor)
-        return {cost: cal_print.price*floor, data: cal_print}
+        return {cost: cal_print.price, data: cal_print}
         
     }
     catch (err) {
@@ -420,7 +432,6 @@ const calCoatingCost = async (order, coatingData) => {
     }
     const { 
         method,
-        width, long, cut,
         lay,
         inWidth, inLong
     } = coatingData
@@ -434,7 +445,7 @@ const calCoatingCost = async (order, coatingData) => {
             return {cost: 0, data: 'ไม่พบ'}
         }
         
-        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        const order_lay = Math.round(parseInt(order)/parseInt(lay))
         //const inWidth = inWidth
         //const inLong = inLong
 
@@ -452,9 +463,7 @@ const calCoatingCost = async (order, coatingData) => {
         (method.type==='spot-uv' && coating_option.avr*parseFloat(inWidth)*parseFloat(inLong) < 1.2) ? 1.2
         : (method.type==='dip-off') ? 5
         : coating_option.avr*parseFloat(inWidth)*parseFloat(inLong)
-        const total_price = parseFloat(coating_price.toFixed(2))*Math.floor(parseInt(order)/parseInt(lay))
-        console.log(parseFloat(coating_price.toFixed(2)))
-        console.log(order_lay)
+        const total_price = Math.round(parseFloat(coating_price.toFixed(2))*order_lay)
 
         const cal_coating = {
             inWidth: inWidth,
@@ -462,11 +471,18 @@ const calCoatingCost = async (order, coatingData) => {
             order_lay: order_lay,
             avr: coating_option.avr,
             coating_price: parseFloat(coating_price.toFixed(2)),
-            price: (total_price < coating_option.minPrice)
-            ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
+            cost: (total_price < coating_option.minPrice)
+            ? coating_option.minPrice : parseFloat(total_price.toFixed(2)),
+            details: {
+                'ขนาดใบพิมพ์กว้าง' : `${inWidth} นิ้ว`,
+                'ขนาดใบพิมพ์ยาว' : `${inLong} นิ้ว`,
+                'ออร์เดอร์ต่อเล' : order_lay,
+                'ประเภทเคลือบ' : `${method.type} ${method.type} (${parseFloat(coating_price.toFixed(2))})`,
+                'ค่าเคลือบ' : (total_price < coating_option.minPrice) ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
+            }
         }
 
-        return {cost: cal_coating.price, data: cal_coating}
+        return {cost: cal_coating.cost, data: cal_coating}
         
     }
     catch (err) {
@@ -488,7 +504,7 @@ const calEmbossCost = async (order, embossData) => {
             return {cost: 0, data: 'ไม่พบ'}
         }
 
-        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        const order_lay = Math.round(parseInt(order)/parseInt(lay))
         
         const round_option = emboss.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
         if(round_option.length===0){
@@ -502,8 +518,8 @@ const calEmbossCost = async (order, embossData) => {
         const emboss_cost = Math.ceil((inWidth*inLong*26)*0.01)*100
 
         const emboss_price = lay*emboss_cost
-
-        const pumpPrice = emboss_option.pumpPrice
+        //console.log(`option : ${round_option[0].round.start}`)
+        const pumpPrice = (round_option[0].round.start > 5000 && round_option[0].round.end < 10000000) ? emboss_option.pumpPrice*order_lay : emboss_option.pumpPrice
 
         const total_price = emboss_price+pumpPrice
 
@@ -512,7 +528,7 @@ const calEmbossCost = async (order, embossData) => {
             inWidth: inWidth,
             inLong: inLong,
             order_lay: order_lay,
-            pumpPrice: pumpPrice,
+            pumpPrice: Math.ceil(pumpPrice),
             emboss_price: parseFloat(emboss_price.toFixed(2)),
             emboss_cost: emboss_cost,
             price: parseFloat(total_price.toFixed(2))
@@ -559,7 +575,7 @@ const calHotStampCost = async (order, hotStampData) => {
             stamp_color: hotStamp.stamp_color,
             stamp_avr: hotStamp.avr,
             other_avr: 0.1,
-            stamp_color_cost: stamp_color_cost,
+            stamp_color_cost: parseFloat(stamp_color_cost.toFixed(2)),
             total_stamp_color_cost: total_stamp_color_cost,
             totol_cost: (total_stamp_color_cost + total_block_cost !== NaN) ? total_stamp_color_cost + total_block_cost : 0
         }
@@ -586,7 +602,7 @@ const calDiecutCost = async (order, diecutData) => {
             return {data: 'ไม่พบไดคัต', cost: 0}
         }
 
-        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         
         const diecut = diecuts.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
         console.log(diecut)
@@ -604,8 +620,8 @@ const calDiecutCost = async (order, diecutData) => {
             blockSize: diecut_option.plateSize || plateSize,
             blockPrice: diecut_option.blockPrice,
             diecutRound : diecut[0].round.join,
-            pumpPrice: (diecut[0].round.start>5000) ? diecut_pumpPrice*order_lay : diecut_pumpPrice,
-            totalPrice: (diecut[0].round.start>5000) ? diecut_pumpPrice*order_lay + diecut_option.blockPrice : diecut_pumpPrice + diecut_option.blockPrice
+            pumpPrice: (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay) : Math.ceil(diecut_pumpPrice),
+            totalPrice: (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay + diecut_option.blockPrice) : Math.ceil(diecut_pumpPrice + diecut_option.blockPrice)
         }
 
         return {data: cal_diecut, cost: cal_diecut.totalPrice}
