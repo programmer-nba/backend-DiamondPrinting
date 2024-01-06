@@ -196,7 +196,7 @@ exports.calAll = async (req, res) => {
                 datas: datas,
                 costDetails: costs,
                 sumCost: sumCost,
-                costperOrder: sumCost/order,
+                costperOrder: parseFloat((sumCost/order).toFixed(2)),
                 normal: {
                     percent: `24.00%`,
                     total_price: parseFloat((((24.00*sumCost)/100)+sumCost).toFixed(2)),
