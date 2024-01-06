@@ -64,6 +64,7 @@ exports.calAll = async (req, res) => {
             }
 
             if(print_4_Data && print_4_Data.colors.length!==0){
+                let prints = []
                 for (i in print_4_Data.colors) {
                     const sendPrint = {
                         lay: print_4_Data.lay,
@@ -76,11 +77,20 @@ exports.calAll = async (req, res) => {
                             : 1
                     }
                     const print_4_cost = await calPrint_4_Cost(order,sendPrint)
+                    prints.push(print_4_cost.cost)
                     datas.push({[`print_4_${i}`]:print_4_cost.data})
                     datas.push({print_4_Ffloor:print_4_Data.floor_front})
                     datas.push({print_4_Bfloor:print_4_Data.floor_back})
-                    costs[`print_4_${i}`] = print_4_cost.cost
                 }
+                const print = (prints.length > 0) ? prints.reduce((a,b)=>a+b) : 0
+                costs.print = print
+            }
+
+            if(diecutData){
+                const diecut_cost = await calDiecutCost(order, diecutData)
+                datas.push({diecut:diecut_cost.data})
+                costs.diecut_block = diecut_cost.data.blockPrice
+                costs.diecut_pump = diecut_cost.data.pumpPrice
             }
             
             if(coatingData && coatingData.methods && coatingData.methods.length!==0){
@@ -101,6 +111,8 @@ exports.calAll = async (req, res) => {
             }
 
             if(embossData){
+                let emboss_blocks = []
+                let emboss_pumps = []
                 for (em in embossData.demensions){
                     const sendEmboss = {
                         inWidth: embossData.demensions[em].inWidth,
@@ -111,11 +123,17 @@ exports.calAll = async (req, res) => {
                     }
                     const emboss_cost = await calEmbossCost(order, sendEmboss)
                     datas.push({[`emboss_${em}`]:emboss_cost.data})
-                    costs[`emboss_${em}`] = emboss_cost.cost
-                } 
+                    emboss_pumps.push(emboss_cost.data.pumpPrice)
+                    emboss_blocks.push(emboss_cost.data.emboss_price)
+                }
+                const sum_emboss_blocks = (emboss_blocks.length > 0) ? emboss_blocks.reduce((a,b)=>a+b) : 0
+                const emboss_pump = emboss_pumps[0] || 0
+                costs.emboss_pump = emboss_pump
+                costs.emboss_block = sum_emboss_blocks
             }
 
             if(hotStampData){
+                let blocks_k = []
                 for (i in hotStampData.block){
                     const sendStamp = {
                         block: {
@@ -130,23 +148,22 @@ exports.calAll = async (req, res) => {
                     }
                     const stamp_cost = await calHotStampCost(order, sendStamp)
                     datas.push({[`stamp_${i}`]:stamp_cost.data})
-                    costs[`stamp_${i}`] = stamp_cost.cost
+                    blocks_k.push(stamp_cost.data.total_block_cost)
                 } 
-            }
-
-            if(diecutData){
-                const diecut_cost = await calDiecutCost(order, diecutData)
-                datas.push({diecut:diecut_cost.data})
-                costs.diecut = diecut_cost.cost
+                const block_k =(blocks_k.length > 0) ? blocks_k.reduce((a,b)=>a+b) : 0
+                costs.block_k = block_k
             }
 
             if(glueData){
                 if(glueData.glue && glueData.glue.length!==0){
+                    let glues = []
                     for (g in glueData.glue) {
                         const glue_cost = await calGlueCost(order, glueData.glue[g].long)
                         datas.push({[`glue_${g}`]:glue_cost.data})
-                        costs[`glue_${g}`] = glue_cost.cost
+                        glues.push(glue_cost.cost)
                     }
+                    const glue = (glues.length > 0) ? glues.reduce((a,b) => a + b) : 0
+                    costs.glue1d = glue
                 }
                 
                 if(glueData.glue2 && glueData.glue2.length!==0){
@@ -477,7 +494,7 @@ const calCoatingCost = async (order, coatingData) => {
                 'ขนาดใบพิมพ์กว้าง' : `${inWidth} นิ้ว`,
                 'ขนาดใบพิมพ์ยาว' : `${inLong} นิ้ว`,
                 'ออร์เดอร์ต่อเล' : order_lay,
-                'ประเภทเคลือบ' : `${method.type} ${method.type} (${parseFloat(coating_price.toFixed(2))})`,
+                'ประเภทเคลือบ' : `${method.type} ${method.subType} (${parseFloat(coating_price.toFixed(2))})`,
                 'ค่าเคลือบ' : (total_price < coating_option.minPrice) ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
             }
         }
@@ -531,7 +548,15 @@ const calEmbossCost = async (order, embossData) => {
             pumpPrice: Math.ceil(pumpPrice),
             emboss_price: parseFloat(emboss_price.toFixed(2)),
             emboss_cost: emboss_cost,
-            price: parseFloat(total_price.toFixed(2))
+            price: parseFloat(total_price.toFixed(2)),
+            details: {
+                'ตำแหน่งปั้มนูน' : mark,
+                'ขนาด' : `กว้าง ${inWidth} x ยาว ${inLong} นิ้ว`,
+                'ออร์เดอร์ต่อเล' : order_lay,
+                'ค่าปั้ม' : Math.ceil(pumpPrice),
+                'ทุนเคลือบต่อเล' : emboss_cost,
+                'ทุนเคลือบตามเล' : emboss_price
+            }
         }
 
         return {cost: cal_emboss.price, data: cal_emboss}
@@ -576,8 +601,16 @@ const calHotStampCost = async (order, hotStampData) => {
             stamp_avr: hotStamp.avr,
             other_avr: 0.1,
             stamp_color_cost: parseFloat(stamp_color_cost.toFixed(2)),
-            total_stamp_color_cost: total_stamp_color_cost,
-            totol_cost: (total_stamp_color_cost + total_block_cost !== NaN) ? total_stamp_color_cost + total_block_cost : 0
+            total_stamp_color_cost: parseFloat(total_stamp_color_cost.toFixed(2)),
+            totol_cost: (total_stamp_color_cost + total_block_cost !== NaN) ? parseFloat((total_stamp_color_cost + total_block_cost).toFixed(2)) : 0,
+
+            details: {
+                'ขนาด' : `กว้าง ${block.inWidth} x ยาว ${block.inLong} นิ้ว`,
+                'บล๊อคเค' : total_block_cost,
+                'สีปั้ม' : hotStamp.stamp_color,
+                'ค่าเฉลี่ย' : hotStamp.avr,
+                'ค่าปั้มเคต่อชิ้น' : parseFloat(stamp_color_cost.toFixed(2))
+            }
         }
 
         return {data: cal_hotStamp, cost: cal_hotStamp.totol_cost}
@@ -621,7 +654,13 @@ const calDiecutCost = async (order, diecutData) => {
             blockPrice: diecut_option.blockPrice,
             diecutRound : diecut[0].round.join,
             pumpPrice: (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay) : Math.ceil(diecut_pumpPrice),
-            totalPrice: (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay + diecut_option.blockPrice) : Math.ceil(diecut_pumpPrice + diecut_option.blockPrice)
+            totalPrice: (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay + diecut_option.blockPrice) : Math.ceil(diecut_pumpPrice + diecut_option.blockPrice),
+            details: {
+                'ขนาดบล๊อค' : diecut_option.plateSize || plateSize,
+                'รอบไดคัท' : diecut[0].round.join,
+                'ค่าบล๊อค' : diecut_option.blockPrice,
+                'ค่าปั้มไดคัท' : (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay) : Math.ceil(diecut_pumpPrice)
+            }
         }
 
         return {data: cal_diecut, cost: cal_diecut.totalPrice}
@@ -646,6 +685,11 @@ const calGlueCost = async (order, long) => {
             avr: avr,
             cost: glue_cost,
             total: glue_cost*order,
+            details: {
+                'ค่าเฉลี่ยต่อชิ้น' : avr,
+                'จำนวนออร์เดอร์' : order,
+                'ปะกาวหน้าเดียวรวม' : glue_cost*order
+            }
         }
 
         return {data: gluedata, cost: gluedata.total}
@@ -668,6 +712,9 @@ const calGlue2Cost = async (order, long) => {
             avr: avr,
             cost: glue_cost*2,
             total: glue_cost*2*order,
+            details: {
+                'ค่าปะกาวสองหน้า' : ''
+            }
         }
 
         return {data: gluedata, cost: gluedata.total}
@@ -690,6 +737,11 @@ const calGlueDotCost = async (order, amount) => {
             dotPrice: dot,
             cost: glue_cost,
             total: glue_cost*order,
+            details: {
+                'จุดละ' : dot,
+                'จำนวนออร์เดอร์' : order,
+                'รวม' : glue_cost*order
+            }
         }
 
         return {data: gluedata, cost: gluedata.total}
