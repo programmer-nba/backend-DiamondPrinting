@@ -790,20 +790,31 @@ exports.creatQuotation = async (req, res) => {
             preOrder: preOrderId
         })
 
-        preProduction.status.push({
-            name: 'got-quotation',
-            text: 'เพิ่มในใบเสนอราคาแล้ว',
-            ref: code,
-            sender: {
-                name: `${userName.first} ${userName.last}`,
-                code: userCode,
-                _id: userId
-            },
-            createAt: new Date()
+        const updateStatus = preProduction.forEach( async item => {
+            item.status.push({
+                name: 'got-quotation',
+                text: 'เพิ่มในใบเสนอราคาแล้ว',
+                ref: code,
+                sender: {
+                    name: `${userName.first} ${userName.last}`,
+                    code: userCode,
+                    _id: userId
+                },
+                createAt: new Date()
+            })
+            const saved_preProduction = await item.save()
+            if(!saved_preProduction){
+                console.log('Saved pre production fail')
+            }
         })
 
-        const saved_preProduction = await preProduction.save()
-
+        const updatedStatus = await Promise.all(updateStatus)
+        if(!updatedStatus){
+            return res.status(500).send({
+                message: 'update pre-production status fail'
+            })
+        }
+        
         return res.send({
             message: 'สร้างใบเสนอราคาสำเร็จ',
             success: true,
