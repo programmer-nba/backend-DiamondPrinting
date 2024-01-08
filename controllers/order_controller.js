@@ -23,12 +23,15 @@ exports.addPreOrder = async (req, res) => {
         demensions,
         paper,
 
+        colors_front_type,
         colors_front,
+        colors_back_type,
         colors_back,
         front_pantone,
         back_pantone,
         floor_front,
         floor_back,
+        flip_plate,
 
         coating,
         hotStamp,
@@ -133,9 +136,11 @@ exports.addPreOrder = async (req, res) => {
             },
 
             colors: {
+                front_type:(colors_front_type) ? colors_front_type : null,
                 front: (colors_front) ? colors_front : 0,
                 front_pantone: (front_pantone) && front_pantone,
                 floor_front: (floor_front) && floor_front,
+                back_type:(colors_back_type) ? colors_back_type : null,
                 back: (colors_back) ? colors_back : 0,
                 back_pantone: (back_pantone) && back_pantone,
                 floor_back: (floor_back) && floor_back,
@@ -465,6 +470,15 @@ exports.addPreProduction = async (req, res) => {
             sale: preOrder.sale,
             production: userId,
             preOrder: id,
+            data_input: {
+                width: width,
+                long: long,
+                cut: cut,
+                lay: lay,
+                plateSize: plateSize,
+                inWidth: inWidth,
+                inLong: inLong
+            },
             rawMattData : {
                 type : (preOrder.paper && preOrder.paper.type) && preOrder.paper.type, // from pre-order
                 subType: (preOrder.paper && preOrder.paper.subType) &&  preOrder.paper.subType, // from pre-order
@@ -487,7 +501,7 @@ exports.addPreProduction = async (req, res) => {
                 floor_back: (preOrder.colors && preOrder.colors.floor_back) ? preOrder.colors.floor_back : false
             } : null,
             plateData : {
-                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0], // from pre-order
+                colors : (preOrder.colors && preOrder.colors.front) ? preOrder.colors.front + preOrder.colors.back : 0, // from pre-order
                 size : (plateSize) && plateSize.toString()
             },
             coatingData : {

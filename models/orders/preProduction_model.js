@@ -22,6 +22,15 @@ const preProductionSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PreOrder'
         },
+        data_input: {
+            width: Number,
+            long: Number,
+            cut: Number,
+            lay: Number,
+            plateSize: String,
+            inWidth: Number,
+            inLong: Number
+        },
         rawMattData : {
             type : {
                 type: String
@@ -46,7 +55,7 @@ const preProductionSchema = new Schema(
             floor_back: Boolean
         },
         plateData : {
-            colors : [Number, Number], // from pre-order
+            colors : Number, // from pre-order
             size : String
         },
         coatingData : {

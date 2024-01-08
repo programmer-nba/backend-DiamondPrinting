@@ -29,12 +29,15 @@ const preOrderSchema = new Schema(
             gsm: Number
         },
         colors: {
+            front_type: String,
             front: Number,
             front_pantone: String,
             floor_front: Boolean,
+            back_type: String,
             back: Number,
             back_pantone: String,
             floor_back: Boolean,
+            flip_plate: Boolean
         },
         coating: [
             {
@@ -45,10 +48,6 @@ const preOrderSchema = new Schema(
                     subType: String
                 },
                 mark: String
-                /* spotUv: {
-                    type: String
-                },
-                dipOff: Boolean */
             }
         ],
         hotStamp: [
@@ -83,7 +82,9 @@ const preOrderSchema = new Schema(
         glue2: [
             {
                 mark: String,
+                width: Number,
                 long: Number,
+                price: Number,
                 notice: String
             }
         ],

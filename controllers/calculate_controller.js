@@ -175,7 +175,12 @@ exports.calAll = async (req, res) => {
                 
                 if(glueData.glue2 && glueData.glue2.length!==0){
                     for (g in glueData.glue2) {
-                        const glue2_cost = await calGlue2Cost(order, glueData.glue2[g].long)
+                        const glu2Data = {
+                            width: glueData.glue2[g].width,
+                            long: glueData.glue2[g].long,
+                            price: glueData.glue2[g].price
+                        }
+                        const glue2_cost = await calGlue2Cost(order, glu2Data)
                         datas.push({[`glue2_${g}`]:glue2_cost.data})
                         costs[`glue2_${g}`] = glue2_cost.cost
                     }
@@ -295,6 +300,12 @@ const calRawMattCost = async (order, rawMattData) => {
                 ค่าเฉลี่ยกระดาษตั้งเครื่อง : avm_paper,
                 etc_1 : 3100,
                 etc_2 : 500
+            },
+            cal: {
+                papers_amount_formula: `roundup((((${order}/(${cut}*${lay}))+(${avm_paper}/${cut}))*0.01))*100`,
+                papers_amount_result: papers,
+                papers_cost_formula: `roundup(((${papers}*${option.psheet})*0.01))*100`,
+                papers_cost_result: papers_cost
             }
 
         }
@@ -313,7 +324,7 @@ const calPlateCost = async (plateData) => {
     if(!plateData){
         return {cost: 0, data: null}
     }
-    const { size, colors } = plateData
+    const { size, colors, flip } = plateData
 
     try {
         const plate = await Plate.findOne({
@@ -336,6 +347,10 @@ const calPlateCost = async (plateData) => {
                 ราคาต่อสี: plate.price,
                 จำนวนสี: `${reqColors || colors} สี`,
                 ราคารวม: plate_price
+            },
+            cal: {
+                plate_price_formula : `${plate.price}*${reqColors}`,
+                plate_price_result : plate_price
             }
         }
 
@@ -390,6 +405,10 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
                 เทพื้น : (floor>1) ? 'เทพื้น' : 'ไม่เทพื้น',
                 ค่าพิมพ์ : (option[0].round.start >= 10001)
                 ? option[0].price*order_lay*floor : option[0].price*floor
+            },
+            cal: {
+                print_price_formula: (option[0].round.start >= 10001) ? `${option[0].price}*${order_lay}*${floor}` : `${option[0].price}*${floor}`,
+                print_price_result: (option[0].round.start >= 10001) ? option[0].price*order_lay*floor : option[0].price*floor
             }
         }
         return {cost: cal_print.price, data: cal_print}
@@ -439,6 +458,10 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
                 เทพื้น : (floor>1) ? 'เทพื้น' : 'ไม่เทพื้น',
                 ค่าพิมพ์ : (option[0].round.start >= 10001)
                 ? option[0].price*order_lay*floor : option[0].price*floor
+            },
+            cal: {
+                print_price_formula: (option[0].round.start >= 10001) ? `${option[0].price}*${order_lay}*${floor}` : `${option[0].price}*${floor}`,
+                print_price_result: (option[0].round.start >= 10001) ? option[0].price*order_lay*floor : option[0].price*floor
             }
         }
         return {cost: cal_print.price, data: cal_print}
@@ -487,7 +510,7 @@ const calCoatingCost = async (order, coatingData) => {
         (method.type==='spot-uv' && coating_option.avr*parseFloat(inWidth)*parseFloat(inLong) < 1.2) ? 1.2
         : (method.type==='dip-off') ? 5
         : coating_option.avr*parseFloat(inWidth)*parseFloat(inLong)
-        const total_price = Math.round(parseFloat(coating_price.toFixed(2))*order_lay)
+        const total_price = Math.ceil(parseFloat(coating_price.toFixed(2))*order_lay)
 
         const cal_coating = {
             inWidth: inWidth,
@@ -503,6 +526,11 @@ const calCoatingCost = async (order, coatingData) => {
                 'ออร์เดอร์ต่อเล' : order_lay,
                 'ประเภทเคลือบ' : `${method.type} ${method.subType} (${parseFloat(coating_price.toFixed(2))})`,
                 'ค่าเคลือบ' : (total_price < coating_option.minPrice) ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
+            },
+            cal: {
+                coating_price_unit_formula: (method.type==='spot-uv' && coating_option.avr*parseFloat(inWidth)*parseFloat(inLong) < 1.2) ? `1.2` : (method.type==='dip-off') ? 5 : `${coating_option.avr}*(${inWidth}*${inLong})`,
+                coating_price_formula: (total_price < coating_option.minPrice) ? `${coating_option.minPrice}` : `round(${coating_price})*${order_lay}`,
+                coating_price_result: (total_price < coating_option.minPrice) ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
             }
         }
 
@@ -542,7 +570,7 @@ const calEmbossCost = async (order, embossData) => {
         const emboss_cost = Math.ceil((inWidth*inLong*26)*0.01)*100
 
         const emboss_price = lay*emboss_cost
-        //console.log(`option : ${round_option[0].round.start}`)
+        
         const pumpPrice = (round_option[0].round.start > 5000 && round_option[0].round.end < 10000000) ? emboss_option.pumpPrice*order_lay : emboss_option.pumpPrice
 
         const total_price = emboss_price+pumpPrice
@@ -563,6 +591,12 @@ const calEmbossCost = async (order, embossData) => {
                 'ค่าปั้ม' : Math.ceil(pumpPrice),
                 'ทุนเคลือบต่อเล' : emboss_cost,
                 'ทุนเคลือบตามเล' : emboss_price
+            },
+            cal: {
+                pumpPrice_formula: (round_option[0].round.start > 5000 && round_option[0].round.end < 10000000) ? `${emboss_option.pumpPrice}*${order_lay}` : `${emboss_option.pumpPrice}`,
+                pumpPrice_result: (round_option[0].round.start > 5000 && round_option[0].round.end < 10000000) ? emboss_option.pumpPrice*order_lay : emboss_option.pumpPrice,
+                block_cost_formula: `(roundup((${inWidth}*${inLong}*26)*0.01)*100)*${lay}`,
+                block_cost_result: lay*emboss_cost
             }
         }
 
@@ -617,6 +651,12 @@ const calHotStampCost = async (order, hotStampData) => {
                 'สีปั้ม' : hotStamp.stamp_color,
                 'ค่าเฉลี่ย' : hotStamp.avr,
                 'ค่าปั้มเคต่อชิ้น' : parseFloat(stamp_color_cost.toFixed(2))
+            },
+            cal: {
+                block_cost_formula: `(roundup((${block.inWidth}*${block.inLong}*13)*0.01)*100)*${block.lay}`,
+                block_cost_result: `${total_block_cost} (คิดแค่ครั้งเดียว)`,
+                k_cost_formula: `((${block.inWidth}*${block.inLong}*${hotStamp.avr})+0.1)*${stamp.k}`,
+
             }
         }
 
@@ -706,25 +746,24 @@ const calGlueCost = async (order, long) => {
     }
 }
 
-const calGlue2Cost = async (order, long) => {
+const calGlue2Cost = async (order, glue2Data) => {
+    const { width, long, price } = glue2Data
     try {
-        const gluebase = await Glue.find()
-        if(!gluebase){
-            return {data: 'ไม่พบ', cost: 0}
-        }
 
-        const avr = gluebase[0].glueAvr
-        const glue_cost = avr*long
-        const gluedata = {
-            avr: avr,
-            cost: glue_cost*2,
-            total: glue_cost*2*order,
-            details: {
-                'ค่าปะกาวสองหน้า' : ''
+        const glue2data = {
+            order: order,
+            width: width,
+            long: long,
+            ppu: price,
+            cal: {
+                unit_result_formula: `กว้าง(${width} cm) x ยาว(${long} cm) x ราคาต่อหน่วย(${price})`,
+                unit_result: parseFloat((width*long*price).toFixed(2)),
+                order_result_formula: `กว้าง(${width} cm) x ยาว(${long} cm) x ราคาต่อหน่วย(${price}) x จำนวนออเดอร์(${order}))`,
+                order_result: parseFloat((width*long*price*order).toFixed(2))
             }
         }
 
-        return {data: gluedata, cost: gluedata.total}
+        return {data: glue2data, cost: glue2data.cal.order_result}
     }
     catch (err) {
         return {data: 'ไม่พบ', cost: 0}
