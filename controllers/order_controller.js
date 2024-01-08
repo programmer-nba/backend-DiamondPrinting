@@ -809,11 +809,11 @@ exports.creatQuotation = async (req, res) => {
         })
 
         const updatedStatus = await Promise.all(updateStatus)
-        if(!updatedStatus){
+        /* if(!updatedStatus){
             return res.status(500).send({
                 message: 'update pre-production status fail'
             })
-        }
+        } */
         
         return res.send({
             message: 'สร้างใบเสนอราคาสำเร็จ',
@@ -822,9 +822,9 @@ exports.creatQuotation = async (req, res) => {
         })
     }
     catch (err) {
-        res.status(500).send({
+        res.send({
             message: 'ไม่สามารถสร้างใบเสนอราคาได้',
-            err: err
+            err: err.message
         })
         console.log(err)
     }
