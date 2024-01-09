@@ -500,7 +500,7 @@ const calCoatingCost = async (order, coatingData) => {
             return {cost: 0, data: 'ไม่พบ'}
         }
         
-        const order_lay = Math.round(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         //const inWidth = inWidth
         //const inLong = inLong
 
