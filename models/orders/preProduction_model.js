@@ -56,7 +56,8 @@ const preProductionSchema = new Schema(
         },
         plateData : {
             colors : Number, // from pre-order
-            size : String
+            size : String,
+            flip_plate: Boolean
         },
         coatingData : {
             methods: Array,

@@ -54,7 +54,8 @@ exports.calAll = async (req, res) => {
                             : (i==='0' && !print_2_Data.floor_front) ? 1
                             : (i==='1' && print_2_Data.floor_back) ? 2
                             : (i==='1' && !print_2_Data.floor_back) ? 1
-                            : 1
+                            : 1,
+                        flip: (print_2_Data.flip)
                     }
                     const print_2_cost = await calPrint_2_Cost(order,sendPrint)
                     prints.push(print_2_cost.cost)
@@ -322,34 +323,36 @@ const calRawMattCost = async (order, rawMattData) => {
 // calculate Plate
 const calPlateCost = async (plateData) => {
     if(!plateData){
-        return {cost: 0, data: null}
+        return {cost: 0, data: 'ไม่พบข้อมูล'}
     }
-    const { size, colors, flip } = plateData
+    const { size, colors, flip_plate } = plateData
 
     try {
         const plate = await Plate.findOne({
             size: size,
         })
         if(!plate){
-            return {cost: 0, data: null}
+            return {cost: 0, data: 'ไม่พบข้อมูล'}
         }
 
         const reqColors = parseInt(colors)
-        const plate_price = plate.price*reqColors
-        
+        const fliped = (flip_plate) ? 2 : 1
+        const plate_price = (plate.price*reqColors)/fliped
         const calPlate = {
             size: plate.size || size,
             ppu: plate.price,
+            flip_plate: flip_plate,
             colors: reqColors || colors,
             result: plate_price,
             details: {
                 เพลทตัด: plate.size || size,
-                ราคาต่อสี: plate.price,
+                ราคาต่อสี: plate.price/fliped,
                 จำนวนสี: `${reqColors || colors} สี`,
                 ราคารวม: plate_price
             },
             cal: {
-                plate_price_formula : `${plate.price}*${reqColors}`,
+                flip_plate: flip_plate,
+                plate_price_formula : `${plate.price}*${reqColors}/${fliped}`,
                 plate_price_result : plate_price
             }
         }
@@ -361,8 +364,11 @@ const calPlateCost = async (plateData) => {
         
     }
     catch (err) {
-        res.send(`ERR : ${err.message}`)
-        conbsole.log(err.message)
+        console.log(err.message)
+        return {
+            cost: 0,
+            data: 'ไม่พบข้อมูล'
+        }
     }
 }
 
@@ -707,6 +713,9 @@ const calDiecutCost = async (order, diecutData) => {
                 'รอบไดคัท' : diecut[0].round.join,
                 'ค่าบล๊อค' : diecut_option.blockPrice,
                 'ค่าปั้มไดคัท' : (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay) : Math.ceil(diecut_pumpPrice)
+            },
+            cal: {
+                pumpPrice_formula: (diecut[0].round.start>5000) ? `roundup(${diecut_pumpPrice}*${order_lay})` : `roundup(${diecut_pumpPrice})`,
             }
         }
 
@@ -736,6 +745,10 @@ const calGlueCost = async (order, long) => {
                 'ค่าเฉลี่ยต่อชิ้น' : avr,
                 'จำนวนออร์เดอร์' : order,
                 'ปะกาวหน้าเดียวรวม' : glue_cost*order
+            },
+            cal: {
+                glue_cost_formula: `${glue_cost}*${order}`,
+                glue_cost_result: glue_cost*order
             }
         }
 
@@ -756,9 +769,9 @@ const calGlue2Cost = async (order, glue2Data) => {
             long: long,
             ppu: price,
             cal: {
-                unit_result_formula: `กว้าง(${width} cm) x ยาว(${long} cm) x ราคาต่อหน่วย(${price})`,
+                unit_result_formula: `${width} * ${long} * ${price}`,
                 unit_result: parseFloat((width*long*price).toFixed(2)),
-                order_result_formula: `กว้าง(${width} cm) x ยาว(${long} cm) x ราคาต่อหน่วย(${price}) x จำนวนออเดอร์(${order}))`,
+                order_result_formula: `${width} * ${long} * ${price} * ${order}`,
                 order_result: parseFloat((width*long*price*order).toFixed(2))
             }
         }
@@ -787,6 +800,10 @@ const calGlueDotCost = async (order, amount) => {
                 'จุดละ' : dot,
                 'จำนวนออร์เดอร์' : order,
                 'รวม' : glue_cost*order
+            },
+            cal: {
+                gluDot_formula: `${glue_cost}*${order}`,
+                gluDot_result: glue_cost*order
             }
         }
 
@@ -800,7 +817,7 @@ const calGlueDotCost = async (order, amount) => {
 /*--------------------------------------------------------------
 -------------------------alone calculate------------------------
 --------------------------------------------------------------*/
- 
+
 // calculate Raw-Material
 exports.calRawMaterial = async (req,res) => {
     const {

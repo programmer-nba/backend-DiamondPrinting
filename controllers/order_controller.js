@@ -135,6 +135,8 @@ exports.addPreOrder = async (req, res) => {
                 gsm: (paper && paper.gsm) && paper.gsm
             },
 
+            flip_plate: (flip_plate) ? true : false,
+
             colors: {
                 front_type:(colors_front_type) ? colors_front_type : null,
                 front: (colors_front) ? colors_front : 0,
@@ -502,7 +504,8 @@ exports.addPreProduction = async (req, res) => {
             } : null,
             plateData : {
                 colors : (preOrder.colors && preOrder.colors.front) ? preOrder.colors.front + preOrder.colors.back : 0, // from pre-order
-                size : (plateSize) && plateSize.toString()
+                size : (plateSize) && plateSize.toString(),
+                flip_plate: preOrder.flip_plate
             },
             coatingData : {
                 methods: (preOrder.coating && preOrder.coating.length!==0) ? preOrder.coating : null,

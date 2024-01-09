@@ -20,7 +20,7 @@ const preOrderSchema = new Schema(
             long: Number,
             height: Number
         },
-       
+        flip_plate: Boolean,
         paper: {
             type: {
                 type: String
@@ -36,8 +36,7 @@ const preOrderSchema = new Schema(
             back_type: String,
             back: Number,
             back_pantone: String,
-            floor_back: Boolean,
-            flip_plate: Boolean
+            floor_back: Boolean
         },
         coating: [
             {
