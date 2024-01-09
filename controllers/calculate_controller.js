@@ -562,7 +562,7 @@ const calEmbossCost = async (order, embossData) => {
             return {cost: 0, data: 'ไม่พบ'}
         }
 
-        const order_lay = Math.round(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         
         const round_option = emboss.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
         if(round_option.length===0){
@@ -572,13 +572,13 @@ const calEmbossCost = async (order, embossData) => {
         const option = round_option[0].option.filter(item=>item.plateSize===plateSize)
 
         const emboss_option = option[0]
-
+    
         const emboss_cost = Math.ceil((inWidth*inLong*26)*0.01)*100
 
         const emboss_price = lay*emboss_cost
         
-        const pumpPrice = (round_option[0].round.start > 5000 && round_option[0].round.end < 10000000) ? emboss_option.pumpPrice*order_lay : emboss_option.pumpPrice
-
+        const pumpPrice = (round_option[0].round.start > 5000 && round_option[0].round.end < 100000000) ? emboss_option.pumpPrice*order_lay : emboss_option.pumpPrice
+        
         const total_price = emboss_price+pumpPrice
 
         const cal_emboss = {
@@ -599,8 +599,8 @@ const calEmbossCost = async (order, embossData) => {
                 'ทุนเคลือบตามเล' : emboss_price
             },
             cal: {
-                pumpPrice_formula: (round_option[0].round.start > 5000 && round_option[0].round.end < 10000000) ? `${emboss_option.pumpPrice}*${order_lay}` : `${emboss_option.pumpPrice}`,
-                pumpPrice_result: (round_option[0].round.start > 5000 && round_option[0].round.end < 10000000) ? emboss_option.pumpPrice*order_lay : emboss_option.pumpPrice,
+                pumpPrice_formula: (round_option[0].round.start > 5000 && round_option[0].round.end < 100000000) ? `${emboss_option.pumpPrice}*${order_lay}` : `${emboss_option.pumpPrice}`,
+                pumpPrice_result: (round_option[0].round.start > 5000 && round_option[0].round.end < 100000000) ? emboss_option.pumpPrice*order_lay : emboss_option.pumpPrice,
                 block_cost_formula: `(roundup((${inWidth}*${inLong}*26)*0.01)*100)*${lay}`,
                 block_cost_result: lay*emboss_cost
             }
