@@ -1,5 +1,14 @@
 const Customer = require('../models/customers/customer_model.js')
 
+const genCode = (curLength) => {
+    const result = 
+        (curLength>999) ? `${curLength}`
+        : (curLength>99 && curLength<1000) ? `0${curLength}`
+        : (curLength>9 && curLength<100) ? `00${curLength}`
+        : `000${curLength}`
+    return result
+}
+
 exports.customersSearch = async (req, res) => {
     try {
         const customers = await Customer.find()
@@ -88,5 +97,51 @@ exports.getCustomer = async (req, res) => {
             message: err.message
         })
         console.log(err)
+    }
+}
+
+exports.createCustomer = async (req, res) => {
+    const { customer } = req.body
+    try {
+        const allCustumers = await Customer.find()
+        const new_customer = new Customer({
+            nameTh: (customer.nameTh) ? customer.nameTh : '-',
+            nameEng: (customer.nameEng) ? customer.nameEng : '-',
+            address: {
+                houseNo: (customer.address && customer.address.houseNo) ? customer.address.houseNo : '-',
+                province: (customer.address && customer.address.province) ? customer.address.province : '-',
+                district: (customer.address && customer.address.district) ? customer.address.district : '-',
+                subdistrict: (customer.address && customer.address.subdistrict) ? customer.address.subdistrict : '-',
+                street: (customer.address && customer.address.street) ? customer.address.street : '-',
+                postcode: (customer.address && customer.address.postcode) ? customer.address.postcode : '-'
+            },
+            taxID: (customer.taxID) ? customer.taxID : '-',
+            code: genCode(allCustumers.length),
+            contact: {
+                name: (customer.contact && customer.contact.name) ? customer.contact.name : '-',
+                tel: (customer.contact && customer.contact.tel) ? customer.contact.tel : '-',
+                createAt: new Date()
+            }
+        })
+        const saved_customer = await new_customer.save()
+        if(!saved_customer){
+            return res.send({
+                message: 'can not saved new customer!',
+                customer: saved_customer
+            })
+        }
+
+        return res.send({
+            message: 'success! create new customer',
+            success: true,
+            customer: saved_customer
+        })
+    }
+    catch(err){
+        console.log(err)
+        return res.send({
+            message: 'ERROR',
+            err: err.message
+        })
     }
 }

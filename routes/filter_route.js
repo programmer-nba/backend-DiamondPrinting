@@ -30,5 +30,6 @@ route.get('/coating-option/:type', Coating.getCoatingOptions)
 route.get('/customers-name', Customer.customersSearch)
 route.get('/customer/:nameTh', Customer.getCustomer)
 route.get('/customers', Customer.getCustomers)
+route.post('/customer-new', Customer.createCustomer)
 
 module.exports = route

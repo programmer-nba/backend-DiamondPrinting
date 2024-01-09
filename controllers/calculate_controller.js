@@ -83,9 +83,9 @@ exports.calAll = async (req, res) => {
                     const print_4_cost = await calPrint_4_Cost(order,sendPrint)
                     prints.push(print_4_cost.cost)
                     datas.push({[`print_4_${i}`]:print_4_cost.data})
-                    datas.push({print_4_Ffloor:print_4_Data.floor_front})
-                    datas.push({print_4_Bfloor:print_4_Data.floor_back})
                 }
+                datas.push({print_4_Ffloor:print_4_Data.floor_front})
+                datas.push({print_4_Bfloor:print_4_Data.floor_back})
                 const print = (prints.length > 0) ? prints.reduce((a,b)=>a+b) : 0
                 costs.print = Math.ceil(print)
             }
@@ -323,7 +323,7 @@ const calRawMattCost = async (order, rawMattData) => {
 // calculate Plate
 const calPlateCost = async (plateData) => {
     if(!plateData){
-        return {cost: 0, data: 'ไม่พบข้อมูล'}
+        return {cost: 0, data: null}
     }
     const { size, colors, flip_plate } = plateData
 
@@ -332,7 +332,7 @@ const calPlateCost = async (plateData) => {
             size: size,
         })
         if(!plate){
-            return {cost: 0, data: 'ไม่พบข้อมูล'}
+            return {cost: 0, data: null}
         }
 
         const reqColors = parseInt(colors)
@@ -367,7 +367,7 @@ const calPlateCost = async (plateData) => {
         console.log(err.message)
         return {
             cost: 0,
-            data: 'ไม่พบข้อมูล'
+            data: null
         }
     }
 }
@@ -421,7 +421,7 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
         
     }
     catch (err) {
-        return {cost: 0, data: 'ไม่พบ'}
+        return {cost: 0, data: null}
     }
 }
 
@@ -443,14 +443,14 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             colors: parseInt(colors)
         })
         if(!print){
-            return {cost: 0, data: 'ไม่พบ'}
+            return {cost: 0, data: null}
         }
 
         const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         
         const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         if(option.length!==1){
-            return {cost: 0, data: 'ไม่พบ'}
+            return {cost: 0, data: null}
         }
 
         const cal_print = {
@@ -458,6 +458,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             round: option[0].round.join,
             price: (option[0].round.start >= 10001)
             ? option[0].price*order_lay*floor : option[0].price*floor,
+            colors: colors,
             details: {
                 ออร์เดอร์ต่อเล : order_lay,
                 รอบการพิมพ์ : option[0].round.join,
@@ -474,7 +475,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
         
     }
     catch (err) {
-        return {cost: 0, data: 'ไม่พบ'}
+        return {cost: 0, data: null}
     }
 }
 
@@ -691,7 +692,7 @@ const calDiecutCost = async (order, diecutData) => {
         const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         
         const diecut = diecuts.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
-        console.log(diecut)
+        
         const option = diecut[0].option.filter(option=>option.plateSize===plateSize)
         if(!option || option.length===0){
             return {data: 'ไม่พบตัวเลือกไดคัต', cost: 0}
