@@ -390,14 +390,14 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
             colors: parseInt(colors)
         })
         if(!print){
-            return {cost: 0, data: 'ไม่พบจำนวนสีในระบบ'}
+            return {cost: 0, data: null}
         }
 
         const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         
         const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         if(option.length!==1){
-            return {cost: 0, data: 'ไม่พบช่วงการพิมพ์ในระบบ'}
+            return {cost: 0, data: null}
         }
 
         const cal_print = {
@@ -405,10 +405,11 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
             round: option[0].round.join,
             price: (option[0].round.start >= 10001)
             ? option[0].price*order_lay*floor : option[0].price*floor,
+            colors: colors,
             details: {
                 ออร์เดอร์ต่อเล : order_lay,
                 รอบการพิมพ์ : option[0].round.join,
-                เทพื้น : (floor>1) ? 'เทพื้น' : 'ไม่เทพื้น',
+                เทพื้น : (floor>1) ? 'เทพื้น' : null,
                 ค่าพิมพ์ : (option[0].round.start >= 10001)
                 ? option[0].price*order_lay*floor : option[0].price*floor
             },
@@ -462,7 +463,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             details: {
                 ออร์เดอร์ต่อเล : order_lay,
                 รอบการพิมพ์ : option[0].round.join,
-                เทพื้น : (floor>1) ? 'เทพื้น' : 'ไม่เทพื้น',
+                เทพื้น : (floor>1) ? 'เทพื้น' : null,
                 ค่าพิมพ์ : (option[0].round.start >= 10001)
                 ? option[0].price*order_lay*floor : option[0].price*floor
             },
