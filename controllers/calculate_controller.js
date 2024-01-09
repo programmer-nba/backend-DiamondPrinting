@@ -521,6 +521,7 @@ const calCoatingCost = async (order, coatingData) => {
         const total_price = Math.ceil(parseFloat(coating_price.toFixed(2))*order_lay)
 
         const cal_coating = {
+            type: `${method.type} ${method.subType}`,
             inWidth: inWidth,
             inLong: inLong,
             order_lay: order_lay,
