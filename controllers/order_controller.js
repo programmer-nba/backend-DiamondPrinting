@@ -37,6 +37,7 @@ exports.addPreOrder = async (req, res) => {
         hotStamp,
         emboss,
         dieCut,
+        dieCutWindow,
         glue,
         glue2,
         glue_dot,
@@ -170,6 +171,12 @@ exports.addPreOrder = async (req, res) => {
                 percent: (dieCut.percent) ? dieCut.percent : null,
                 notice: (dieCut.notice) ? dieCut.notice : null,
                 detail: (dieCut.detail) ? dieCut.detail : null
+            } : null,
+
+            dieCutWindow: (dieCutWindow) ? {
+                percent: (dieCutWindow.percent) ? dieCutWindow.percent : null,
+                notice: (dieCutWindow.notice) ? dieCutWindow.notice : null,
+                detail: 'หน้าต่าง'
             } : null,
 
             glue: (glue && glue.length!==0) ? glue : null,
@@ -542,7 +549,10 @@ exports.addPreProduction = async (req, res) => {
                 k: (k) ? k : 1
             },
             diecutData : {
-                force: (preOrder.dieCut) ? preOrder.dieCut : null,
+                plateSize: (plateSize) ? plateSize : null,
+                lay: (lay) && lay
+            },
+            diecutWindowData : {
                 plateSize: (plateSize) ? plateSize : null,
                 lay: (lay) && lay
             },

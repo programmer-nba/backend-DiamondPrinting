@@ -72,6 +72,14 @@ const preOrderSchema = new Schema(
                 default: '-' // ปรุ, หน้าต่าง
             }
         },
+        dieCutWindow: {
+            percent: String,
+            notice: String,
+            detail: {
+                type: String,
+                default: 'หน้าต่าง' // ปรุ, หน้าต่าง
+            }
+        },
         glue: [
             {
                 mark: String,

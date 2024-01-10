@@ -96,6 +96,10 @@ const preProductionSchema = new Schema(
             plateSize: String,
             lay: Number
         },
+        diecutWindowData : {
+            plateSize: String,
+            lay: Number
+        },
         glueData : {
             glue: Array,
             glue2: Array,

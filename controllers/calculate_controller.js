@@ -29,7 +29,7 @@ exports.calAll = async (req, res) => {
                 })
             }
 
-            const { rawMattData, plateData, print_2_Data, print_4_Data, coatingData, embossData, hotStampData, diecutData, glueData } = preProduction
+            const { rawMattData, plateData, print_2_Data, print_4_Data, coatingData, embossData, hotStampData, diecutData, glueData, diecutWindowData } = preProduction
 
             if(rawMattData){
                 const rawMatt_cost = await calRawMattCost(order,rawMattData)
@@ -60,9 +60,9 @@ exports.calAll = async (req, res) => {
                     const print_2_cost = await calPrint_2_Cost(order,sendPrint)
                     prints.push(print_2_cost.cost)
                     datas.push({[`print_2_${i}`]:print_2_cost.data})
-                    datas.push({print_2_Ffloor:print_2_Data.floor_front})
-                    datas.push({print_2_Bfloor:print_2_Data.floor_back})
                 }
+                datas.push({print_2_Ffloor:print_2_Data.floor_front})
+                datas.push({print_2_Bfloor:print_2_Data.floor_back})
                 const print = (prints.length > 0) ? prints.reduce((a,b)=>a+b) : 0
                 costs.print = Math.ceil(print)
             }
@@ -96,11 +96,18 @@ exports.calAll = async (req, res) => {
                 costs.diecut_block = diecut_cost.data.blockPrice
                 costs.diecut_pump = diecut_cost.data.pumpPrice
             }
+
+            if(diecutWindowData){
+                const window_cost = await calDiecutWindowCost(order, diecutWindowData)
+                datas.push({diecut_window:window_cost.data})
+                costs.diecut_window_block = window_cost.data.blockPrice
+                costs.diecut_window_pump = window_cost.data.pumpPrice
+            }
             
             if(coatingData && coatingData.methods && coatingData.methods.length!==0){
-                for (m of coatingData.methods){
+                for (m in coatingData.methods){
                     const sendCoating = {
-                        method: m.method,
+                        method: coatingData.methods[m].method,
                         width: coatingData.width,
                         inWidth: coatingData.inWidth,
                         long: coatingData.long,
@@ -109,8 +116,8 @@ exports.calAll = async (req, res) => {
                         lay: coatingData.lay
                     }
                     const coating_cost = await calCoatingCost(order, sendCoating)
-                    datas.push({[`coating_${m.method.type}`]:coating_cost.data})
-                    costs[`coating_${m.method.type}`] = coating_cost.cost
+                    datas.push({[`coating_${m}`]:coating_cost.data})
+                    costs[`coating_${m}`] = coating_cost.cost
                 }
             }
 
@@ -384,7 +391,7 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
         lay,
         floor
     } = print_2_Data
-
+    console.log(print_2_Data)
     try {
         const print = await Print_2.findOne({
             colors: parseInt(colors)
@@ -674,6 +681,59 @@ const calHotStampCost = async (order, hotStampData) => {
     }
     catch (err) {
         console.log(err.message)
+        return {data: 'ไม่พบ', cost: 0}
+    }
+}
+
+// calculate Diecut Window
+const calDiecutWindowCost = async (order, diecutWindowData) => {
+    const { 
+        plateSize,
+        lay
+    } = diecutWindowData
+
+    try {
+        const diecuts = await Diecut.find()
+        if(!diecuts){
+            return {data: 'ไม่พบไดคัต', cost: 0}
+        }
+        
+        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
+        
+        const diecut = diecuts.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
+        
+        const option = diecut[0].option.filter(option=>option.plateSize===plateSize)
+        if(!option || option.length===0){
+            return {data: 'ไม่พบตัวเลือกไดคัต', cost: 0}
+        }
+        const diecut_option = option[0]
+        const diecut_pumpPrice = diecut_option.pumpPrice
+
+        const cal_diecut = {
+            order: order,
+            lay: lay,
+            order_lay: order_lay,
+            blockSize: diecut_option.plateSize || plateSize,
+            blockPrice: diecut_option.blockPrice,
+            diecutRound : diecut[0].round.join,
+            pumpPrice: (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay) : Math.ceil(diecut_pumpPrice),
+            totalPrice: (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay + diecut_option.blockPrice) : Math.ceil(diecut_pumpPrice + diecut_option.blockPrice),
+            details: {
+                'ขนาดบล๊อค' : diecut_option.plateSize || plateSize,
+                'รอบไดคัท' : diecut[0].round.join,
+                'ค่าบล๊อค' : diecut_option.blockPrice,
+                'ค่าปั้มไดคัท' : (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay) : Math.ceil(diecut_pumpPrice)
+            },
+            cal: {
+                pumpPrice_formula: (diecut[0].round.start>5000) ? `roundup(${diecut_pumpPrice}*${order_lay})` : `roundup(${diecut_pumpPrice})`,
+            }
+        }
+
+        return {data: cal_diecut, cost: cal_diecut.totalPrice}
+        
+    }
+    catch (err) {
+        console.log(err)
         return {data: 'ไม่พบ', cost: 0}
     }
 }
