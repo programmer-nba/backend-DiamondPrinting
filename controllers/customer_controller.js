@@ -90,8 +90,25 @@ exports.getCustomer = async (req, res) => {
             })
         }
 
+        const show_customer = {
+            code: customer.code,
+            nameTh: customer.nameTh,
+            nameEng: customer.nameEng,
+            email: customer.email,
+            address: {
+                houseNo: customer.address.houseNo,
+                province: customer.address.province,
+                district: customer.address.district,
+                subdistrict: customer.address.subdistrict,
+                street: customer.address.street,
+                postcode: customer.address.postcode
+            },
+            taxID: customer.taxID,
+            contact: customer.contact[customer.contact.length-1]
+        }
+
         return res.send({
-            customer: customer
+            customer: show_customer
         })
     }
     catch( err ) {
