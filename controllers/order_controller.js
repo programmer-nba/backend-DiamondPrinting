@@ -88,27 +88,38 @@ exports.addPreOrder = async (req, res) => {
             }
             curCustomer = saved_customer
         } else {
-            if(existCustomer.contact[existCustomer.contact.length-1].name!==customer.contact.name || existCustomer.contact[existCustomer.contact.length-1].tel!==customer.contact.tel){
-                const updated_customer = await Customer.findByIdAndUpdate(existCustomer._id,
-                    {
-                        $push: {
-                            contact: {
-                                name: customer.contact.name,
-                                tel: customer.contact.tel,
-                                createAt: new Date()
-                            }
+            
+            const updated_customer = await Customer.findByIdAndUpdate(existCustomer._id,
+                {
+                    $set: {
+                        nameTh: customer.nameTh,
+                        nameEng: customer.nameEng,
+                        address: {
+                            houseNo: customer.address.houseNo,
+                            province: customer.address.province,
+                            district: customer.address.district,
+                            subdistrict: customer.address.subdistrict,
+                            street: customer.address.street,
+                            postcode: customer.address.postcode
+                        },
+                        taxID: customer.taxID
+                    },
+                    $push: {
+                        contact: {
+                            name: customer.contact.name,
+                            tel: customer.contact.tel,
+                            createAt: new Date()
                         }
-                    }, {new:true}
-                )
-                if(!updated_customer){
-                    return res.send({
-                        message: 'อัพเดทข้อมูลผู้ติดต่อไม่สำเร็จ'
-                    })
-                }
-                curCustomer = updated_customer
-            } else {
-                curCustomer = existCustomer
+                    }
+                }, {new:true}
+            )
+            if(!updated_customer){
+                return res.send({
+                    message: 'อัพเดทข้อมูลผู้ติดต่อไม่สำเร็จ'
+                })
             }
+            curCustomer = updated_customer
+            
         }
 
         const prev_preOrder = await PreOrder.find()
