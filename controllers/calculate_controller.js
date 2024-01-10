@@ -91,14 +91,14 @@ exports.calAll = async (req, res) => {
                 costs.print = Math.ceil(print)
             }
 
-            if(diecutData){
+            if(diecutData.plateSize){
                 const diecut_cost = await calDiecutCost(order, diecutData)
                 datas.push({diecut:diecut_cost.data})
                 costs.diecut_block = diecut_cost.data.blockPrice
                 costs.diecut_pump = diecut_cost.data.pumpPrice
             }
 
-            if(diecutWindowData){
+            if(diecutWindowData.plateSize){
                 const window_cost = await calDiecutWindowCost(order, diecutWindowData)
                 datas.push({diecut_window:window_cost.data})
                 costs.diecut_window_block = window_cost.data.blockPrice
@@ -122,7 +122,7 @@ exports.calAll = async (req, res) => {
                 }
             }
 
-            if(embossData){
+            if(embossData && embossData.demensions && embossData.demensions.length!==0){
                 let emboss_blocks = []
                 let emboss_pumps = []
                 for (em in embossData.demensions){
@@ -144,7 +144,7 @@ exports.calAll = async (req, res) => {
                 costs.emboss_block = sum_emboss_blocks
             }
 
-            if(hotStampData){
+            if(hotStampData && hotStampData.block && hotStampData.block.length!==0){
                 let blocks_k = []
                 let costs_k = []
                 for (i in hotStampData.block){

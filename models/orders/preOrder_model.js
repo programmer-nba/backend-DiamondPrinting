@@ -65,19 +65,32 @@ const preOrderSchema = new Schema(
             }   
         ],
         dieCut: {
-            percent: String,
-            notice: String,
+            percent: {
+                type: String,
+                default: null 
+            },
+            notice: {
+                type: String,
+                default: null 
+            },
             detail: {
                 type: String,
-                default: '-' // ปรุ, หน้าต่าง
-            }
+                default: null // ปรุ, -
+            },
         },
         dieCutWindow: {
-            percent: String,
-            notice: String,
+            percent: {
+                type: String,
+                default: null 
+            },
+            notice: {
+                type: String,
+                default: null 
+            },
             detail: {
                 type: String,
-            }
+                default: null // หน้าต่าง
+            },
         },
         glue: [
             {

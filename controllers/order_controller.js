@@ -37,7 +37,7 @@ exports.addPreOrder = async (req, res) => {
         hotStamp,
         emboss,
         dieCut,
-        dieCutWindow,
+        dieCutWindow=null,
         glue,
         glue2,
         glue_dot,
@@ -173,10 +173,10 @@ exports.addPreOrder = async (req, res) => {
                 detail: (dieCut.detail) ? dieCut.detail : null
             } : null,
 
-            dieCutWindow: (dieCutWindow.has===true) ? {
+            dieCutWindow: (dieCutWindow) ? {
                 percent: (dieCutWindow.percent) ? dieCutWindow.percent : null,
                 notice: (dieCutWindow.notice) ? dieCutWindow.notice : null,
-                detail: 'หน้าต่าง'
+                detail: (dieCutWindow) ? 'หน้าต่าง' : null
             } : null,
 
             glue: (glue && glue.length!==0) ? glue : null,
@@ -220,7 +220,7 @@ exports.addPreOrder = async (req, res) => {
 
 exports.getPreOrders = async (req, res) => {
     try {
-        const preOrders = await PreOrder.find().populate('customer', '_id nameTh nameEng taxID address contact').populate('sale', '_id name phone_number email')
+        const preOrders = await PreOrder.find().populate('customer', '_id nameTh nameEng taxID address contact email').populate('sale', '_id name phone_number email')
         if(!preOrders || preOrders.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
@@ -244,7 +244,7 @@ exports.getPreOrders = async (req, res) => {
 exports.getPreOrder = async (req, res) => {
     const { id } = req.params
     try {
-        const preOrder = await PreOrder.findById(id).populate('customer', '_id nameTh nameEng taxID address contact').populate('sale', '_id name phone_number email')
+        const preOrder = await PreOrder.findById(id).populate('customer', '_id nameTh nameEng taxID address contact email').populate('sale', '_id name phone_number email')
         if(!preOrder || preOrder.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
@@ -444,7 +444,7 @@ exports.getPreProductionsOfOrder = async (req, res) => {
     try {
         const preProductions = await PreProduction.find({
             preOrder: id
-        }).populate('customer', 'nameTh nameEng taxID contact address _id').poppulate('production', 'name code _id email')
+        }).populate('customer', 'nameTh nameEng taxID contact address _id email').populate('production', 'name code _id email')
         if(!preProductions){
             return res.send({
                 message: 'ไม่พบรายการนี้ในระบบ',
@@ -548,14 +548,14 @@ exports.addPreProduction = async (req, res) => {
                 lay: (lay) && lay,
                 k: (k) ? k : 1
             },
-            diecutData : {
-                plateSize: (plateSize) ? plateSize : null,
-                lay: (lay) && lay
-            },
-            diecutWindowData : {
-                plateSize: (plateSize) ? plateSize : null,
-                lay: (lay) && lay
-            },
+            diecutData : (preOrder.dieCut.detail) ? {
+                plateSize: (preOrder.dieCut.detail) ? plateSize : null,
+                lay: (preOrder.dieCut.detail) ? lay : null
+            } : null,
+            diecutWindowData : (preOrder.dieCutWindow.detail) ? {
+                plateSize: (preOrder.dieCutWindow.detail) ? plateSize : null,
+                lay: (preOrder.dieCutWindow.detail) ? lay : null
+            } : null,
             glueData : {
                 glue: (preOrder.glue && preOrder.glue.length!==0) ? preOrder.glue : null,
                 glue2: (preOrder.glue2 && preOrder.glue2.length!==0) ? preOrder.glue2 : null,
@@ -573,6 +573,7 @@ exports.addPreProduction = async (req, res) => {
             },
             down: (cut && lay) ? cut*lay : null
         })
+        //console.log(preOrder.dieCutWindow)
         const saved_production = await new_preProduction.save()
         if(!saved_production){
             return res.send({
@@ -611,7 +612,7 @@ exports.addPreProduction = async (req, res) => {
 
 exports.getPreProductions = async (req, res) => {
     try {
-        const preProductions = await PreProduction.find().populate('customer', 'nameTh nameEng taxID contact address').populate('preOrder').populate('sale', '_id code name phone_number email')
+        const preProductions = await PreProduction.find().populate('customer', 'nameTh nameEng taxID contact address email').populate('preOrder').populate('sale', '_id code name phone_number email')
         if(!preProductions || preProductions.length===0){
             return res.send({
                 message: 'ไม่พบรายการนี้ในระบบ',
@@ -639,7 +640,7 @@ exports.getPreProductions = async (req, res) => {
 exports.getPreProduction = async (req, res) => {
     const {id} = req.params
     try {
-        const preProduction = await PreProduction.findById(id).populate('customer', 'nameTh nameEng taxID contact address').populate('sale', '_id code name phone_number email')
+        const preProduction = await PreProduction.findById(id).populate('customer', 'nameTh nameEng taxID contact address email').populate('sale', '_id code name phone_number email')
         if(!preProduction){
             return res.send({
                 message: 'ไม่พบรายการนี้ในระบบ',
@@ -781,7 +782,7 @@ exports.creatQuotation = async (req, res) => {
     const userCode = req.user.code
     try {
         let preOrder = await PreOrder.findById(preOrderId)
-        .populate('customer', 'code nameTh nameEng contact address _id')
+        .populate('customer', 'code nameTh nameEng contact address _id email')
         .populate('sale', 'code name phone_number email _id')
         if(!preOrder){
             return res.send({
@@ -873,7 +874,7 @@ exports.creatQuotation = async (req, res) => {
 // get all quotations
 exports.getQuotations = async (req, res) => {
     try {
-        const quotations = await Quotation.find().populate('customer', 'nameTh nameEng taxID contact _id code address').populate('sale', 'name phone_number code').populate('preOrder')
+        const quotations = await Quotation.find().populate('customer', 'nameTh nameEng taxID contact _id code address email').populate('sale', 'name phone_number code').populate('preOrder')
         if(!quotations){
             return res.send({
                 message: 'ไม่พบใบเสนอราคา',
@@ -906,7 +907,7 @@ exports.getQuotationOfpreOrder = async (req, res) => {
     try {
         const quotations = await Quotation.find({
             preOrder: id
-        }).poppulate('customer', 'nameTh nameEng taxID contact _id code address').poppulate('sale', 'name phone_number code').populate('preOrder')
+        }).populate('customer', 'nameTh nameEng taxID contact _id code address email').populate('sale', 'name phone_number code email').populate('preOrder')
         if(!quotations){
             return res.send({
                 message: 'ไม่พบใบเสนอราคา',
@@ -937,7 +938,7 @@ exports.getQuotationOfpreOrder = async (req, res) => {
 exports.getQuotation = async (req, res) => {
     const { id } = req.params
     try {
-        const quotation = await Quotation.findById(id).populate('customer', 'nameTh nameEng taxID contact _id code address').populate('sale', 'name phone_number code').populate('preOrder')
+        const quotation = await Quotation.findById(id).populate('customer', 'nameTh nameEng taxID contact _id code address email').populate('sale', 'name phone_number code email').populate('preOrder')
         if(!quotation){
             return res.send({
                 message: 'ไม่พบใบเสนอราคา',
