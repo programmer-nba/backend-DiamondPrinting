@@ -176,7 +176,7 @@ exports.addPreOrder = async (req, res) => {
             dieCutWindow: (dieCutWindow) ? {
                 percent: (dieCutWindow.percent) ? dieCutWindow.percent : null,
                 notice: (dieCutWindow.notice) ? dieCutWindow.notice : null,
-                detail: (dieCutWindow) ? 'หน้าต่าง' : null
+                detail: (dieCutWindow.detail) ? dieCutWindow.detail : null
             } : null,
 
             glue: (glue && glue.length!==0) ? glue : null,
@@ -552,7 +552,7 @@ exports.addPreProduction = async (req, res) => {
                 plateSize: (preOrder.dieCut.detail) ? plateSize : null,
                 lay: (preOrder.dieCut.detail) ? lay : null
             } : null,
-            diecutWindowData : (preOrder.dieCutWindow.detail) ? {
+            diecutWindowData : (preOrder.dieCutWindow.detail && preOrder.dieCutWindow.percent) ? {
                 plateSize: (preOrder.dieCutWindow.detail) ? plateSize : null,
                 lay: (preOrder.dieCutWindow.detail) ? lay : null
             } : null,
