@@ -78,7 +78,8 @@ exports.calAll = async (req, res) => {
                             : (i==='0' && !print_4_Data.floor_front) ? 1
                             : (i==='1' && print_4_Data.floor_back) ? 2
                             : (i==='1' && !print_4_Data.floor_back) ? 1
-                            : 1
+                            : 1,
+                        flip: (print_4_Data.flip)
                     }
                     const print_4_cost = await calPrint_4_Cost(order,sendPrint)
                     prints.push(print_4_cost.cost)
@@ -533,7 +534,7 @@ const calCoatingCost = async (order, coatingData) => {
             inLong: inLong,
             order_lay: order_lay,
             avr: coating_option.avr,
-            coating_price: parseFloat(coating_price.toFixed(2)),
+            coating_price: parseFloat(Math.ceil(coating_price).toFixed(2)),
             cost: (total_price < coating_option.minPrice)
             ? coating_option.minPrice : parseFloat(total_price.toFixed(2)),
             details: {
@@ -545,7 +546,7 @@ const calCoatingCost = async (order, coatingData) => {
             },
             cal: {
                 coating_price_unit_formula: (method.type==='spot-uv' && coating_option.avr*parseFloat(inWidth)*parseFloat(inLong) < 1.2) ? `1.2` : (method.type==='dip-off') ? 5 : `${coating_option.avr}*(${inWidth}*${inLong})`,
-                coating_price_formula: (total_price < coating_option.minPrice) ? `${coating_option.minPrice}` : `round(${coating_price})*${order_lay}`,
+                coating_price_formula: (total_price < coating_option.minPrice) ? `${coating_option.minPrice}` : `roundup(${parseFloat(coating_price.toFixed(2))})*${order_lay}`,
                 coating_price_result: (total_price < coating_option.minPrice) ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
             }
         }
