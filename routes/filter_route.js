@@ -31,5 +31,6 @@ route.get('/customers-name', Customer.customersSearch)
 route.get('/customer/:nameTh', Customer.getCustomer)
 route.get('/customers', Customer.getCustomers)
 route.post('/customer-new', Customer.createCustomer)
+route.delete('/customer/:id', Customer.deleteCustomer)
 
 module.exports = route

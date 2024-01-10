@@ -145,3 +145,26 @@ exports.createCustomer = async (req, res) => {
         })
     }
 }
+
+exports.deleteCustomer = async (req, res) => {
+    const { id } = req.params
+    try {
+        const customer = await Customer.findByIdAndDelete(id)
+        if(!customer) {
+            return res.send({
+                message: 'ไม่พบข้อมลูลูกค้า',
+                customer: customer
+            })
+        }
+
+        return res.send({
+            message: 'delete success!'
+        })
+    }
+    catch( err ) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
