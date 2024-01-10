@@ -19,6 +19,14 @@ exports.customersSearch = async (req, res) => {
             })
         }
 
+        const customers_nameAndId = customers.map(item=>{
+            return {
+                name: item.nameTh,
+                _id: item._id,
+                taxID: item.taxID
+            }
+        })
+
         const customersName = customers.map(customer=>customer.nameTh)
         const uniqueCustomersName = new Set(customersName)
         const customersTaxID = customers.map(customer=>customer.taxID)
@@ -28,7 +36,8 @@ exports.customersSearch = async (req, res) => {
 
         return res.send({
             message: `มีลูกค้าทั้งหมด ${customers.length}`,
-            customersName: [...uniqueCustomersName],
+            customersName: customers_nameAndId
+            //customersName: [...uniqueCustomersName],
             //customersTaxID: [...uniqueCustomersTaxID],
             //customersNameTax: [...uniqueCustomersNameTax]
         })
@@ -110,6 +119,8 @@ exports.createCustomer = async (req, res) => {
                 {taxID: customer.taxID}
             ]
         })
+
+        console.log(existCustomer)
 
         if (!existCustomer){
             const new_customer = new Customer({

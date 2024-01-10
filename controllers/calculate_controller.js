@@ -593,6 +593,7 @@ const calEmbossCost = async (order, embossData) => {
         const total_price = emboss_price+pumpPrice
 
         const cal_emboss = {
+            type: 'emboss',
             mark: mark,
             inWidth: inWidth,
             inLong: inLong,
