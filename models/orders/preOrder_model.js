@@ -77,7 +77,6 @@ const preOrderSchema = new Schema(
             notice: String,
             detail: {
                 type: String,
-                default: 'หน้าต่าง' // ปรุ, หน้าต่าง
             }
         },
         glue: [

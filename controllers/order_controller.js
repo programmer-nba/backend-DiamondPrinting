@@ -173,7 +173,7 @@ exports.addPreOrder = async (req, res) => {
                 detail: (dieCut.detail) ? dieCut.detail : null
             } : null,
 
-            dieCutWindow: (dieCutWindow) ? {
+            dieCutWindow: (dieCutWindow.has===true) ? {
                 percent: (dieCutWindow.percent) ? dieCutWindow.percent : null,
                 notice: (dieCutWindow.notice) ? dieCutWindow.notice : null,
                 detail: 'หน้าต่าง'
