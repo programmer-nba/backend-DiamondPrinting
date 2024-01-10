@@ -214,3 +214,52 @@ exports.deleteCustomer = async (req, res) => {
         console.log(err)
     }
 }
+
+exports.updateCustomer = async (req, res) => {
+    const { id } = req.params
+    const { customer } = req.body
+    try {
+        const updated_customer = await Customer.findByIdAndUpdate(id,
+            {
+                $set: {
+                    nameTh: customer.nameTh,
+                    nameEng: customer.nameEng,
+                    email: customer.email,
+                    address: {
+                        houseNo: customer.address.houseNo,
+                        province: customer.address.province,
+                        district: customer.address.district,
+                        subdistrict: customer.address.subdistrict,
+                        street: customer.address.street,
+                        postcode: customer.address.postcode
+                    },
+                    taxID: customer.taxID
+                },
+                $push: {
+                    contact: {
+                        name: customer.contact.name,
+                        tel: customer.contact.tel,
+                        createAt: new Date()
+                    }
+                }
+            }, { new: true }
+        )
+        if(!updated_customer) {
+            return res.send({
+                message: 'ไม่พบข้อมลูลูกค้า',
+                customer: updated_customer
+            })
+        }
+
+        return res.send({
+            message: 'update success!',
+            customer: updated_customer
+        })
+    }
+    catch( err ) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
