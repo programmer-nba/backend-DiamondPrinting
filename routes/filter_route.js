@@ -28,7 +28,7 @@ route.get('/coating-type', Coating.getCoatingTypes)
 route.get('/coating-option/:type', Coating.getCoatingOptions)
 
 route.get('/customers-name', Customer.customersSearch)
-route.get('/customer/:nameTh', Customer.getCustomer)
+route.get('/customer/:id', Customer.getCustomer)
 route.get('/customers', Customer.getCustomers)
 route.post('/customer-new', Customer.createCustomer)
 route.delete('/customer/:id', Customer.deleteCustomer)
