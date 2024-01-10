@@ -63,7 +63,8 @@ exports.addPreOrder = async (req, res) => {
         if(!existCustomer) {
             const new_customer = new Customer({
                 nameTh: (customer.nameTh) ? customer.nameTh : '-',
-                nameEng: (customer.nameEng) ? customer.nameEng : '-',
+                nameEng: (customer.nameEng) ? customer.nameEng : null,
+                email: (customer.email) ? customer.email : null,
                 address: {
                     houseNo: (customer.address && customer.address.houseNo) ? customer.address.houseNo : '-',
                     province: (customer.address && customer.address.province) ? customer.address.province : '-',
@@ -94,6 +95,7 @@ exports.addPreOrder = async (req, res) => {
                     $set: {
                         nameTh: customer.nameTh,
                         nameEng: customer.nameEng,
+                        email: customer.email,
                         address: {
                             houseNo: customer.address.houseNo,
                             province: customer.address.province,

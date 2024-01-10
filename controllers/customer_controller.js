@@ -106,7 +106,8 @@ exports.createCustomer = async (req, res) => {
         const allCustumers = await Customer.find()
         const new_customer = new Customer({
             nameTh: (customer.nameTh) ? customer.nameTh : '-',
-            nameEng: (customer.nameEng) ? customer.nameEng : '-',
+            nameEng: (customer.nameEng) ? customer.nameEng : null,
+            email: (customer.email) ? customer.email : null,
             address: {
                 houseNo: (customer.address && customer.address.houseNo) ? customer.address.houseNo : '-',
                 province: (customer.address && customer.address.province) ? customer.address.province : '-',
