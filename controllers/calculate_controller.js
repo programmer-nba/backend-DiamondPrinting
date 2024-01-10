@@ -623,7 +623,7 @@ const calEmbossCost = async (order, embossData) => {
     }
     catch (err) {
         console.log(err.message)
-        return {cost: 0, data: 'ไม่พบ'}
+        return {cost: 0, data: null}
     }
 }
 
@@ -638,7 +638,7 @@ const calHotStampCost = async (order, hotStampData) => {
             stamp_color: stamp.stamp_color
         })
         if(!hotStamp){
-            return {data: 'ไม่พบ', cost: 0}
+            return {data: null, cost: 0}
         }
 
         const block_cost = Math.ceil((block.inWidth*block.inLong*13)*0.01)*100
@@ -672,9 +672,9 @@ const calHotStampCost = async (order, hotStampData) => {
             },
             cal: {
                 block_cost_formula: `(roundup((${block.inWidth}*${block.inLong}*13)*0.01)*100)*${block.lay}`,
-                block_cost_result: `${total_block_cost} (คิดแค่ครั้งเดียว)`,
+                block_cost_result: total_block_cost,
                 k_cost_formula: `((${block.inWidth}*${block.inLong}*${hotStamp.avr})+0.1)*${stamp.k}`,
-
+                k_cost_result: parseFloat(stamp_color_cost.toFixed(2)),
             }
         }
 
