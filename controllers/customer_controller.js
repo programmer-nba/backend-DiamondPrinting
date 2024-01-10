@@ -80,16 +80,9 @@ exports.getCustomers = async (req, res) => {
 }
 
 exports.getCustomer = async (req, res) => {
-    const { nameTh } = req.params
+    const { id } = req.params
     try {
-        const customer = await Customer.findOne({
-            $or: [
-                //{taxID: tax},
-                {nameTh: nameTh},
-                //{nameEng: nameEng},
-                //{code: code}
-            ]
-        })
+        const customer = await Customer.findById(id)
         if(!customer) {
             return res.send({
                 message: 'ไม่พบข้อมลูลูกค้า',
