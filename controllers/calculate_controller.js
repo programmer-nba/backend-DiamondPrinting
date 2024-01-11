@@ -118,7 +118,7 @@ exports.calAll = async (req, res) => {
                     }
                     const coating_cost = await calCoatingCost(order, sendCoating)
                     datas.push({[`coating_${m}`]:coating_cost.data})
-                    costs[`coating_${m}`] = coating_cost.cost
+                    costs[`coating_${coatingData.methods[m].method.type} ${coatingData.methods[m].method.subType}`] = coating_cost.cost
                 }
             }
 
