@@ -31,7 +31,7 @@ const customerSchema = new Schema(
         ],
         enable: {
             type: Boolean,
-            defult: true
+            default: true
         }
     },
     {

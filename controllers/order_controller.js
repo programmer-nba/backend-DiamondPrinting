@@ -80,7 +80,8 @@ exports.addPreOrder = async (req, res) => {
                     name: (customer.contact && customer.contact.name) ? customer.contact.name : '-',
                     tel: (customer.contact && customer.contact.tel) ? customer.contact.tel : '-',
                     createAt: new Date()
-                }
+                },
+                enable: true
             })
             const saved_customer = await new_customer.save()
             if(!saved_customer){
