@@ -976,7 +976,7 @@ exports.creatQuotation = async (req, res) => {
         const new_quotation = new Quotation({
             code: code,
             customer: preOrder.customer._id,
-            sale: preOrder.sale._id,
+            sale: preOrder.sale?._id || userId,
             preOrder: preOrder._id,
             price: calOrder,
             start: curDate.toISOString(),
