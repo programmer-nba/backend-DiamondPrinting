@@ -1025,7 +1025,7 @@ exports.creatQuotation = async (req, res) => {
             }
         })
 
-        const updatedStatus = await Promise.all(updateStatus)
+        //const updatedStatus = await Promise.all(updateStatus)
         /* if(!updatedStatus){
             return res.status(500).send({
                 message: 'update pre-production status fail'

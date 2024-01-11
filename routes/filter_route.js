@@ -30,8 +30,10 @@ route.get('/coating-option/:type', Coating.getCoatingOptions)
 route.get('/customers-name', Customer.customersSearch)
 route.get('/customer/:id', Customer.getCustomer)
 route.get('/customers', Customer.getCustomers)
+route.get('/customers-enable', Customer.getEnableCustomers)
 route.post('/customer-new', Customer.createCustomer)
 route.delete('/customer/:id', Customer.deleteCustomer)
 route.put('/customer/:id', Customer.updateCustomer)
+route.put('/customer-enable/:id', Customer.enableCustomer)
 
 module.exports = route

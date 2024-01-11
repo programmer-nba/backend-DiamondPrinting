@@ -26,9 +26,12 @@ exports.customersSearch = async (req, res) => {
             return {
                 name: item.nameTh,
                 _id: item._id,
-                taxID: item.taxID
+                taxID: item.taxID,
+                enable: item.enable
             }
         })
+
+        const enable_customers = customers_nameAndId.filter(e=>e.enable===true)
 
         const customersName = customers.map(customer=>customer.nameTh)
         const uniqueCustomersName = new Set(customersName)
@@ -38,8 +41,8 @@ exports.customersSearch = async (req, res) => {
         const uniqueCustomersNameTax = new Set(customersNameTax)
 
         return res.send({
-            message: `มีลูกค้าทั้งหมด ${customers.length}`,
-            customersName: customers_nameAndId
+            message: `มีลูกค้าทั้งหมด ${customers.filter(c=>c.enable===true).length}`,
+            customersName: enable_customers
             //customersName: [...uniqueCustomersName],
             //customersTaxID: [...uniqueCustomersTaxID],
             //customersNameTax: [...uniqueCustomersNameTax]
@@ -72,6 +75,37 @@ exports.getCustomers = async (req, res) => {
         return res.send({
             message: `มีลูกค้าทั้งหมด ${customers.length} รายการ`,
             customers: customers
+        })
+    }
+    catch( err ) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err.message)
+    }
+}
+
+exports.getEnableCustomers = async (req, res) => {
+    try {
+        const customers = await Customer.find()
+        if(!customers) {
+            return res.send({
+                message: 'ไม่พบข้อมลูลูกค้า',
+                customers: customers
+            })
+        }
+        if(customers && customers.length===0) {
+            return res.send({
+                message: 'ยังไม่มีลูกค้าในระบบ',
+                customers: customers || []
+            })
+        }
+
+        const enable_customers = customers.filter(enable=>enable.enable===true)
+
+        return res.send({
+            message: `มีลูกค้าทั้งหมด ${enable_customers.length} รายการ`,
+            customers: enable_customers
         })
     }
     catch( err ) {
@@ -132,8 +166,6 @@ exports.createCustomer = async (req, res) => {
                 {taxID: customer.taxID}
             ]
         })
-
-        console.log(existCustomer)
 
         if (!existCustomer){
             const new_customer = new Customer({
@@ -242,8 +274,47 @@ exports.deleteCustomer = async (req, res) => {
             }) 
         }
 
+        const quotation = await Quotation.deleteMany({customer: id})
+        if(!quotation){
+            return res.send({
+                message: 'can not delete quotations of this customer',
+                quotation: quotation
+            }) 
+        }
+
         return res.send({
             message: 'delete success!'
+        })
+    }
+    catch( err ) {
+        res.status(500).send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
+exports.enableCustomer = async (req, res) => {
+    const { id } = req.params
+    try {
+        let customer = await Customer.findById(id)
+        if(!customer) {
+            return res.send({
+                message: 'ไม่พบข้อมลูลูกค้า',
+                customer: customer
+            })
+        }
+        customer.enable = !customer.enable
+        const updated_customer = await customer.save()
+        if(!updated_customer){
+            return res.send({
+                message: 'can not enable/unenable customer',
+                customer: updated_customer
+            })
+        }
+
+        return res.send({
+            message: 'update enable success!'
         })
     }
     catch( err ) {

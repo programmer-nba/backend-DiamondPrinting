@@ -28,7 +28,11 @@ const customerSchema = new Schema(
                 quotationID: mongoose.Schema.Types.ObjectId,
                 createAt: Date
             }
-        ]
+        ],
+        enable: {
+            type: Boolean,
+            defult: true
+        }
     },
     {
         timestamps: true
