@@ -749,17 +749,111 @@ exports.updatePreProduction = async (req, res) => {
     const userCode = req.user.code
     const userName = req.user.name
     //const { files } = req.files
-    const { gsm, width, long, cut, lay, plateSize } = req.body
+    const { width, long, cut, lay, plateSize, k, inWidth, inLong } = req.body
 
     try {
-        let preProduction = await PreProduction.findById(id)
+        let preOrder = await PreOrder.findById(id)
+        if(!preOrder){
+            return res.send({
+                message: 'ไม่พบ pre-order นี้'
+            })
+        }
+        let preProduction = await PreProduction.findOneAndUpdate({  }, {
+            $set: {
+                code: code,
+            customer: preOrder.customer,
+            sale: preOrder.sale,
+            production: userId,
+            preOrder: id,
+            data_input: {
+                width: width,
+                long: long,
+                cut: cut,
+                lay: lay,
+                plateSize: plateSize,
+                inWidth: inWidth,
+                inLong: inLong
+            },
+            rawMattData : {
+                type : (preOrder.paper && preOrder.paper.type) && preOrder.paper.type, // from pre-order
+                subType: (preOrder.paper && preOrder.paper.subType) &&  preOrder.paper.subType, // from pre-order
+                gsm: (preOrder.paper && preOrder.paper.gsm) && preOrder.paper.gsm, 
+                width: (width) && width,
+                long: (long) && long,
+                cut : (cut) && cut,
+                lay : (lay) && lay
+            },
+            print_4_Data : (plateSize && plateSize==="4") ? {
+                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0],
+                lay : (lay) && lay,
+                floor_front: (preOrder.colors && preOrder.colors.floor_front) ? preOrder.colors.floor_front : false,
+                floor_back: (preOrder.colors && preOrder.colors.floor_back) ? preOrder.colors.floor_back : false
+            } : null,
+            print_2_Data : (plateSize && plateSize==="2") ? {
+                colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0],
+                lay : (lay) && lay,
+                floor_front: (preOrder.colors && preOrder.colors.floor_front) ? preOrder.colors.floor_front : false,
+                floor_back: (preOrder.colors && preOrder.colors.floor_back) ? preOrder.colors.floor_back : false
+            } : null,
+            plateData : {
+                colors : (preOrder.colors && preOrder.colors.front) ? preOrder.colors.front + preOrder.colors.back : 0, // from pre-order
+                size : (plateSize) && plateSize.toString(),
+                flip_plate: preOrder.flip_plate
+            },
+            coatingData : {
+                methods: (preOrder.coating && preOrder.coating.length!==0) ? preOrder.coating : null,
+                //spotUv: (preOrder.coating && preOrder.coating.spotUv.trim() !=='' || preOrder.coating.spotUv !==null) ? true : false,
+                //dipOff: (preOrder.coating && preOrder.coating.dipOff) ? true : false,
+                width: (width) && width, // from pre-order
+                inWidth: (inWidth) && inWidth, // from pre-order
+                inLong: (inLong) && inLong, // from pre-order
+                long: (long) && long, // from pre-order
+                cut: (cut) && cut,  // from pre-order
+                lay: (lay) && lay // from pre-order
+            },
+            embossData : {
+                demensions: (preOrder.emboss) ? preOrder.emboss : null,
+                plateSize: (plateSize) && plateSize.toString(),
+                lay: (lay) && lay
+            },
+            hotStampData : {
+                block : (preOrder.hotStamp) ? preOrder.hotStamp : null,
+                lay: (lay) && lay,
+                k: (k) ? k : 1
+            },
+            diecutData : (preOrder.dieCut.detail) ? {
+                plateSize: (preOrder.dieCut.detail) ? plateSize : null,
+                lay: (preOrder.dieCut.detail) ? lay : null
+            } : null,
+            diecutWindowData : (preOrder.dieCutWindow.detail && preOrder.dieCutWindow.percent) ? {
+                plateSize: (preOrder.dieCutWindow.detail) ? plateSize : null,
+                lay: (preOrder.dieCutWindow.detail) ? lay : null
+            } : null,
+            glueData : {
+                glue: (preOrder.glue && preOrder.glue.length!==0) ? preOrder.glue : null,
+                glue2: (preOrder.glue2 && preOrder.glue2.length!==0) ? preOrder.glue2 : null,
+                glue_dot: (preOrder.glue_dot && preOrder.glue_dot.length!==0) ? preOrder.glue_dot : null
+            },
+            status: {
+                name: 'new',
+                text: 'พรีโพรดักชันใหม่',
+                sender: {
+                    name: `${userName.first} ${userName.last}`,
+                    _id: userId,
+                    code: userCode
+                },
+                createAt: new Date()
+            },
+            down: (cut && lay) ? cut*lay : null
+            }
+        })
         if(!preProduction){
             return res.send({
                 message: 'ไม่พบ pre-order นี้'
             })
         }
         
-        preProduction.rawMattData.gsm = gsm || preProduction.rawMattData.gsm, 
+        /* preProduction.rawMattData.gsm = gsm || preProduction.rawMattData.gsm, 
         preProduction.rawMattData.width = width || preProduction.rawMattData.width,
         preProduction.rawMattData.long = long || preProduction.rawMattData.long,
         preProduction.rawMattData.cut = cut || preProduction.rawMattData.cut,
@@ -787,7 +881,7 @@ exports.updatePreProduction = async (req, res) => {
                 message: 'can not create',
                 updated_production: updated_production
             })
-        }
+        } */
 
         return res.send({
             message: 'success!',
