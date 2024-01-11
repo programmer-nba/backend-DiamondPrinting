@@ -1,4 +1,7 @@
 const Customer = require('../models/customers/customer_model.js')
+const PreOrder = require('../models/orders/preOrder_model.js')
+const PreProduction = require('../models/orders/preProduction_model.js')
+const Quotation = require('../models/orders/quotation_model.js')
 
 const genCode = (curLength) => {
     const result = 
@@ -222,6 +225,21 @@ exports.deleteCustomer = async (req, res) => {
                 message: 'ไม่พบข้อมลูลูกค้า',
                 customer: customer
             })
+        }
+        const preOrder = await PreOrder.deleteMany({customer: id})
+        if(!preOrder){
+            return res.send({
+                message: 'can not delete pre-orders of this customer',
+                preOrder: preOrder
+            }) 
+        }
+
+        const preProduction = await PreProduction.deleteMany({customer: id})
+        if(!preProduction){
+            return res.send({
+                message: 'can not delete pre-productions of this customer',
+                preProduction: preProduction
+            }) 
         }
 
         return res.send({
