@@ -267,21 +267,32 @@ exports.getPreOrder = async (req, res) => {
 exports.updatePreOrder = async (req, res) => {
     const { id } = req.params
     const {
+        customer,
+        name,
+        brand,
+
         demensions,
         paper,
+
+        colors_front_type,
         colors_front,
+        colors_back_type,
         colors_back,
         front_pantone,
         back_pantone,
         floor_front,
         floor_back,
+        flip_plate,
+
         coating,
         hotStamp,
         emboss,
         dieCut,
+        dieCutWindow=null,
         glue,
         glue2,
         glue_dot,
+
         note
     } = req.body
 
@@ -290,15 +301,86 @@ exports.updatePreOrder = async (req, res) => {
     const userCode = req.user.code
 
     try {
-        let preOrder = await PreOrder.findById(id)
+        let preOrder = await PreOrder.findByIdAndUpdate(id,
+            {
+                $set: {
+                    //code: code,
+                    //customer: curCustomer._id,
+                    name: (name) && name,
+                    brand: (brand) && brand,
+                    
+                    demensions: (demensions) && {
+                        width: demensions.width,
+                        long: demensions.long,
+                        height: demensions.height
+                    },
+
+                    //sale: userId,
+                    
+                    paper: {
+                        type: (paper && paper.type) && paper.type,
+                        subType: (paper && paper.subType) && paper.subType,
+                        gsm: (paper && paper.gsm) && paper.gsm
+                    },
+
+                    flip_plate: (flip_plate) ? true : false,
+
+                    colors: {
+                        front_type:(colors_front_type) ? colors_front_type : null,
+                        front: (colors_front) ? colors_front : 0,
+                        front_pantone: (front_pantone) && front_pantone,
+                        floor_front: (floor_front) && floor_front,
+                        back_type:(colors_back_type) ? colors_back_type : null,
+                        back: (colors_back) ? colors_back : 0,
+                        back_pantone: (back_pantone) && back_pantone,
+                        floor_back: (floor_back) && floor_back,
+                    },
+
+                    coating: (coating && coating.length!==0) ? coating : null,
+
+                    hotStamp: (hotStamp && hotStamp.length!==0) ? hotStamp : null,
+                    emboss: (emboss && emboss.length!==0) ? emboss : null,
+
+                    dieCut: (dieCut) ? {
+                        percent: (dieCut.percent) ? dieCut.percent : null,
+                        notice: (dieCut.notice) ? dieCut.notice : null,
+                        detail: (dieCut.detail) ? dieCut.detail : null
+                    } : null,
+
+                    dieCutWindow: (dieCutWindow) ? {
+                        percent: (dieCutWindow.percent) ? dieCutWindow.percent : null,
+                        notice: (dieCutWindow.notice) ? dieCutWindow.notice : null,
+                        detail: (dieCutWindow.detail) ? dieCutWindow.detail : null
+                    } : null,
+
+                    glue: (glue && glue.length!==0) ? glue : null,
+                    glue2: (glue2 && glue2.length!==0) ? glue2 : null,
+                    glue_dot: (glue_dot && glue_dot.length!==0) ? glue_dot : null,
+            
+                    note: (note) ? note : ''
+                },
+                $push: {
+                    status: {
+                        name: 'edit',
+                        text: 'แก้ไขข้อมูลพรีออร์เดอร์',
+                        sender: {
+                            name: `${userName.first} ${userName.last}`,
+                            code: userCode,
+                            _id: userId
+                        },
+                        createAt: new Date()
+                    }
+                }
+            }, { new:true }
+        )
         if(!preOrder || preOrder.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
                 preOrders: preOrder
             })
         }
-        
-        preOrder.demensions.width = (demensions && demensions.width) ? demensions.width : preOrder.demensions.width
+
+        /* preOrder.demensions.width = (demensions && demensions.width) ? demensions.width : preOrder.demensions.width
         preOrder.demensions.long = (demensions && demensions.long) ? demensions.long : preOrder.demensions.long
         preOrder.demensions.height = (demensions && demensions.height) ? demensions.height : preOrder.demensions.height
             
@@ -329,9 +411,9 @@ exports.updatePreOrder = async (req, res) => {
 
         preOrder.glue2 = (glue2 && glue2.length!==0) ? glue2 : preOrder.glue2
 
-        preOrder.glue_dot = (glue_dot && glue_dot.length!==0) ? glue_dot : preOrder.glue_dot
+        preOrder.glue_dot = (glue_dot && glue_dot.length!==0) ? glue_dot : preOrder.glue_dot */
 
-        preOrder.status.push(
+        /* preOrder.status.push(
             {
                 name: 'edit',
                 text: 'แก้ไขข้อมูลพรีออร์เดอร์',
@@ -342,17 +424,17 @@ exports.updatePreOrder = async (req, res) => {
                 },
                 createAt: new Date()
             }
-        )
+        ) */
         
-        preOrder.note = (note) ? note : preOrder.note
+        //preOrder.note = (note) ? note : preOrder.note
 
-        const updated_preOrder = preOrder.save()
+        /* const updated_preOrder = preOrder.save()
         if(!updated_preOrder) {
             return res.send({
                 message: 'ไม่สามารถเซฟ pre-order ที่แก้ไขแล้ว',
                 updated_preOrder: updated_preOrder
             })
-        }
+        } */
 
         return res.send({
             success: true,
