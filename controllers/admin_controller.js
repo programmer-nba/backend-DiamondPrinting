@@ -70,3 +70,72 @@ exports.getAllMembers = async ( req, res ) => {
     }
 }
 
+exports.deleteAdmin = async ( req, res ) => {
+    const { id } = req.params
+    try {
+        const admin = await Admin.findByIdAndDelete(id)
+        if(!admin){
+            return res.send({
+                message: 'admin id not found!',
+                admin: admin
+            })
+        }
+
+        return res.send({
+            message: 'delete success!'
+        })
+    }
+    catch(error){
+        console.log(error)
+        return res.send({
+            message: 'can not delete admin'
+        })
+    }
+}
+
+exports.deleteSale = async ( req, res ) => {
+    const { id } = req.params
+    try {
+        const sale = await Sale.findByIdAndDelete(id)
+        if(!sale){
+            return res.send({
+                message: 'sale id not found!',
+                sale: sale
+            })
+        }
+
+        return res.send({
+            message: 'delete success!'
+        })
+    }
+    catch(error){
+        console.log(error)
+        return res.send({
+            message: 'can not delete sale'
+        })
+    }
+}
+
+exports.deleteProduction = async ( req, res ) => {
+    const { id } = req.params
+    try {
+        const production = await Production.findByIdAndDelete(id)
+        if(!production){
+            return res.send({
+                message: 'sale id not found!',
+                production: production
+            })
+        }
+
+        return res.send({
+            message: 'delete success!'
+        })
+    }
+    catch(error){
+        console.log(error)
+        return res.send({
+            message: 'can not delete production'
+        })
+    }
+}
+
