@@ -703,7 +703,7 @@ exports.getPreProductions = async (req, res) => {
             })
         }
 
-        console.log(preProductions[0].preOrder)
+        //console.log(preProductions[0].preOrder)
         
 
         return res.send({

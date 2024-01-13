@@ -58,7 +58,8 @@ exports.getAllMembers = async ( req, res ) => {
 
         return res.send({
             message: `มีสมาชิกทั้งหมด ${members_data.length}`,
-            members : members
+            members : members,
+            success : true
         })
     }
     catch (err) {
