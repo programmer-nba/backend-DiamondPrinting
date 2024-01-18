@@ -406,6 +406,118 @@ exports.updatePreOrder = async (req, res) => {
     }
 }
 
+exports.editEmbossSize = async (req, res) => {
+    const { id } = req.params
+    const { inWidth, inLong, mark } = req.body
+    const userId = req.user.id
+    const userName = req.user.name
+    const userCode = req.user.code
+    try {
+        let preOrder = await PreOrder.updateOne(
+            {
+                'emboss._id' : id
+            },
+            {
+                $set: {
+                    'emboss.$.inWidth' : inWidth,
+                    'emboss.$.inLong' : inLong,
+                    'emboss.$.mark' : mark
+                }, 
+                $push: {
+                    status: {
+                        name: 'edit',
+                        text: 'แก้ไขข้อมูล',
+                        sender: {
+                            name: `${userName.first} ${userName.last}`,
+                            code: userCode,
+                            _id: userId
+                        },
+                        createAt: new Date()
+                    }
+                }
+            },
+            {
+                new : true
+            }
+        )
+        if(!preOrder){
+            return res.send({
+                message: 'ไม่พบ pre-order นี้',
+                preOrder: preOrder
+            })
+        }
+
+        return res.send({
+            message: 'update success!',
+            success: true
+        })
+
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: 'ERROR',
+            err: err.message
+        })
+    }
+}
+
+exports.editStampSize = async (req, res) => {
+    const { id } = req.params
+    const { inWidth, inLong, mark } = req.body
+    const userId = req.user.id
+    const userName = req.user.name
+    const userCode = req.user.code
+    try {
+        const preOrder = await PreOrder.updateOne(
+            {
+                'hotStamp._id' : id
+            },
+            {
+                $set: {
+                    'hotStamp.$.inWidth' : inWidth,
+                    'hotStamp.$.inLong' : inLong,
+                    'hotStamp.$.mark' : mark
+                }, 
+                $push: {
+                    status: {
+                        name: 'edit',
+                        text: 'แก้ไขข้อมูล',
+                        sender: {
+                            name: `${userName.first} ${userName.last}`,
+                            code: userCode,
+                            _id: userId
+                        },
+                        createAt: new Date()
+                    }
+                }
+            },
+            {
+                new : true
+            }
+        )
+        if(!preOrder){
+            return res.send({
+                message: 'ไม่พบ pre-order นี้',
+                preOrder: preOrder
+            })
+        }
+
+        return res.send({
+            message: 'update success!',
+            success: true
+        })
+
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: 'ERROR',
+            err: err.message
+        })
+    }
+}
+
 exports.deletePreOrder = async (req, res) => {
     const { id } = req.params
     try {
