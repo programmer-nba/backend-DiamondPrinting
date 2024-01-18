@@ -10,8 +10,8 @@ exports.addRawMatt = async (req, res) => {
 
         const new_rawMatt = new RawMatt({
             code: code,
-            type: type,
-            subType: subType
+            type: type.trim(),
+            subType: subType.trim()
         })
         const saved_rawMatt = await new_rawMatt.save()
         if(!saved_rawMatt) {

@@ -33,10 +33,12 @@ const preOrderSchema = new Schema(
             front: Number,
             front_pantone: String,
             floor_front: Boolean,
+            front_text: Array,
             back_type: String,
             back: Number,
             back_pantone: String,
-            floor_back: Boolean
+            floor_back: Boolean,
+            back_text: Array,
         },
         coating: [
             {
@@ -112,6 +114,16 @@ const preOrderSchema = new Schema(
                 type: String
             }
         ],
+        chain: [
+            {
+                mark: String,
+                width: Number,
+                long: Number,
+                price: Number,
+                notice: String
+            }
+        ],
+        bag: Boolean,
         note: String,
         status: [
             {

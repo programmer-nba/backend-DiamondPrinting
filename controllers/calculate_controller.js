@@ -200,6 +200,31 @@ exports.calAll = async (req, res) => {
                     datas.push({[`glueDot`]:glueDot_cost.data})
                     costs[`glueDot`] = glueDot_cost.cost
                 }
+
+                if(glueData.chain && glueData.chain.length!==0){
+                    for (g in glueData.chain) {
+                        const chainData = {
+                            width: glueData.chain[g].width,
+                            long: glueData.chain[g].long,
+                            price: glueData.chain[g].price
+                        }
+                        const chain_cost = await calChainCost(order, chainData)
+                        datas.push({[`chain_${g}`]:chain_cost.data})
+                        costs[`chain_${g}`] = chain_cost.cost
+                    }
+                }
+
+                if(glueData.bag){
+                    const bag_cost = {
+                        data: {
+                            order: order,
+                            ppu: 2.5
+                        },
+                        cost: 2.5 * order
+                    }
+                    datas.push({[`bag`]:bag_cost.data})
+                    costs[`bag`] = bag_cost.cost
+                }
                 
             }
 
@@ -873,6 +898,30 @@ const calGlueDotCost = async (order, amount) => {
         }
 
         return {data: gluedata, cost: gluedata.total}
+    }
+    catch (err) {
+        return {data: 'ไม่พบ', cost: 0}
+    }
+}
+
+const calChainCost = async (order, chainData) => {
+    const { width, long, price } = chainData
+    try {
+
+        const chainData = {
+            order: order,
+            width: width,
+            long: long,
+            ppu: price,
+            cal: {
+                unit_result_formula: `${width} * ${long} * ${price}`,
+                unit_result: parseFloat((width*long*price).toFixed(2)),
+                order_result_formula: `${width} * ${long} * ${price} * ${order}`,
+                order_result: parseFloat((width*long*price*order).toFixed(2))
+            }
+        }
+
+        return {data: chainData, cost: chainData.cal.order_result}
     }
     catch (err) {
         return {data: 'ไม่พบ', cost: 0}
