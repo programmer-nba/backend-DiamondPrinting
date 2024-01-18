@@ -280,10 +280,8 @@ exports.updatePreOrder = async (req, res) => {
     const {
         name,
         brand,
-
         demensions,
         paper,
-
         colors_front_type,
         colors_front_text,
         colors_front,
@@ -295,7 +293,6 @@ exports.updatePreOrder = async (req, res) => {
         floor_front,
         floor_back,
         flip_plate,
-
         coating,
         hotStamp,
         emboss,
@@ -304,10 +301,8 @@ exports.updatePreOrder = async (req, res) => {
         glue,
         glue2,
         glue_dot,
-
         chain,
         bag,
-
         note
     } = req.body
 
@@ -319,8 +314,6 @@ exports.updatePreOrder = async (req, res) => {
         let preOrder = await PreOrder.findByIdAndUpdate(id,
             {
                 $set: {
-                    //code: code,
-                    //customer: curCustomer._id,
                     name: (name) && name,
                     brand: (brand) && brand,
                     
@@ -329,8 +322,6 @@ exports.updatePreOrder = async (req, res) => {
                         long: demensions.long,
                         height: demensions.height
                     },
-
-                    //sale: userId,
                     
                     paper: {
                         type: (paper && paper.type) && paper.type,

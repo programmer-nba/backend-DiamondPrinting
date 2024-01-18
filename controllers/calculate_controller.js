@@ -668,7 +668,7 @@ const calHotStampCost = async (order, hotStampData) => {
 
         const block_cost = Math.ceil((block.inWidth*block.inLong*13)*0.01)*100
         const total_block_cost = block_cost*block.lay
-        const stamp_color_cost = ((block.inWidth*block.inLong*hotStamp.avr)+0.1)*stamp.k
+        const stamp_color_cost = (((block.inWidth*block.inLong*hotStamp.avr)+0.1)*stamp.k < 0.15) ? 0.15 : ((block.inWidth*block.inLong*hotStamp.avr)+0.1)*stamp.k
         const total_stamp_color_cost = parseFloat(stamp_color_cost.toFixed(2))*order
 
         const cal_hotStamp = {
@@ -684,7 +684,7 @@ const calHotStampCost = async (order, hotStampData) => {
             stamp_color: hotStamp.stamp_color,
             stamp_avr: hotStamp.avr,
             other_avr: 0.1,
-            stamp_color_cost: parseFloat(stamp_color_cost.toFixed(2)),
+            stamp_color_cost: (parseFloat(stamp_color_cost.toFixed(2)) < 0.15) ? 0.15 : parseFloat(stamp_color_cost.toFixed(2)),
             total_stamp_color_cost: total_stamp_color_cost,
             totol_cost: (total_stamp_color_cost + total_block_cost !== NaN) ? parseFloat((total_stamp_color_cost + total_block_cost).toFixed(2)) : 0,
 
@@ -693,13 +693,13 @@ const calHotStampCost = async (order, hotStampData) => {
                 'บล๊อคเค' : total_block_cost,
                 'สีปั้ม' : hotStamp.stamp_color,
                 'ค่าเฉลี่ย' : hotStamp.avr,
-                'ค่าปั้มเคต่อชิ้น' : parseFloat(stamp_color_cost.toFixed(2))
+                'ค่าปั้มเคต่อชิ้น' : (parseFloat(stamp_color_cost.toFixed(2)) < 0.15) ? 0.15 : parseFloat(stamp_color_cost.toFixed(2)),
             },
             cal: {
                 block_cost_formula: `(roundup((${block.inWidth}*${block.inLong}*13)*0.01)*100)*${block.lay}`,
                 block_cost_result: total_block_cost,
                 k_cost_formula: `((${block.inWidth}*${block.inLong}*${hotStamp.avr})+0.1)*${stamp.k}`,
-                k_cost_result: parseFloat(stamp_color_cost.toFixed(2)),
+                k_cost_result: (parseFloat(stamp_color_cost.toFixed(2)) < 0.15) ? 0.15 : parseFloat(stamp_color_cost.toFixed(2)),
             }
         }
 
