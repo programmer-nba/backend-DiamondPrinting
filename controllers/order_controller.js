@@ -231,7 +231,7 @@ exports.addPreOrder = async (req, res) => {
 
 exports.getPreOrders = async (req, res) => {
     try {
-        const preOrders = await PreOrder.find().populate('customer', '_id nameTh nameEng taxID address contact email').populate('sale', '_id name phone_number email')
+        const preOrders = await PreOrder.find().populate('customer', '_id nameTh nameEng taxID address contact email').populate('sale', '_id name phone_number email code')
         if(!preOrders || preOrders.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
@@ -255,7 +255,7 @@ exports.getPreOrders = async (req, res) => {
 exports.getPreOrder = async (req, res) => {
     const { id } = req.params
     try {
-        const preOrder = await PreOrder.findById(id).populate('customer', '_id nameTh nameEng taxID address contact email').populate('sale', '_id name phone_number email')
+        const preOrder = await PreOrder.findById(id).populate('customer', '_id nameTh nameEng taxID address contact email').populate('sale', '_id name phone_number email code')
         if(!preOrder || preOrder.length===0){
             return res.send({
                 message: 'ไม่พบรายการ',
