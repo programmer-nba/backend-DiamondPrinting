@@ -372,7 +372,7 @@ exports.updatePreOrder = async (req, res) => {
                 },
                 $push: {
                     status: {
-                        name: 'edit',
+                        name: 'new',
                         text: 'แก้ไขข้อมูลพรีออร์เดอร์',
                         sender: {
                             name: `${userName.first} ${userName.last}`,
