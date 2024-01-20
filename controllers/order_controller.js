@@ -1102,6 +1102,11 @@ exports.getQuotations = async (req, res) => {
             })
         }
 
+        quotations.forEach(item=>{
+            item.status.reverse()
+            item.status = item.status[0]
+        })
+
         return res.send({
             success: true,
             message: `มีใบเสนอราคาทั้งหมด ${quotations.length}`,
