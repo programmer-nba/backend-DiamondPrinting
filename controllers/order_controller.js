@@ -1121,6 +1121,135 @@ exports.getQuotations = async (req, res) => {
     }
 }
 
+// get new quotations
+exports.getNewQuotations = async (req, res) => {
+    try {
+        const quotations = await Quotation.find(
+            {
+                'status.name' : 'new'
+            },
+            {
+                'status': { $slice: -1 }
+            }
+        )
+        .populate('customer', 'nameTh nameEng taxID contact _id code address email')
+        .populate('sale', 'name phone_number code')
+        .populate('preOrder')
+        if(!quotations){
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotations || []
+            })
+        } else if (quotations.length === 0) {
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotations || []
+            })
+        }
+
+        quotations.forEach(item=>{
+            item.status.reverse()
+            item.status = item.status[0]
+        })
+
+        return res.send({
+            success: true,
+            message: `มีใบเสนอราคาทั้งหมด ${quotations.length}`,
+            quotations: quotations
+        })
+    }
+    catch (err) {
+        res.send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
+// get rejected quotations
+exports.getRejectedQuotations = async (req, res) => {
+    try {
+        const quotations = await Quotation.find(
+            {
+                'reject.status' : true
+            }
+        )
+        .populate('customer', 'nameTh nameEng taxID contact _id code address email')
+        .populate('sale', 'name phone_number code')
+        .populate('preOrder')
+        if(!quotations){
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotations || []
+            })
+        } else if (quotations.length === 0) {
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotations || []
+            })
+        }
+
+        quotations.forEach(item=>{
+            item.status.reverse()
+            item.status = item.status[0]
+        })
+
+        return res.send({
+            success: true,
+            message: `มีใบเสนอราคาที่ถูกยกเลิกทั้งหมด ${quotations.length}`,
+            quotations: quotations
+        })
+    }
+    catch (err) {
+        res.send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
+// get approved quotations
+exports.getApprovedQuotations = async (req, res) => {
+    try {
+        const quotations = await Quotation.find(
+            {
+                approve : true
+            }
+        )
+        .populate('customer', 'nameTh nameEng taxID contact _id code address email')
+        .populate('sale', 'name phone_number code')
+        .populate('preOrder')
+        if(!quotations){
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotations || []
+            })
+        } else if (quotations.length === 0) {
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotations: quotations || []
+            })
+        }
+
+        quotations.forEach(item=>{
+            item.status.reverse()
+            item.status = item.status[0]
+        })
+
+        return res.send({
+            success: true,
+            message: `มีใบเสนอราคาที่ยืนยันแล้วทั้งหมด ${quotations.length}`,
+            quotations: quotations
+        })
+    }
+    catch (err) {
+        res.send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
 // get all quotations of specific pre-order
 exports.getQuotationOfpreOrder = async (req, res) => {
     const { id } = req.params
