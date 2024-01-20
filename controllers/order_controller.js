@@ -35,7 +35,9 @@ exports.addPreOrder = async (req, res) => {
 
         demensions,
         paper,
-
+        
+        front_remark,
+        back_remark,
         colors_front_type,
         colors_front,
         colors_front_text,
@@ -180,6 +182,8 @@ exports.addPreOrder = async (req, res) => {
             flip_plate: (flip_plate) ? true : false,
 
             colors: {
+                front_remark: front_remark || '',
+                back_remark: back_remark || '',
                 front_type:(colors_front_type) ? colors_front_type : null,
                 front: (colors_front) ? colors_front : 0,
                 front_pantone: (front_pantone) && front_pantone,

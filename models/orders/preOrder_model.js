@@ -29,6 +29,8 @@ const preOrderSchema = new Schema(
             gsm: Number
         },
         colors: {
+            front_remark: String,
+            back_remark: String,
             front_type: String,
             front: Number,
             front_pantone: String,
