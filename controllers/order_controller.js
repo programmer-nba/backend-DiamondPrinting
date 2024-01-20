@@ -1015,7 +1015,17 @@ exports.creatQuotation = async (req, res) => {
             preOrder: preOrder._id,
             price: calOrder,
             start: curDate.toISOString(),
-            expire: expirationDate.toISOString()
+            expire: expirationDate.toISOString(),
+            status: {
+                name: 'new',
+                text: 'ใบเสนอราคาใหม่',
+                sender: {
+                    name: `${userName.first} ${userName.last}`,
+                    _id: userId,
+                    code: userCode
+                },
+                createAt: new Date()
+            },
         })
         const saved_quotation = await new_quotation.save()
         if(!saved_quotation){
@@ -1037,13 +1047,13 @@ exports.creatQuotation = async (req, res) => {
             createAt: new Date()
         })
 
-        const saved_preOrder = await preOrder.save()
+        await preOrder.save()
 
         let preProduction = await PreProduction.find({
             preOrder: preOrderId
         })
 
-        const updateStatus = preProduction.forEach( async item => {
+        preProduction.forEach( async item => {
             item.status.push({
                 name: 'got-quotation',
                 text: 'เพิ่มในใบเสนอราคาแล้ว',
@@ -1155,6 +1165,104 @@ exports.getQuotation = async (req, res) => {
             success: true,
             quotation: quotation,
             contact: quotation.customer.contact[quotation.customer.contact.length-1]
+        })
+    }
+    catch (err) {
+        res.send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
+// approve a quotation
+exports.approveQuotation = async (req, res) => {
+    const { id } = req.params
+    const userId = req.user.id
+    const userName = req.user.name
+    const userCode = req.user.code
+    try {
+        const quotation = await Quotation.findByIdAndUpdate(id, {
+            $set: {
+                approve: true,
+            },
+            $push: {
+                status: {
+                    name: 'approved',
+                    text: 'สำเร็จ',
+                    sender: {
+                        name: `${userName.first} ${userName.last}`,
+                        _id: userId,
+                        code: userCode
+                    },
+                    createAt: new Date()
+                },
+            }
+        }, { new : true })
+        if(!quotation){
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotation: quotation
+            })
+        }
+
+        return res.send({
+            message: 'ใบเสนอราคาผ่านการยืนยันแล้ว',
+            success: true,
+            quotation: quotation,
+            approve: quotation.approve
+        })
+    }
+    catch (err) {
+        res.send({
+            message: err.message
+        })
+        console.log(err)
+    }
+}
+
+// reject a quotation
+exports.approveQuotation = async (req, res) => {
+    const { id } = req.params
+    const { remark } = req.body
+    const userId = req.user.id
+    const userName = req.user.name
+    const userCode = req.user.code
+    try {
+        const quotation = await Quotation.findByIdAndUpdate(id, {
+            $set: {
+                approve: false,
+                reject: {
+                    status: true,
+                    remark: remark || ''
+                }
+            },
+            $push: {
+                status: {
+                    name: 'rejected',
+                    text: remark,
+                    sender: {
+                        name: `${userName.first} ${userName.last}`,
+                        _id: userId,
+                        code: userCode
+                    },
+                    createAt: new Date()
+                },
+            }
+        }, { new : true })
+        if(!quotation){
+            return res.send({
+                message: 'ไม่พบใบเสนอราคา',
+                quotation: quotation
+            })
+        }
+
+        return res.send({
+            message: 'ใบเสนอราคานี้ถูกปฏิเสธ',
+            success: true,
+            quotation: quotation,
+            approve: quotation.approve,
+            reject: quotation.reject
         })
     }
     catch (err) {

@@ -30,7 +30,20 @@ const quotationSchema = new Schema(
                     unit: Number
                 }
             }
-        ]
+        ],
+        status: [
+            {
+                name: String,
+                text: String,
+                sender: {
+                    name: String,
+                    code: String,
+                    _id: mongoose.Schema.Types.ObjectId
+                },
+                createAt: Date
+            }
+        ],
+        approve: Boolean
     },
     {
         timestamps: true
