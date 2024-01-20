@@ -12,6 +12,19 @@ const genCode = (curLength) => {
     return result
 }
 
+const customRound = (value) => {
+    const integerPart = Math.floor(value);
+    const decimalPart = value - integerPart;
+  
+    if (decimalPart >= 0.1 && decimalPart <= 0.5) {
+      return integerPart + 0.5;
+    } else if (decimalPart > 0.5) {
+      return Math.ceil(value);
+    } else {
+      return integerPart;
+    }
+}
+
 // Sale ----------------------------------------
 
 exports.addPreOrder = async (req, res) => {
@@ -133,6 +146,15 @@ exports.addPreOrder = async (req, res) => {
 
         const prev_preOrder = await PreOrder.find()
         const code = genCode(prev_preOrder.length)
+
+        const gluess = (glue && glue.length > 0) 
+            ? glue.map(g => {
+                const saved_glue = {
+                    mark: g.mark || null,
+                    long: customRound(g.long)
+                }
+                return saved_glue
+            }) : null
         
         // add new pre-order
         const new_preOrder = new PreOrder({
@@ -187,7 +209,7 @@ exports.addPreOrder = async (req, res) => {
                 detail: (dieCutWindow.detail) ? dieCutWindow.detail : null
             } : null,
 
-            glue: (glue && glue.length!==0) ? glue : null,
+            glue: (glue && glue.length!==0) ? gluess : null,
             glue2: (glue2 && glue2.length!==0) ? glue2 : null,
             glue_dot: (glue_dot && glue_dot.length!==0) ? glue_dot : null,
 
@@ -207,6 +229,7 @@ exports.addPreOrder = async (req, res) => {
             
             note: (note) ? note : ''
         })
+
         const saved_preOrder = await new_preOrder.save()
         if(!saved_preOrder){
             return res.send({
