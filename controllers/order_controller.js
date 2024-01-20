@@ -1185,6 +1185,10 @@ exports.approveQuotation = async (req, res) => {
         const quotation = await Quotation.findByIdAndUpdate(id, {
             $set: {
                 approve: true,
+                reject: {
+                    status: false,
+                    remark: ''
+                }
             },
             $push: {
                 status: {
@@ -1222,7 +1226,7 @@ exports.approveQuotation = async (req, res) => {
 }
 
 // reject a quotation
-exports.approveQuotation = async (req, res) => {
+exports.rejectQuotation = async (req, res) => {
     const { id } = req.params
     const { remark } = req.body
     const userId = req.user.id

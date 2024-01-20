@@ -43,7 +43,11 @@ const quotationSchema = new Schema(
                 createAt: Date
             }
         ],
-        approve: Boolean
+        approve: Boolean,
+        reject: {
+            status: Boolean,
+            remark: String
+        }
     },
     {
         timestamps: true

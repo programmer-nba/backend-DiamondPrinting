@@ -27,5 +27,7 @@ route.get('/quotations', Order.getQuotations)
 route.get('/quotation/:id', Order.getQuotation)
 route.delete('/quotation/:id', verifyToken, Order.deleteQuotation)
 route.get('/quotations/:id', Order.getQuotationOfpreOrder)
+route.put('/quotation-ok/:id',verifyToken, Order.approveQuotation)
+route.put('/quotation-reject/:id',verifyToken, Order.rejectQuotation)
 
 module.exports = route
