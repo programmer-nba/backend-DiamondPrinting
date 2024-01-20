@@ -1095,7 +1095,7 @@ exports.getQuotations = async (req, res) => {
         return res.send({
             success: true,
             message: `มีใบเสนอราคาทั้งหมด ${quotations.length}`,
-            quotations: quotations.reverse()
+            quotations: quotations
         })
     }
     catch (err) {
