@@ -47,7 +47,8 @@ const quotationSchema = new Schema(
         reject: {
             status: Boolean,
             remark: String
-        }
+        },
+        calDetails: Array
     },
     {
         timestamps: true

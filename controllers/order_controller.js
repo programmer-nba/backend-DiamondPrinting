@@ -2,6 +2,7 @@ const Customer = require('../models/customers/customer_model.js')
 const PreOrder = require('../models/orders/preOrder_model.js')
 const PreProduction = require('../models/orders/preProduction_model.js')
 const Quotation = require('../models/orders/quotation_model.js')
+const Order = require('../models/orders/order_model.js')
 
 const genCode = (curLength) => {
     const result = 
@@ -1015,7 +1016,7 @@ exports.deletePreProduction = async (req, res) => {
 
 // create new quotation
 exports.creatQuotation = async (req, res) => {
-    const { preOrderId, calOrder  } = req.body
+    const { preOrderId, calOrder, calDetails  } = req.body
     const userId = req.user.id
     const userName = req.user.name
     const userCode = req.user.code
@@ -1053,6 +1054,7 @@ exports.creatQuotation = async (req, res) => {
                 },
                 createAt: new Date()
             },
+            calDetails: (calDetails && calDetails.length > 0) ? calDetails : []
         })
         const saved_quotation = await new_quotation.save()
         if(!saved_quotation){
@@ -1460,5 +1462,236 @@ exports.deleteQuotation = async (req, res) => {
             message: err.message
         })
         console.log(err)
+    }
+}
+
+/* 
+---------------------------------------
+-----------------Order-----------------
+---------------------------------------
+*/ 
+
+exports.createOrder = async (req, res) => {
+    const { 
+        price_type, 
+        amount, 
+        cal_data, 
+        cost_detail, 
+        cost_total, 
+        cost_ppu, 
+        price 
+    } = req.body
+    const { id } = req.params
+    const userId = req.user.id
+    const userName = req.user.name
+    const userCode = req.user.code
+    try {
+        const quotation = await Quotation.findById( id )
+        const prev_order = await Order.find()
+        const code = `${quotation.code}-${genCode( prev_order.length )}`
+
+        const new_order = {
+            code: code,
+            quotation: quotation,
+            customer: quotation.customer,
+            details: quotation.preOrder,
+            data: {
+                price_type: price_type,
+                amount: amount,
+                cal_data: cal_data,
+                cost_detail: cost_detail,
+                cost_total: cost_total,
+                cost_ppu: cost_ppu,
+                price: price,
+            },
+            status: {
+                name: 'new',
+                text: 'ออร์เดอร์ใหม่',
+                sender: {
+                    name: `${userName.first} ${userName.last}`,
+                    _id: userId,
+                    code: userCode
+                },
+                createAt: new Date()
+            },
+        }
+        const saved_order = await new_order.save()
+        if(!saved_order) {
+            return res.send({
+                message: 'บันทึกออร์เดอร์ใหม่ไม่สำเร็จ',
+                order: saved_order
+            })
+        }
+
+        return res.send({
+            message: 'สร้างออร์เดอร์ใหม่สำเร็จ !!!',
+            order: saved_order,
+            success: true
+        })
+    }
+    catch (error) {
+        console.log(error)
+        return res.send({
+            message: error.message
+        })
+    }
+}
+
+exports.getAllOrders = async (req, res) => {
+    try {
+        const orders = await Order.find()
+        if(!orders || orders.length < 1) {
+            return res.send({
+                message: 'ไม่พบออร์เดอร์ในระบบ',
+                orders: orders || []
+            })
+        }
+
+        return res.send({
+            message: `มีออร์เดอร์ทั้งหมด ${orders.length || 0} ออร์เดอร์`,
+            orders: orders,
+            success: true
+        })
+    }
+    catch(error) {
+        console.log(error)
+        return res.send({
+            message: error.message
+        })
+    }
+}
+
+exports.getOrder = async (req, res) => {
+    const { id } = req.params
+    try {
+        const order = await Order.findById( id )
+        if(!order) {
+            return res.send({
+                message: 'ไม่พบออร์เดอร์ในระบบ',
+                order: order || null
+            })
+        }
+
+        return res.send({
+            order: order,
+            success: true
+        })
+    }
+    catch(error) {
+        console.log(error)
+        return res.send({
+            message: error.message
+        })
+    }
+}
+
+exports.editOrder = async (req, res) => {
+    const { 
+        price_type, 
+        amount, 
+        cal_data, 
+        cost_detail, 
+        cost_total, 
+        cost_ppu, 
+        price 
+    } = req.body
+    const { id } = req.params
+    const userId = req.user.id
+    const userName = req.user.name
+    const userCode = req.user.code
+    try {
+        const order = await Order.findByIdAndUpdate( id ,
+            {
+                $set: {
+                    'data.price_type': price_type,
+                    'data.amount': amount,
+                    'data.cal_data': cal_data,
+                    'data.cost_detail': cost_detail,
+                    'data.cost_total': cost_total,
+                    'data.cost_ppu': cost_ppu,
+                    'data.price': price
+                },
+                $push: {
+                    status: {
+                        name: 'new',
+                        text: 'ออร์เดอร์ใหม่',
+                        sender: {
+                            name: `${userName.first} ${userName.last}`,
+                            _id: userId,
+                            code: userCode
+                        },
+                        createAt: new Date()
+                    }
+                }
+            },
+            {
+                new : true
+            }
+        )
+        if(!order) {
+            return res.send({
+                message: 'แก้ไขออร์เดอร์ไม่สำเร็จ',
+                order: order
+            })
+        }
+
+        return res.send({
+            message: 'แก้ไขออร์เดอร์สำเร็จ !!!',
+            order: order,
+            success: true
+        })
+    }
+    catch (error) {
+        console.log(error)
+        return res.send({
+            message: error.message
+        })
+    }
+}
+
+exports.deleteOrder = async (req, res) => {
+    const { id } = req.params
+    try {
+        const order = await Order.findByIdAndDelete( id )
+        if(!order) {
+            return res.send({
+                message: 'ไม่พบออร์เดอร์ในระบบ',
+                order: order || null
+            })
+        }
+
+        return res.send({
+            message: 'ลบออร์เดอร์สำเร็จ',
+            success: true
+        })
+    }
+    catch(error) {
+        console.log(error)
+        return res.send({
+            message: error.message
+        })
+    }
+}
+
+exports.deleteOrders = async (req, res) => {
+    try {
+        const order = await Order.deleteMany( )
+        if(!order) {
+            return res.send({
+                message: 'ไม่พบออร์เดอร์ในระบบ',
+                order: order || null
+            })
+        }
+
+        return res.send({
+            message: 'ลบออร์เดอร์ทั้งหมดสำเร็จ',
+            success: true
+        })
+    }
+    catch(error) {
+        console.log(error)
+        return res.send({
+            message: error.message
+        })
     }
 }
