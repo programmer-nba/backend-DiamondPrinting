@@ -56,6 +56,7 @@ exports.addPreOrder = async (req, res) => {
         emboss,
         dieCut,
         dieCutWindow,
+        dieCutBlow,
         glue,
         glue2,
         glue_dot,
@@ -212,6 +213,8 @@ exports.addPreOrder = async (req, res) => {
                 notice: (dieCutWindow.notice) ? dieCutWindow.notice : null,
                 detail: (dieCutWindow.detail) ? dieCutWindow.detail : null
             } : null,
+
+            dieCutBlow: (dieCutBlow) ? true : false,
 
             glue: (glue && glue.length!==0) ? gluess : null,
             glue2: (glue2 && glue2.length!==0) ? glue2 : null,
