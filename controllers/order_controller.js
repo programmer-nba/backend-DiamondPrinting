@@ -153,7 +153,6 @@ exports.addPreOrder = async (req, res) => {
         const gluess = (glue && glue.length > 0) 
             ? glue.map(g => {
                 const saved_glue = {
-                    mark: g.mark || null,
                     long: customRound(g.long)
                 }
                 return saved_glue

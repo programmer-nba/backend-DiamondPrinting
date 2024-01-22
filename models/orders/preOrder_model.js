@@ -96,9 +96,9 @@ const preOrderSchema = new Schema(
                 default: null // หน้าต่าง
             },
         },
+        dieCutBlow: Boolean, // ตัดปลิว
         glue: [
             {
-                mark: String,
                 long: Number
             }
         ],

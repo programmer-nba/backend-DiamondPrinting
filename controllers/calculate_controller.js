@@ -29,7 +29,19 @@ exports.calAll = async (req, res) => {
                 })
             }
 
-            const { rawMattData, plateData, print_2_Data, print_4_Data, coatingData, embossData, hotStampData, diecutData, glueData, diecutWindowData } = preProduction
+            const { 
+                rawMattData, 
+                plateData, 
+                print_2_Data, 
+                print_4_Data, 
+                coatingData, 
+                embossData, 
+                hotStampData, 
+                diecutData, 
+                glueData, 
+                diecutWindowData, 
+                diecutBlowData,
+            } = preProduction
 
             if(rawMattData){
                 const rawMatt_cost = await calRawMattCost(order,rawMattData)
@@ -103,6 +115,16 @@ exports.calAll = async (req, res) => {
                 datas.push({diecut_window:window_cost.data})
                 costs.diecut_window_block = window_cost.data.blockPrice
                 costs.diecut_window_pump = window_cost.data.pumpPrice
+            }
+
+            if(diecutBlowData){
+                const blow_cost = (order*0.05 < 500) ? 500 : order*0.05
+                datas.push({diecut_blow: {
+                    avr: 0.05,
+                    cal: `${order}x0.05`,
+                    total: blow_cost
+                }})
+                costs.diecut_blow = blow_cost
             }
             
             if(coatingData && coatingData.methods && coatingData.methods.length!==0){
