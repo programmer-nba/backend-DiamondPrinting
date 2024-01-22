@@ -732,6 +732,7 @@ exports.addPreProduction = async (req, res) => {
                 plateSize: (preOrder.dieCutWindow.percent) ? plateSize : null,
                 lay: (preOrder.dieCutWindow.percent) ? lay : null
             } : null,
+            diecutBlowData: (preOrder.dieCutBlow) ? true : false,
             glueData : {
                 glue: (preOrder.glue && preOrder.glue.length!==0) ? preOrder.glue : null,
                 glue2: (preOrder.glue2 && preOrder.glue2.length!==0) ? preOrder.glue2 : null,
