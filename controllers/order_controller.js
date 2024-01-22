@@ -1476,6 +1476,7 @@ exports.deleteQuotation = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
     const { 
+        quotation_id,
         price_type, 
         amount, 
         cal_data, 
@@ -1484,16 +1485,15 @@ exports.createOrder = async (req, res) => {
         cost_ppu, 
         price 
     } = req.body
-    const { id } = req.params
     const userId = req.user.id
     const userName = req.user.name
     const userCode = req.user.code
     try {
-        const quotation = await Quotation.findById( id )
+        const quotation = await Quotation.findById( quotation_id )
         const prev_order = await Order.find()
         const code = `${quotation.code}-${genCode( prev_order.length )}`
 
-        const new_order = {
+        const new_order = new Order({
             code: code,
             quotation: quotation,
             customer: quotation.customer,
@@ -1517,7 +1517,7 @@ exports.createOrder = async (req, res) => {
                 },
                 createAt: new Date()
             },
-        }
+        })
         const saved_order = await new_order.save()
         if(!saved_order) {
             return res.send({

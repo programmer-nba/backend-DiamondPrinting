@@ -25,16 +25,18 @@ const orderSchema = new Schema(
             cost_ppu: Number,
             price: Object,
         },
-        status: {
-            name: String,
-            text: String,
-            sender: {
+        status: [
+            {
                 name: String,
-                _id: String,
-                code: String
-            },
-            createAt: Date
-        },
+                text: String,
+                sender: {
+                    name: String,
+                    _id: String,
+                    code: String
+                },
+                createAt: Date
+            }
+        ],
     },
     {
         timestamps: true
