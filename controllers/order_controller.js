@@ -33,12 +33,11 @@ exports.addPreOrder = async (req, res) => {
         customer,
         name,
         brand,
-
         demensions,
         paper,
-        
         front_remark,
         back_remark,
+        colors_uv,
         colors_front_type,
         colors_front,
         colors_front_text,
@@ -50,7 +49,6 @@ exports.addPreOrder = async (req, res) => {
         floor_front,
         floor_back,
         flip_plate,
-
         coating,
         hotStamp,
         emboss,
@@ -60,21 +58,16 @@ exports.addPreOrder = async (req, res) => {
         glue,
         glue2,
         glue_dot,
-
         chain,
         bag,
-
         note
     } = req.body
 
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
-    //const userRole = req.user.role.main
-    //const userPhone = req.user.phone_number
     
     try {
-        // check customer already exist? or create new one
         let curCustomer = null
         const allCustumers = await Customer.find()
         const existCustomer = await Customer.findOne({
@@ -183,6 +176,7 @@ exports.addPreOrder = async (req, res) => {
             flip_plate: (flip_plate) ? true : false,
 
             colors: {
+                colors_uv: (colors_uv) ? colors_uv : false,
                 front_remark: front_remark || '',
                 back_remark: back_remark || '',
                 front_type:(colors_front_type) ? colors_front_type : null,
@@ -692,18 +686,20 @@ exports.addPreProduction = async (req, res) => {
                 colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0],
                 lay : (lay) && lay,
                 floor_front: (preOrder.colors && preOrder.colors.floor_front) ? preOrder.colors.floor_front : false,
-                floor_back: (preOrder.colors && preOrder.colors.floor_back) ? preOrder.colors.floor_back : false
+                floor_back: (preOrder.colors && preOrder.colors.floor_back) ? preOrder.colors.floor_back : false,
+                colors_uv: (preOrder.colors && preOrder.colors.colors_uv) ? preOrder.colors.colors_uv : false,
             } : null,
             print_2_Data : (plateSize && plateSize==="2") ? {
                 colors : (preOrder.colors && preOrder.colors.front) ? [preOrder.colors.front, preOrder.colors.back] : [0, 0],
                 lay : (lay) && lay,
                 floor_front: (preOrder.colors && preOrder.colors.floor_front) ? preOrder.colors.floor_front : false,
-                floor_back: (preOrder.colors && preOrder.colors.floor_back) ? preOrder.colors.floor_back : false
+                floor_back: (preOrder.colors && preOrder.colors.floor_back) ? preOrder.colors.floor_back : false,
+                colors_uv: (preOrder.colors && preOrder.colors.colors_uv) ? preOrder.colors.colors_uv : false,
             } : null,
             plateData : {
                 colors : (preOrder.colors && preOrder.colors.front) ? preOrder.colors.front + preOrder.colors.back : 0, // from pre-order
                 size : (plateSize) && plateSize.toString(),
-                flip_plate: preOrder.flip_plate
+                flip_plate: preOrder.flip_plate,
             },
             coatingData : {
                 methods: (preOrder.coating && preOrder.coating.length!==0) ? preOrder.coating : null,

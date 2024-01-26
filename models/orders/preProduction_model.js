@@ -46,13 +46,15 @@ const preProductionSchema = new Schema(
             colors : [Number, Number], // from pre-order
             lay : Number,
             floor_front: Boolean,
-            floor_back: Boolean
+            floor_back: Boolean,
+            colors_uv: Boolean
         },
         print_2_Data : {
             colors : [Number, Number], // from pre-order
             lay : Number,
             floor_front: Boolean,
-            floor_back: Boolean
+            floor_back: Boolean,
+            colors_uv: Boolean
         },
         plateData : {
             colors : Number, // from pre-order

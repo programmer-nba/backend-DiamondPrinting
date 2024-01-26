@@ -67,7 +67,8 @@ exports.calAll = async (req, res) => {
                             : (i==='1' && print_2_Data.floor_back) ? 2
                             : (i==='1' && !print_2_Data.floor_back) ? 1
                             : 1,
-                        flip: (print_2_Data.flip)
+                        flip: (print_2_Data.flip),
+                        uv: (print_2_Data.colors_uv) ? 1.5 : 1
                     }
                     const print_2_cost = await calPrint_2_Cost(order,sendPrint)
                     prints.push(print_2_cost.cost)
@@ -91,7 +92,8 @@ exports.calAll = async (req, res) => {
                             : (i==='1' && print_4_Data.floor_back) ? 2
                             : (i==='1' && !print_4_Data.floor_back) ? 1
                             : 1,
-                        flip: (print_4_Data.flip)
+                        flip: (print_4_Data.flip),
+                        uv: (print_4_Data.colors_uv) ? 1.5 : 1
                     }
                     const print_4_cost = await calPrint_4_Cost(order,sendPrint)
                     prints.push(print_4_cost.cost)
@@ -437,7 +439,8 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
     const { 
         colors,
         lay,
-        floor
+        floor,
+        uv
     } = print_2_Data
     console.log(print_2_Data)
     try {
@@ -459,18 +462,20 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
             order_lay: order_lay,
             round: option[0].round.join,
             price: (option[0].round.start >= 10001)
-            ? option[0].price*order_lay*floor : option[0].price*floor,
+            ? option[0].price*order_lay*floor*uv
+            : option[0].price*floor*uv,
             colors: colors,
             details: {
-                ออร์เดอร์ต่อเล : order_lay,
-                รอบการพิมพ์ : option[0].round.join,
-                เทพื้น : (floor>1) ? 'เทพื้น' : null,
-                ค่าพิมพ์ : (option[0].round.start >= 10001)
-                ? option[0].price*order_lay*floor : option[0].price*floor
+                'ออร์เดอร์ต่อเล' : order_lay,
+                'รอบการพิมพ์' : option[0].round.join,
+                'เทพื้น' : (floor>1) ? 'เทพื้น' : null,
+                'สีUV': (uv > 1) ? 'สีUV' : null,
+                'ค่าพิมพ์' : (option[0].round.start >= 10001)
+                ? option[0].price*order_lay*floor*uv : option[0].price*floor*uv
             },
             cal: {
-                print_price_formula: (option[0].round.start >= 10001) ? `${option[0].price}*${order_lay}*${floor}` : `${option[0].price}*${floor}`,
-                print_price_result: (option[0].round.start >= 10001) ? option[0].price*order_lay*floor : option[0].price*floor
+                print_price_formula: (option[0].round.start >= 10001) ? `${option[0].price}*${order_lay}*${floor}*${uv}` : `${option[0].price}*${floor}*${uv}`,
+                print_price_result: (option[0].round.start >= 10001) ? option[0].price*order_lay*floor*uv : option[0].price*floor*uv
             }
         }
         return {cost: cal_print.price, data: cal_print}
@@ -491,7 +496,8 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
     const { 
         colors,
         lay,
-        floor
+        floor,
+        uv
     } = print_4_Data
 
     try {
@@ -513,18 +519,19 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             order_lay: order_lay,
             round: option[0].round.join,
             price: (option[0].round.start >= 10001)
-            ? option[0].price*order_lay*floor : option[0].price*floor,
+            ? option[0].price*order_lay*floor*uv : option[0].price*floor*uv,
             colors: colors,
             details: {
-                ออร์เดอร์ต่อเล : order_lay,
-                รอบการพิมพ์ : option[0].round.join,
-                เทพื้น : (floor>1) ? 'เทพื้น' : null,
-                ค่าพิมพ์ : (option[0].round.start >= 10001)
-                ? option[0].price*order_lay*floor : option[0].price*floor
+                'ออร์เดอร์ต่อเล' : order_lay,
+                'รอบการพิมพ์' : option[0].round.join,
+                'เทพื้น' : (floor>1) ? 'เทพื้น' : null,
+                'สีUV': (uv > 1) ? 'สีUV' : null,
+                'ค่าพิมพ์' : (option[0].round.start >= 10001)
+                ? option[0].price*order_lay*floor*uv: option[0].price*floor*uv
             },
             cal: {
-                print_price_formula: (option[0].round.start >= 10001) ? `${option[0].price}*${order_lay}*${floor}` : `${option[0].price}*${floor}`,
-                print_price_result: (option[0].round.start >= 10001) ? option[0].price*order_lay*floor : option[0].price*floor
+                print_price_formula: (option[0].round.start >= 10001) ? `${option[0].price}*${order_lay}*${floor}*${uv}` : `${option[0].price}*${floor}*${uv}`,
+                print_price_result: (option[0].round.start >= 10001) ? option[0].price*order_lay*floor*uv : option[0].price*floor*uv
             }
         }
         return {cost: cal_print.price, data: cal_print}

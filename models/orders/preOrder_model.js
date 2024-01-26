@@ -41,6 +41,7 @@ const preOrderSchema = new Schema(
             back_pantone: String,
             floor_back: Boolean,
             back_text: Array,
+            colors_uv: Boolean
         },
         coating: [
             {
