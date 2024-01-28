@@ -11,30 +11,27 @@ const Diecut = require('../models/products/diecut_model.js')
 const Glue = require('../models/products/glue_model.js')
 
 exports.calAll = async (req, res) => {
-    const { id } = req.params // _id of preProduction
+    const { id } = req.params
     const {orders} = req.body
     let costs_list = []
     try {
-
         for (let order of orders) {
             let datas = []
             let costs = {}
-
             const preProduction = await PreProduction.findById(id).populate('preOrder')
-            
             if(!preProduction || preProduction.length===0){
                 return res.send({
                     massage: 'ไม่พบรายการนี้ในระบบ',
                     preProduction: preProduction || []
                 })
             }
-
             const { 
                 rawMattData, 
                 plateData, 
                 print_2_Data, 
                 print_4_Data, 
                 coatingData, 
+                coatingBackData,
                 embossData, 
                 hotStampData, 
                 diecutData, 
@@ -143,6 +140,23 @@ exports.calAll = async (req, res) => {
                     const coating_cost = await calCoatingCost(order, sendCoating)
                     datas.push({[`coating_${m}`]:coating_cost.data})
                     costs[`coating_${coatingData.methods[m].method.type} ${coatingData.methods[m].method.subType}`] = coating_cost.cost
+                }
+            }
+
+            if(coatingBackData && coatingBackData.methods && coatingBackData.methods.length!==0){
+                for (m in coatingBackData.methods){
+                    const sendCoating = {
+                        method: coatingBackData.methods[m].method,
+                        width: coatingBackData.width,
+                        inWidth: coatingBackData.inWidth,
+                        long: coatingBackData.long,
+                        inLong: coatingBackData.inLong,
+                        cut: coatingBackData.cut,
+                        lay: coatingBackData.lay
+                    }
+                    const coating_cost = await calCoatingCost(order, sendCoating)
+                    datas.push({[`coatingBack_${m}`]:coating_cost.data})
+                    costs[`coatingBack_${coatingBackData.methods[m].method.type} ${coatingBackData.methods[m].method.subType}`] = coating_cost.cost
                 }
             }
 

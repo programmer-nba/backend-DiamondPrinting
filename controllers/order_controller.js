@@ -50,6 +50,7 @@ exports.addPreOrder = async (req, res) => {
         floor_back,
         flip_plate,
         coating,
+        coating_back,
         hotStamp,
         emboss,
         dieCut,
@@ -192,6 +193,7 @@ exports.addPreOrder = async (req, res) => {
             },
 
             coating: (coating && coating.length!==0) ? coating : null,
+            coating_back: (coating_back && coating_back.length!==0) ? coating_back : null,
 
             hotStamp: (hotStamp && hotStamp.length!==0) ? hotStamp : null,
             emboss: (emboss && emboss.length!==0) ? emboss : null,
@@ -318,6 +320,7 @@ exports.updatePreOrder = async (req, res) => {
         floor_back,
         flip_plate,
         coating,
+        coating_back,
         hotStamp,
         emboss,
         dieCut,
@@ -369,6 +372,7 @@ exports.updatePreOrder = async (req, res) => {
                     },
 
                     coating: (coating && coating.length!==0) ? coating : null,
+                    coating_back: (coating_back && coating_back.length!==0) ? coating_back : null,
 
                     hotStamp: (hotStamp && hotStamp.length!==0) ? hotStamp : null,
                     emboss: (emboss && emboss.length!==0) ? emboss : null,
@@ -710,6 +714,15 @@ exports.addPreProduction = async (req, res) => {
                 cut: (cut) && cut,  // from pre-order
                 lay: (lay) && lay // from pre-order
             },
+            coatingBackData : {
+                methods: (preOrder.coating_back && preOrder.coating_back.length!==0) ? preOrder.coating_back : null,
+                width: (width) && width, // from pre-order
+                inWidth: (inWidth) && inWidth, // from pre-order
+                inLong: (inLong) && inLong, // from pre-order
+                long: (long) && long, // from pre-order
+                cut: (cut) && cut,  // from pre-order
+                lay: (lay) && lay // from pre-order
+            },
             embossData : {
                 demensions: (preOrder.emboss) ? preOrder.emboss : null,
                 plateSize: (plateSize) && plateSize.toString(),
@@ -893,6 +906,15 @@ exports.updatePreProduction = async (req, res) => {
                 },
                 coatingData : {
                     methods: (preOrder.coating && preOrder.coating.length!==0) ? preOrder.coating : null,
+                    width: (width) && width, // from pre-order
+                    inWidth: (inWidth) && inWidth, // from pre-order
+                    inLong: (inLong) && inLong, // from pre-order
+                    long: (long) && long, // from pre-order
+                    cut: (cut) && cut,  // from pre-order
+                    lay: (lay) && lay // from pre-order
+                },
+                coatingBackData : {
+                    methods: (preOrder.coating_back && preOrder.coating_back.length!==0) ? preOrder.coating_back : null,
                     width: (width) && width, // from pre-order
                     inWidth: (inWidth) && inWidth, // from pre-order
                     inLong: (inLong) && inLong, // from pre-order

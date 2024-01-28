@@ -54,6 +54,17 @@ const preOrderSchema = new Schema(
                 mark: String
             }
         ],
+        coating_back: [
+            {
+                method: {
+                    type: {
+                        type: String
+                    },
+                    subType: String
+                },
+                mark: String
+            }
+        ],
         hotStamp: [
             {
                 inWidth: Number,

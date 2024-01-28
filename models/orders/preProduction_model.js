@@ -70,6 +70,15 @@ const preProductionSchema = new Schema(
             cut: Number,  // from pre-order
             lay: Number // from pre-order
         },
+        coatingBackData : {
+            methods: Array,
+            width: Number, // from pre-order
+            inWidth: Number, // from pre-order
+            long: Number, // from pre-order
+            inLong: Number, // from pre-order
+            cut: Number,  // from pre-order
+            lay: Number // from pre-order
+        },
         embossData : {
             demensions: [{
                 inWidth: Number,
