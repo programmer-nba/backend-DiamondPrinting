@@ -65,7 +65,7 @@ exports.createNewPlaningSchedule = async (req, res) => {
 
 exports.getPlaningSchedules = async (req, res) => {
     try {
-        const schedules = await PlaningSchedule.find()
+        const schedules = await PlaningSchedule.find().populate('order')
         if(!schedules && schedules.length < 1){
             return res.send({
                 message: 'ไม่พบตารางงาน',
