@@ -211,7 +211,10 @@ exports.createNewPurchaseSchedule = async (req, res) => {
                 status: 'new',
                 percent: 0
             },
-            remark: remark || '-',
+            remark: {
+                name: remark,
+                createAt: new Date()
+            },
             status: {
                 name: 'new',
                 text: 'ตารางงานใหม่',
