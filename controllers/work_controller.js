@@ -246,6 +246,256 @@ exports.createNewPurchaseSchedule = async (req, res) => {
     }
 }
 
+exports.editDatePurchaseSchedule = async (req, res) => {
+    const { id } = req.params
+    const { 
+        start_time, // required
+        end_time, // required
+        remark
+    } = req.body
+    const userName = req.user.name
+    const userId = req.user.id
+    const userCode = req.user.code
+    try {
+        const schedule = await PurchaseSchedule.findByIdAndUpdate( id, 
+            {
+                $set: {
+                    start_time: start_time,
+                    end_time: end_time,
+                    remark: remark || '-',
+                },
+            },
+            {
+                new : true
+            }
+        )
+        if(!schedule){
+            return res.send({
+                message: 'ไม่สามารถแก้ไขตารางงาน',
+                purchaseSchedule: schedule
+            })
+        }
+
+        return res.send({
+            message: 'แก้ไขตารางงานสำเร็จ',
+            purchaseSchedule: schedule,
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message
+        })
+    }
+}
+
+exports.acceptPurchaseSchedule = async (req, res) => {
+    const { id } = req.params
+    const userName = req.user.name
+    const userId = req.user.id
+    const userCode = req.user.code
+    try {
+        const purchaseSchedule = await PurchaseSchedule.findByIdAndUpdate( id,
+            {
+                $push: {
+                    status: {
+                        name: 'accept',
+                        text: 'รับงานแล้ว',
+                        sender: {
+                            name: `${userName.first} ${userName.last}`,
+                            _id: userId,
+                            code: userCode
+                        },
+                        createAt: new Date()
+                    }
+                }
+            },
+            {
+                new : true
+            }   
+        )
+        if(!purchaseSchedule){
+            return res.send({
+                message: 'รับงานล้มเหลว',
+                purchaseSchedule: purchaseSchedule
+            })
+        }
+
+        return res.send({
+            message: 'รับงานสำเร็จ',
+            purchaseSchedule: purchaseSchedule,
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message
+        })
+    }
+}
+
+exports.updatePurchaseSchedule = async (req, res) => {
+    const { id } = req.params
+    const { remark, status } = req.body
+    const userName = req.user.name
+    const userId = req.user.id
+    const userCode = req.user.code
+    try {
+        const purchaseSchedule = await PurchaseSchedule.findByIdAndUpdate( id,
+            {
+                $push: {
+                    status: {
+                        name: status,
+                        text: 'อัพเดทงานแล้ว',
+                        sender: {
+                            name: `${userName.first} ${userName.last}`,
+                            _id: userId,
+                            code: userCode
+                        },
+                        createAt: new Date()
+                    },
+                    remark: {
+                        name: remark,
+                        createAt: new Date()
+                    }
+                }
+            },
+            {
+                new : true
+            }   
+        )
+        if(!purchaseSchedule){
+            return res.send({
+                message: 'อัพเดทงานล้มเหลว',
+                purchaseSchedule: purchaseSchedule
+            })
+        }
+
+        return res.send({
+            message: 'อัพเดทงานสำเร็จ',
+            purchaseSchedule: purchaseSchedule,
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message
+        })
+    }
+}
+
+exports.getPurchaseSchedule = async (req, res) => {
+    const { id } = req.params
+    try {
+        const purchaseSchedule = 
+            await PurchaseSchedule.findById( id )
+            .populate('order', 'data')
+        if(!purchaseSchedule){
+            return res.send({
+                message: 'ไม่พบงานนี้ในระบบ',
+                purchaseSchedule: purchaseSchedule
+            })
+        }
+        const statusLastIndex = purchaseSchedule.status.length > 0 ? purchaseSchedule.status.length-1 : 0
+        const remarkLastIndex = purchaseSchedule.remark.length > 0 ? purchaseSchedule.remark.length-1 : 0
+        const schedule = {
+            start_time: purchaseSchedule.start_time,
+            end_time: purchaseSchedule.end_time,
+            progress: purchaseSchedule.progress,
+            status: purchaseSchedule.status[statusLastIndex],
+            remark: purchaseSchedule.remark[remarkLastIndex]
+        }
+        
+        const datas = {}
+        purchaseSchedule.order.data.cal_data.forEach(item => {
+            const key = Object.keys(item)[0]
+            datas[key] = item[key]
+        })
+
+        const data = {
+            order: purchaseSchedule.order.amount,
+            paper_type: `${datas.rawMatt?.paperType} ${datas.rawMatt?.option.gsm} แกรม` || null,
+            paper_cost: datas.rawMatt.paper.cost,
+            paper_amount: datas.rawMatt.paper.amount,
+        }
+
+        return res.send({
+            purchaseSchedule: schedule,
+            data: data,
+            _id: purchaseSchedule._id,
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message
+        })
+    }
+}
+
+exports.getPurchaseSchedules = async (req, res) => {
+    try {
+        const purchaseSchedules = await PurchaseSchedule.find().populate('order', 'data')
+        if(!purchaseSchedules){
+            return res.send({
+                message: 'ไม่พบงานนี้ในระบบ',
+                purchaseSchedules: purchaseSchedules
+            })
+        } else if (purchaseSchedules.length < 1){
+            return res.send({
+                message: 'มีงาน 0 งาน',
+                purchaseSchedules: [],
+                success: true
+            })
+        }
+        const formatSchedules = purchaseSchedules.map((purchaseSchedule)=>{
+            const statusLastIndex = purchaseSchedule.status.length > 0 ? purchaseSchedule.status.length-1 : 0
+            const remarkLastIndex = purchaseSchedule.remark.length > 0 ? purchaseSchedule.remark.length-1 : 0
+            const schedule = {
+                start_time: purchaseSchedule.start_time,
+                end_time: purchaseSchedule.end_time,
+                progress: purchaseSchedule.progress,
+                status: purchaseSchedule.status[statusLastIndex],
+                remark: purchaseSchedule.remark[remarkLastIndex]
+            }
+            
+            const datas = {}
+            purchaseSchedule.order.data.cal_data.forEach(item => {
+                const key = Object.keys(item)[0]
+                datas[key] = item[key]
+            })
+    
+            const data = {
+                order: purchaseSchedule.order.amount,
+                paper_type: `${datas.rawMatt?.paperType} ${datas.rawMatt?.option.gsm} แกรม` || null,
+                paper_cost: datas.rawMatt.paper.cost,
+                paper_amount: datas.rawMatt.paper.amount,
+            }
+
+            return {
+                purchaseSchedule: schedule,
+                data: data,
+                _id: purchaseSchedule._id
+            }
+        })
+
+        return res.send({
+            purchaseSchedules: formatSchedules,
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message
+        })
+    }
+}
+
 /*  Production  */
 exports.createNewProductionSchedule = async (req, res) => {
     const { 
