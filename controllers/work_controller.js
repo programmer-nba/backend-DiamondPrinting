@@ -1181,7 +1181,7 @@ exports.createNewTransferSchedule = async (req, res) => {
 
         const planingUpdate = await TransferSchedule.findByIdAndUpdate(scheduleId,{
             $set: {
-                qc: saved_schedule._id
+                transfer: saved_schedule._id
             }
         }, { new:true })
         if(!planingUpdate) {
