@@ -1560,7 +1560,7 @@ exports.createOrder = async (req, res) => {
 
 exports.getAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find()
+        const orders = await Order.find().populate('quotation').populate('customer').populate('details')
         if(!orders || orders.length < 1) {
             return res.send({
                 message: 'ไม่พบออร์เดอร์ในระบบ',
@@ -1585,7 +1585,7 @@ exports.getAllOrders = async (req, res) => {
 exports.getOrder = async (req, res) => {
     const { id } = req.params
     try {
-        const order = await Order.findById( id )
+        const order = await Order.findById( id )..populate('quotation').populate('customer').populate('details')
         if(!order) {
             return res.send({
                 message: 'ไม่พบออร์เดอร์ในระบบ',

@@ -21,7 +21,12 @@ const accountScheduleSchema = new Schema(
             status: String,
             percent: Number
         },
-        remark: String,
+        remark: [
+            {
+                name: String,
+                createAt: Date
+            }
+        ],
         status: [
             {
                 name: String,

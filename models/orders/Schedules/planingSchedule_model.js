@@ -29,6 +29,26 @@ const plaingScheduleSchema = new Schema(
                 createAt: Date
             }
         ],
+        purchase: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'PurchaseSchedule',
+            default: null
+        },
+        production: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'ProductionSchedule',
+            default: null
+        },
+        qc: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'QCSchedule',
+            default: null
+        },
+        transfer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'TransferSchedule',
+            default: null
+        },
     },
     {
         timestamps: true
