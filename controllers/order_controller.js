@@ -1174,14 +1174,7 @@ exports.getQuotations = async (req, res) => {
 // get new quotations
 exports.getNewQuotations = async (req, res) => {
     try {
-        const quotations = await Quotation.find(
-            {
-                'status.name' : 'new'
-            },
-            {
-                'status': { $slice: -1 }
-            }
-        )
+        const quotations = await Quotation.find({ approve: { $ne: true } })
         .populate('customer', 'nameTh nameEng taxID contact _id code address email')
         .populate('sale', 'name phone_number code')
         .populate('preOrder')

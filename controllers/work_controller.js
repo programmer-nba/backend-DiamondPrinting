@@ -629,12 +629,15 @@ exports.editDateProductionSchedule = async (req, res) => {
         remark
     } = req.body
     try {
-        const schedule = await PurchaseSchedule.findByIdAndUpdate( id, 
+        const schedule = await ProductionSchedule.findByIdAndUpdate( id, 
             {
                 $set: {
                     start_time: start_time,
                     end_time: end_time,
-                    remark: remark
+                    remark: {
+                        name: remark,
+                        createAt: new Date()
+                    }
                 }
             },
             {
@@ -956,7 +959,10 @@ exports.editDateQCSchedule = async (req, res) => {
                 $set: {
                     start_time: start_time,
                     end_time: end_time,
-                    remark: remark
+                    remark: {
+                        name: remark,
+                        createAt: new Date()
+                    }
                 }
             },
             {
@@ -1276,7 +1282,10 @@ exports.editDateTransferSchedule = async (req, res) => {
                 $set: {
                     start_time: start_time,
                     end_time: end_time,
-                    remark: remark
+                    remark: {
+                        name: remark,
+                        createAt: new Date()
+                    }
                 }
             },
             {
