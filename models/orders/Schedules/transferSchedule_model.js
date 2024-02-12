@@ -21,12 +21,11 @@ const transferScheduleSchema = new Schema(
             status: String,
             percent: Number
         },
-        remark: [
-            {
-                name: String,
-                createAt: Date
-            }
-        ],
+        remark: {
+            name: String,
+            createAt: Date
+        }
+        ,
         status: [
             {
                 name: String,

@@ -89,9 +89,10 @@ exports.getPlaningSchedules = async (req, res) => {
         const schedules = await PlaningSchedule.find()
         .populate('order')
         .populate('purchase')
-        .populate('production')
         .populate('qc')
+        .populate('production')
         .populate('transfer')
+        .exec()
         if(!schedules && schedules.length < 1){
             return res.send({
                 message: 'ไม่พบตารางงาน',
@@ -119,11 +120,11 @@ exports.getPlaningSchedule = async (req, res) => {
     const {id} = req.params
     try {
         const schedule = await PlaningSchedule.findById(id)
-        .populate('order')
         .populate('purchase')
-        .populate('production')
         .populate('qc')
+        .populate('production')
         .populate('transfer')
+        .exec()
         if(!schedule){
             return res.send({
                 message: 'ไม่พบตารางงาน',
@@ -268,7 +269,7 @@ exports.createNewPurchaseSchedule = async (req, res) => {
 
         const planingUpdate = await PlaningSchedule.findByIdAndUpdate(scheduleId,{
             $set: {
-                purchase: saved_schedule._id
+                purchase: saved_schedule
             }
         }, { new:true })
         if(!planingUpdate) {
@@ -368,6 +369,18 @@ exports.acceptPurchaseSchedule = async (req, res) => {
             })
         }
 
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(purchaseSchedule.planingSchedule,{
+            $set: {
+                purchase: purchaseSchedule
+            }
+        }, { new:true })
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
+            })
+        }
+
         return res.send({
             message: 'รับงานสำเร็จ',
             purchaseSchedule: purchaseSchedule,
@@ -384,7 +397,7 @@ exports.acceptPurchaseSchedule = async (req, res) => {
 
 exports.updatePurchaseSchedule = async (req, res) => {
     const { id } = req.params
-    const { remark, status } = req.body
+    const { text, status } = req.body
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
@@ -394,16 +407,12 @@ exports.updatePurchaseSchedule = async (req, res) => {
                 $push: {
                     status: {
                         name: status,
-                        text: 'อัพเดทงานแล้ว',
+                        text: text,
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
                             code: userCode
                         },
-                        createAt: new Date()
-                    },
-                    remark: {
-                        name: remark,
                         createAt: new Date()
                     }
                 }
@@ -411,11 +420,23 @@ exports.updatePurchaseSchedule = async (req, res) => {
             {
                 new : true
             }   
-        )
+        ).exec()
         if(!purchaseSchedule){
             return res.send({
                 message: 'อัพเดทงานล้มเหลว',
                 schedule: purchaseSchedule
+            })
+        }
+
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(purchaseSchedule.planingSchedule,{
+            $set: {
+                purchase: purchaseSchedule
+            }
+        }, { new:true })
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
             })
         }
 
@@ -438,7 +459,7 @@ exports.getPurchaseSchedule = async (req, res) => {
     try {
         const purchaseSchedule = 
             await PurchaseSchedule.findById( id )
-            .populate('order', 'planingSchedule')
+            .populate('order').populate('planingSchedule')
         if(!purchaseSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -476,7 +497,7 @@ exports.getPurchaseSchedule = async (req, res) => {
 
 exports.getPurchaseSchedules = async (req, res) => {
     try {
-        const purchaseSchedules = await PurchaseSchedule.find().populate('order', 'planingSchedule')
+        const purchaseSchedules = await PurchaseSchedule.find().populate('order').populate('planingSchedule')
         if(!purchaseSchedules){
             return res.send({
                 message : 'ไม่พบงานนี้ในระบบ',
@@ -571,7 +592,7 @@ exports.createNewProductionSchedule = async (req, res) => {
 
         const planingUpdate = await PlaningSchedule.findByIdAndUpdate(scheduleId,{
             $set: {
-                production: saved_schedule._id
+                production: saved_schedule
             }
         }, { new:true })
         if(!planingUpdate) {
@@ -608,12 +629,7 @@ exports.editDateProductionSchedule = async (req, res) => {
                 $set: {
                     start_time: start_time,
                     end_time: end_time,
-                },
-                $push: {
-                    remark: {
-                        name: remark,
-                        createAt: new Date()
-                    }
+                    remark: remark
                 }
             },
             {
@@ -673,6 +689,18 @@ exports.acceptProductionSchedule = async (req, res) => {
             })
         }
 
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(productionSchedule.planingSchedule,{
+            $set: {
+                purchase: productionSchedule
+            }
+        }, { new:true })
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
+            })
+        }
+
         return res.send({
             message: 'รับงานสำเร็จ',
             schedule: productionSchedule,
@@ -689,7 +717,7 @@ exports.acceptProductionSchedule = async (req, res) => {
 
 exports.updateProductionSchedule = async (req, res) => {
     const { id } = req.params
-    const { remark, status } = req.body
+    const { text, status } = req.body
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
@@ -699,16 +727,12 @@ exports.updateProductionSchedule = async (req, res) => {
                 $push: {
                     status: {
                         name: status,
-                        text: 'อัพเดทงานแล้ว',
+                        text: text,
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
                             code: userCode
                         },
-                        createAt: new Date()
-                    },
-                    remark: {
-                        name: remark,
                         createAt: new Date()
                     }
                 }
@@ -721,6 +745,18 @@ exports.updateProductionSchedule = async (req, res) => {
             return res.send({
                 message: 'อัพเดทงานล้มเหลว',
                 schedule: productionSchedule
+            })
+        }
+
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(productionSchedule.planingSchedule,{
+            $set: {
+                purchase: productionSchedule
+            }
+        }, { new:true })
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
             })
         }
 
@@ -743,7 +779,7 @@ exports.getProductionSchedule = async (req, res) => {
     try {
         const productionSchedule = 
             await ProductionSchedule.findById( id )
-            .populate('order', 'planingSchedule')
+            .populate('order').populate('planingSchedule')
         if(!productionSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -781,7 +817,9 @@ exports.getProductionSchedule = async (req, res) => {
 
 exports.getProductionSchedules = async (req, res) => {
     try {
-        const productionSchedules = await ProductionSchedule.find().populate('order', 'planingSchedule')
+        const productionSchedules = await ProductionSchedule.find()
+        .populate('order')
+        .populate('planingSchedule')
         if(!productionSchedules){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -876,7 +914,7 @@ exports.createNewQCSchedule = async (req, res) => {
 
         const planingUpdate = await PlaningSchedule.findByIdAndUpdate(scheduleId,{
             $set: {
-                qc: saved_schedule._id
+                qc: saved_schedule
             }
         }, { new:true })
         if(!planingUpdate) {
@@ -913,12 +951,7 @@ exports.editDateQCSchedule = async (req, res) => {
                 $set: {
                     start_time: start_time,
                     end_time: end_time,
-                },
-                $push: {
-                    remark: {
-                        name: remark,
-                        createAt: new Date()
-                    }
+                    remark: remark
                 }
             },
             {
@@ -978,6 +1011,18 @@ exports.acceptQCSchedule = async (req, res) => {
             })
         }
 
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(qcSchedule.planingSchedule,{
+            $set: {
+                purchase: qcSchedule
+            }
+        }, { new:true })
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
+            })
+        }
+
         return res.send({
             message: 'รับงานสำเร็จ',
             schedule: qcSchedule,
@@ -994,7 +1039,7 @@ exports.acceptQCSchedule = async (req, res) => {
 
 exports.updateQCSchedule = async (req, res) => {
     const { id } = req.params
-    const { remark, status } = req.body
+    const { text, status } = req.body
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
@@ -1004,16 +1049,12 @@ exports.updateQCSchedule = async (req, res) => {
                 $push: {
                     status: {
                         name: status,
-                        text: 'อัพเดทงานแล้ว',
+                        text: text,
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
                             code: userCode
                         },
-                        createAt: new Date()
-                    },
-                    remark: {
-                        name: remark,
                         createAt: new Date()
                     }
                 }
@@ -1026,6 +1067,18 @@ exports.updateQCSchedule = async (req, res) => {
             return res.send({
                 message: 'อัพเดทงานล้มเหลว',
                 schedule: qcSchedule
+            })
+        }
+
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(qcSchedule.planingSchedule,{
+            $set: {
+                purchase: qcSchedule
+            }
+        }, { new:true })
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
             })
         }
 
@@ -1048,7 +1101,7 @@ exports.getQCSchedule = async (req, res) => {
     try {
         const qcSchedule = 
             await QCSchedule.findById( id )
-            .populate('order', 'planingSchedule')
+            .populate('order').populate('planingSchedule')
         if(!qcSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -1086,7 +1139,7 @@ exports.getQCSchedule = async (req, res) => {
 
 exports.getQCSchedules = async (req, res) => {
     try {
-        const qcSchedules = await QCSchedule.find().populate('order', 'planingSchedule')
+        const qcSchedules = await QCSchedule.find().populate('order').populate('planingSchedule')
         if(!qcSchedules){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -1179,9 +1232,9 @@ exports.createNewTransferSchedule = async (req, res) => {
             })
         }
 
-        const planingUpdate = await TransferSchedule.findByIdAndUpdate(scheduleId,{
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(scheduleId,{
             $set: {
-                transfer: saved_schedule._id
+                transfer: saved_schedule
             }
         }, { new:true })
         if(!planingUpdate) {
@@ -1218,12 +1271,7 @@ exports.editDateTransferSchedule = async (req, res) => {
                 $set: {
                     start_time: start_time,
                     end_time: end_time,
-                },
-                $push: {
-                    remark: {
-                        name: remark,
-                        createAt: new Date()
-                    }
+                    remark: remark
                 }
             },
             {
@@ -1283,6 +1331,18 @@ exports.acceptTransferSchedule = async (req, res) => {
             })
         }
 
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(transferSchedule.planingSchedule,{
+            $set: {
+                purchase: transferSchedule
+            }
+        }, { new:true })
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
+            })
+        }
+
         return res.send({
             message: 'รับงานสำเร็จ',
             schedule: transferSchedule,
@@ -1297,9 +1357,9 @@ exports.acceptTransferSchedule = async (req, res) => {
     }
 }
 
-exports.updateTransferScheduleSchedule = async (req, res) => {
+exports.updateTransferSchedule = async (req, res) => {
     const { id } = req.params
-    const { remark, status } = req.body
+    const { text, status } = req.body
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
@@ -1309,16 +1369,12 @@ exports.updateTransferScheduleSchedule = async (req, res) => {
                 $push: {
                     status: {
                         name: status,
-                        text: 'อัพเดทงานแล้ว',
+                        text: text,
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
                             code: userCode
                         },
-                        createAt: new Date()
-                    },
-                    remark: {
-                        name: remark,
                         createAt: new Date()
                     }
                 }
@@ -1333,6 +1389,19 @@ exports.updateTransferScheduleSchedule = async (req, res) => {
                 schedule: transferSchedule
             })
         }
+
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(transferSchedule.planingSchedule,{
+            $set: {
+                purchase: transferSchedule
+            }
+        }, { new:true })
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
+            })
+        }
+
 
         return res.send({
             message: 'อัพเดทงานสำเร็จ',
@@ -1353,7 +1422,7 @@ exports.getTransferSchedule = async (req, res) => {
     try {
         const transferSchedule = 
             await TransferSchedule.findById( id )
-            .populate('order', 'planingSchedule')
+            .populate('order').populate('planingSchedule')
         if(!transferSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -1391,7 +1460,7 @@ exports.getTransferSchedule = async (req, res) => {
 
 exports.getTransferSchedules = async (req, res) => {
     try {
-        const transferSchedules = await TransferSchedule.find().populate('order', 'planingSchedule')
+        const transferSchedules = await TransferSchedule.find().populate('order').populate('planingSchedule')
         if(!transferSchedules){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',

@@ -20,7 +20,25 @@ route.put('/purchase-update/:id', verifyToken, Work.updatePurchaseSchedule)
 route.get('/purchase/:id', verifyToken, Work.getPurchaseSchedule)
 
 route.post('/production', verifyToken, Work.createNewProductionSchedule)
+route.put('/production-edit/:id', verifyToken, Work.editDateProductionSchedule) // planing
+route.get('/productions', verifyToken, Work.getProductionSchedules) // planing
+route.put('/production-accept/:id', verifyToken, Work.acceptProductionSchedule)
+route.put('/production-update/:id', verifyToken, Work.updateProductionSchedule)
+route.get('/production/:id', verifyToken, Work.getProductionSchedule)
+
 route.post('/qc', verifyToken, Work.createNewQCSchedule)
+route.put('/qc-edit/:id', verifyToken, Work.editDateQCSchedule) // planing
+route.get('/qcs', verifyToken, Work.getQCSchedules) // planing
+route.put('/qc-accept/:id', verifyToken, Work.acceptQCSchedule)
+route.put('/qc-update/:id', verifyToken, Work.updateQCSchedule)
+route.get('/qc/:id', verifyToken, Work.getQCSchedule)
+
+
 route.post('/transfer', verifyToken, Work.createNewTransferSchedule)
+route.put('/transfer-edit/:id', verifyToken, Work.editDateTransferSchedule) // planing
+route.get('/transfers', verifyToken, Work.getTransferSchedules) // planing
+route.put('/transfer-accept/:id', verifyToken, Work.acceptTransferSchedule)
+route.put('/transfer-update/:id', verifyToken, Work.updateTransferSchedule)
+route.get('/transfer/:id', verifyToken, Work.getTransferSchedule)
 
 module.exports = route
