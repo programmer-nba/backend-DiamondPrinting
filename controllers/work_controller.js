@@ -20,10 +20,7 @@ exports.createNewPlaningSchedule = async (req, res) => {
             order: orderId,
             start_time: start_time,
             end_time: end_time,
-            progress: {
-                status: 'new',
-                percent: 0
-            },
+            
             status: {
                 name: 'new',
                 text: 'ตารางงานใหม่',
@@ -49,17 +46,19 @@ exports.createNewPlaningSchedule = async (req, res) => {
         }
 
         const updatedOrderStatus = await Order.findByIdAndUpdate(orderId, {
-            $push: {
-                status: {
-                    name: 'working',
-                    text: 'ลงตารางงานแล้ว',
-                    sender: {
-                        name: `${userName.first} ${userName.last}`,
-                        _id: userId,
-                        code: userCode
-                    },
-                    createAt: new Date()
-                },
+            $set: {
+                status: [
+                    {
+                        name: 'working',
+                        text: 'ลงตารางงานแล้ว',
+                        sender: {
+                            name: `${userName.first} ${userName.last}`,
+                            _id: userId,
+                            code: userCode
+                        },
+                        createAt: new Date()
+                    }
+                ]
             }
         }, { new : true })
         if(!updatedOrderStatus){
@@ -309,7 +308,10 @@ exports.editDatePurchaseSchedule = async (req, res) => {
                 $set: {
                     start_time: start_time,
                     end_time: end_time,
-                    remark: remark || '-',
+                    remark: {
+                        name: remark || '-',
+                        createAt: new Date()
+                    },
                 },
             },
             {
@@ -497,7 +499,10 @@ exports.getPurchaseSchedule = async (req, res) => {
 
 exports.getPurchaseSchedules = async (req, res) => {
     try {
-        const purchaseSchedules = await PurchaseSchedule.find().populate('order').populate('planingSchedule')
+        const purchaseSchedules = await PurchaseSchedule.find()
+        .populate('order')
+        .populate('planingSchedule')
+        .exec()
         if(!purchaseSchedules){
             return res.send({
                 message : 'ไม่พบงานนี้ในระบบ',
@@ -510,24 +515,24 @@ exports.getPurchaseSchedules = async (req, res) => {
                 success: true
             })
         }
-        const formatSchedules = purchaseSchedules.map((purchaseSchedule)=>{
+        const formatSchedules = purchaseSchedules.map((pc)=>{
             const datas = {}
-            purchaseSchedule.order.data.cal_data.forEach(item => {
+            pc.order.data.cal_data.forEach(item => {
                 const key = Object.keys(item)[0]
                 datas[key] = item[key]
             })
     
             const data = {
-                order: purchaseSchedule.order.amount,
+                order: pc.order.amount,
                 paper_type: `${datas.rawMatt?.paperType} ${datas.rawMatt?.option.gsm} แกรม` || null,
                 paper_cost: datas.rawMatt.paper.cost,
                 paper_amount: datas.rawMatt.paper.amount,
             }
 
             return {
-                schedule: purchaseSchedule,
+                schedule: pc,
                 data: data,
-                _id: purchaseSchedule._id
+                _id: pc._id
             }
         })
 
