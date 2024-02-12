@@ -1037,7 +1037,7 @@ exports.deletePreProduction = async (req, res) => {
 
 // create new quotation
 exports.creatQuotation = async (req, res) => {
-    const { preOrderId, calOrder, calDetails  } = req.body
+    const { preOrderId, calOrder, calDetails, choosedPrice } = req.body
     const userId = req.user.id
     const userName = req.user.name
     const userCode = req.user.code
@@ -1075,7 +1075,8 @@ exports.creatQuotation = async (req, res) => {
                 },
                 createAt: new Date()
             },
-            calDetails: (calDetails && calDetails.length > 0) ? calDetails : []
+            calDetails: (calDetails && calDetails.length > 0) ? calDetails : [],
+            choosedPrice: choosedPrice
         })
         const saved_quotation = await new_quotation.save()
         if(!saved_quotation){
@@ -1174,7 +1175,10 @@ exports.getQuotations = async (req, res) => {
 // get new quotations
 exports.getNewQuotations = async (req, res) => {
     try {
-        const quotations = await Quotation.find({ approve: { $ne: true } })
+        const quotations = await Quotation.find({ 
+            approve: { $ne: true },
+            'reject.status' : { $ne: true },
+        })
         .populate('customer', 'nameTh nameEng taxID contact _id code address email')
         .populate('sale', 'name phone_number code')
         .populate('preOrder')

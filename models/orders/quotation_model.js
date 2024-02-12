@@ -48,7 +48,8 @@ const quotationSchema = new Schema(
             status: Boolean,
             remark: String
         },
-        calDetails: Array
+        calDetails: Array,
+        choosedPrice: String,
     },
     {
         timestamps: true
