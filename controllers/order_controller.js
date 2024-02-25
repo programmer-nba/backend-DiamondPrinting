@@ -247,7 +247,7 @@ exports.addPreOrder = async (req, res) => {
         })
     }
     catch (err) {
-        res.status(500).send({
+        return res.status(500).send({
             message: 'ไม่สามารถเพิ่ม preorder',
             err: err.message
         })
@@ -271,7 +271,7 @@ exports.getPreOrders = async (req, res) => {
         })
     }
     catch (err) {
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
         console.log(err)
@@ -294,7 +294,7 @@ exports.getPreOrder = async (req, res) => {
         })
     }
     catch (err) {
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
         console.log(err)
@@ -427,7 +427,7 @@ exports.updatePreOrder = async (req, res) => {
 
     }
     catch (err) {
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
         console.log(err)
@@ -578,7 +578,7 @@ exports.deletePreOrder = async (req, res) => {
         })
     }
     catch (err) {
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
         console.log(err)
@@ -609,7 +609,7 @@ exports.deletePreOrders = async (req, res) => {
         })
     }
     catch (err) {
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
         console.log(err)
@@ -636,10 +636,9 @@ exports.getPreProductionsOfOrder = async (req, res) => {
         })
     }
     catch (err) {
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
-        console.log(err.message)
     }
 }
 
@@ -792,7 +791,7 @@ exports.addPreProduction = async (req, res) => {
     }
     catch (err) {
         console.log(err)
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
     }
@@ -818,10 +817,9 @@ exports.getPreProductions = async (req, res) => {
         })
     }
     catch (err) {
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
-        console.log(err.message)
     }
 }
 
@@ -842,10 +840,9 @@ exports.getPreProduction = async (req, res) => {
         })
     }
     catch (err) {
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
-        console.log(err.message)
     }
 }
 
@@ -976,7 +973,7 @@ exports.updatePreProduction = async (req, res) => {
     }
     catch (err) {
         console.log(err)
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
     }
@@ -1026,10 +1023,9 @@ exports.deletePreProduction = async (req, res) => {
         })
     }
     catch (err) {
-        res.status(500).send({
+        return res.status(500).send({
             message: err.message
         })
-        console.log(err.message)
     }
 }
 
@@ -1076,7 +1072,11 @@ exports.creatQuotation = async (req, res) => {
                 createAt: new Date()
             },
             calDetails: (calDetails && calDetails.length > 0) ? calDetails : [],
-            choosedPrice: choosedPrice
+            choosedPrice: choosedPrice,
+            reject: {
+                status: false,
+                remark: null
+            },
         })
         const saved_quotation = await new_quotation.save()
         if(!saved_quotation){
@@ -1129,11 +1129,10 @@ exports.creatQuotation = async (req, res) => {
         })
     }
     catch (err) {
-        res.send({
+        return res.send({
             message: 'ไม่สามารถสร้างใบเสนอราคาได้',
             err: err.message
         })
-        console.log(err)
     }
 }
 
@@ -1165,10 +1164,9 @@ exports.getQuotations = async (req, res) => {
         })
     }
     catch (err) {
-        res.send({
+        return res.send({
             message: err.message
         })
-        console.log(err)
     }
 }
 
@@ -1206,10 +1204,9 @@ exports.getNewQuotations = async (req, res) => {
         })
     }
     catch (err) {
-        res.send({
+        return res.send({
             message: err.message
         })
-        console.log(err)
     }
 }
 
@@ -1248,10 +1245,9 @@ exports.getRejectedQuotations = async (req, res) => {
         })
     }
     catch (err) {
-        res.send({
+        return res.send({
             message: err.message
         })
-        console.log(err)
     }
 }
 
@@ -1290,10 +1286,9 @@ exports.getApprovedQuotations = async (req, res) => {
         })
     }
     catch (err) {
-        res.send({
+        return res.send({
             message: err.message
         })
-        console.log(err)
     }
 }
 
@@ -1323,10 +1318,9 @@ exports.getQuotationOfpreOrder = async (req, res) => {
         })
     }
     catch (err) {
-        res.send({
+        return res.send({
             message: err.message
         })
-        console.log(err)
     }
 }
 
@@ -1349,10 +1343,9 @@ exports.getQuotation = async (req, res) => {
         })
     }
     catch (err) {
-        res.send({
+        return res.send({
             message: err.message
         })
-        console.log(err)
     }
 }
 
@@ -1399,10 +1392,9 @@ exports.approveQuotation = async (req, res) => {
         })
     }
     catch (err) {
-        res.send({
+        return res.send({
             message: err.message
         })
-        console.log(err)
     }
 }
 
@@ -1451,10 +1443,9 @@ exports.rejectQuotation = async (req, res) => {
         })
     }
     catch (err) {
-        res.send({
+        return res.send({
             message: err.message
         })
-        console.log(err)
     }
 }
 
@@ -1476,10 +1467,9 @@ exports.deleteQuotation = async (req, res) => {
         })
     }
     catch (err) {
-        res.send({
+        return res.send({
             message: err.message
         })
-        console.log(err)
     }
 }
 

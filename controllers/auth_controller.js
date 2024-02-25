@@ -478,7 +478,7 @@ exports.planingRegister = async (req, res) => {
 exports.productionRegister = async (req, res) => {
     const {
         username, password, phone_number, email,
-        first_name, last_name,
+        first_name, last_name, subrole
     } = req.body
     try {
 
@@ -506,7 +506,7 @@ exports.productionRegister = async (req, res) => {
             email: email,
             role: {
                 main: 'โปรดักชัน',
-                sub: null,
+                sub: subrole,
             },
             code: production_code,
             logedInHis: 

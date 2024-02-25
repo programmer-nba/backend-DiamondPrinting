@@ -18,6 +18,7 @@ route.get('/purchases', verifyToken, Work.getPurchaseSchedules) // planing
 route.put('/purchase-accept/:id', verifyToken, Work.acceptPurchaseSchedule)
 route.put('/purchase-update/:id', verifyToken, Work.updatePurchaseSchedule)
 route.get('/purchase/:id', verifyToken, Work.getPurchaseSchedule)
+route.get('/purchase-files/:id', verifyToken, Work.getFilesPurchase)
 
 route.post('/production', verifyToken, Work.createNewProductionSchedule)
 route.put('/production-edit/:id', verifyToken, Work.editDateProductionSchedule) // planing
@@ -40,5 +41,6 @@ route.get('/transfers', verifyToken, Work.getTransferSchedules) // planing
 route.put('/transfer-accept/:id', verifyToken, Work.acceptTransferSchedule)
 route.put('/transfer-update/:id', verifyToken, Work.updateTransferSchedule)
 route.get('/transfer/:id', verifyToken, Work.getTransferSchedule)
+route.get('/transfer-files/:id', verifyToken, Work.getFilesTransfer)
 
 module.exports = route

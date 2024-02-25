@@ -9,7 +9,7 @@ exports.fileUpload = async (req, res) => {
         const files = req.dataIds
        
         if(!files || files.length===0) {
-            res.send({
+            return res.send({
                 message: 'ไม่พบไฟล์ที่แนบมา',
                 files: files || []
             })
@@ -51,11 +51,10 @@ exports.fileUpload = async (req, res) => {
         });
     }
     catch(err) {
-        res.send({
+        return res.send({
             message: 'อัพโหลดไฟล์ผิดพลาด',
             err: err.message
         })
-        console.log(err)
     }
 }
 
@@ -76,11 +75,10 @@ exports.getFiles = async (req, res) => {
         })
     }
     catch(err) {
-        res.send({
+        return res.send({
             message: 'ERROR',
             err: err.message
         })
-        console.log(err)
     }
 }
 
@@ -101,11 +99,10 @@ exports.getFile = async (req, res) => {
         })
     }
     catch(err) {
-        res.send({
+        return res.send({
             message: 'ERROR',
             err: err.message
         })
-        console.log(err)
     }
 }
 
@@ -128,10 +125,9 @@ exports.getFilesOfPreOrder = async (req, res) => {
         })
     }
     catch(err) {
-        res.send({
+        return res.send({
             message: 'ERROR',
             err: err.message
         })
-        console.log(err)
     }
 }

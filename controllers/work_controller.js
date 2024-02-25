@@ -4,6 +4,7 @@ const PurchaseSchedule = require('../models/orders/Schedules/purchaseSchedule_mo
 const ProductionSchedule = require('../models/orders/Schedules/productionSchedule_model.js')
 const QCSchedule = require('../models/orders/Schedules/QCSchedule_model.js')
 const TransferSchedule = require('../models/orders/Schedules/transferSchedule_model.js')
+const File = require('../models/files/file_model.js')
 
 /*  Planing  */
 exports.createNewPlaningSchedule = async (req, res) => {
@@ -456,6 +457,24 @@ exports.updatePurchaseSchedule = async (req, res) => {
     }
 }
 
+exports.getFilesPurchase = async (req, res) => {
+    const { id } = req.params
+    try {
+        const files = await File.find({preOrderId: id, fileName: 'purchase'})
+        return res.send({
+            data: files || [],
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message,
+            success: false
+        })
+    }
+}
+
 exports.getPurchaseSchedule = async (req, res) => {
     const { id } = req.params
     try {
@@ -699,7 +718,7 @@ exports.acceptProductionSchedule = async (req, res) => {
 
         const planingUpdate = await PlaningSchedule.findByIdAndUpdate(productionSchedule.planingSchedule,{
             $set: {
-                purchase: productionSchedule
+                production: productionSchedule
             }
         }, { new:true })
         if(!planingUpdate) {
@@ -758,7 +777,7 @@ exports.updateProductionSchedule = async (req, res) => {
 
         const planingUpdate = await PlaningSchedule.findByIdAndUpdate(productionSchedule.planingSchedule,{
             $set: {
-                purchase: productionSchedule
+                production: productionSchedule
             }
         }, { new:true })
         if(!planingUpdate) {
@@ -1024,7 +1043,7 @@ exports.acceptQCSchedule = async (req, res) => {
 
         const planingUpdate = await PlaningSchedule.findByIdAndUpdate(qcSchedule.planingSchedule,{
             $set: {
-                purchase: qcSchedule
+                qc: qcSchedule
             }
         }, { new:true })
         if(!planingUpdate) {
@@ -1083,7 +1102,7 @@ exports.updateQCSchedule = async (req, res) => {
 
         const planingUpdate = await PlaningSchedule.findByIdAndUpdate(qcSchedule.planingSchedule,{
             $set: {
-                purchase: qcSchedule
+                qc: qcSchedule
             }
         }, { new:true })
         if(!planingUpdate) {
@@ -1347,7 +1366,7 @@ exports.acceptTransferSchedule = async (req, res) => {
 
         const planingUpdate = await PlaningSchedule.findByIdAndUpdate(transferSchedule.planingSchedule,{
             $set: {
-                purchase: transferSchedule
+                transfer: transferSchedule
             }
         }, { new:true })
         if(!planingUpdate) {
@@ -1406,7 +1425,7 @@ exports.updateTransferSchedule = async (req, res) => {
 
         const planingUpdate = await PlaningSchedule.findByIdAndUpdate(transferSchedule.planingSchedule,{
             $set: {
-                purchase: transferSchedule
+                transfer: transferSchedule
             }
         }, { new:true })
         if(!planingUpdate) {
@@ -1517,6 +1536,24 @@ exports.getTransferSchedules = async (req, res) => {
         console.log(err)
         return res.send({
             message: err.message
+        })
+    }
+}
+
+exports.getFilesTransfer = async (req, res) => {
+    const { id } = req.params
+    try {
+        const files = await File.find({preOrderId: id, fileName: 'transfer'})
+        return res.send({
+            data: files || [],
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message,
+            success: false
         })
     }
 }
