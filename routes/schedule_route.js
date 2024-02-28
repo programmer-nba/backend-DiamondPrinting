@@ -19,6 +19,7 @@ route.put('/purchase-accept/:id', verifyToken, Work.acceptPurchaseSchedule)
 route.put('/purchase-update/:id', verifyToken, Work.updatePurchaseSchedule)
 route.get('/purchase/:id', verifyToken, Work.getPurchaseSchedule)
 route.get('/purchase-files/:id', verifyToken, Work.getFilesPurchase)
+route.put('/purchase-edit-update/:id/:statusId', verifyToken, Work.editUpdatePurchaseSchedule)
 
 route.post('/production', verifyToken, Work.createNewProductionSchedule)
 route.put('/production-edit/:id', verifyToken, Work.editDateProductionSchedule) // planing

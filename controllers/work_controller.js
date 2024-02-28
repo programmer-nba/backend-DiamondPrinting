@@ -462,6 +462,60 @@ exports.updatePurchaseSchedule = async (req, res) => {
     }
 }
 
+exports.editUpdatePurchaseSchedule = async (req, res) => {
+    const { id, statusId } = req.params
+    const { text, status, detail } = req.body
+    try {
+        const purchaseSchedule = await PurchaseSchedule.findOneAndUpdate( 
+            {
+                _id: id,
+                'status._id' : statusId
+            },
+            {
+                $set: {
+                    'status.$.name' : status,
+                    'status.$.text' : text,
+                    'sstatus.$.detail' : detail,
+                    '.status.$.createAt' : new Date()
+                }
+            },
+            {
+                new : true
+            }   
+        ).exec()
+        if(!purchaseSchedule){
+            return res.send({
+                message: 'อัพเดทงานล้มเหลว',
+                schedule: purchaseSchedule
+            })
+        }
+
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(purchaseSchedule.planingSchedule,{
+            $set: {
+                purchase: purchaseSchedule
+            }
+        }, { new:true })
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
+            })
+        }
+
+        return res.send({
+            message: 'อัพเดทงานสำเร็จ',
+            schedule: purchaseSchedule,
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message
+        })
+    }
+}
+
 exports.getFilesPurchase = async (req, res) => {
     const { id } = req.params
     try {
