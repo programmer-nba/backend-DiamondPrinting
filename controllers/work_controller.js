@@ -25,6 +25,7 @@ exports.createNewPlaningSchedule = async (req, res) => {
             status: {
                 name: 'new',
                 text: 'ตารางงานใหม่',
+                detail: '',
                 sender: {
                     name: `${userName.first} ${userName.last}`,
                     _id: userId,
@@ -165,6 +166,7 @@ exports.editPlaningSchedule = async (req, res) => {
                 status: {
                     name: 'edit',
                     text: 'แก้ไขตารางงาน',
+                    detail: '',
                     sender: {
                         name: `${userName.first} ${userName.last}`,
                         _id: userId,
@@ -250,6 +252,7 @@ exports.createNewPurchaseSchedule = async (req, res) => {
             status: {
                 name: 'new',
                 text: 'ตารางงานใหม่',
+                detail: '',
                 sender: {
                     name: `${userName.first} ${userName.last}`,
                     _id: userId,
@@ -352,6 +355,7 @@ exports.acceptPurchaseSchedule = async (req, res) => {
                     status: {
                         name: 'accept',
                         text: 'รับงานแล้ว',
+                        detail: '',
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
@@ -400,7 +404,7 @@ exports.acceptPurchaseSchedule = async (req, res) => {
 
 exports.updatePurchaseSchedule = async (req, res) => {
     const { id } = req.params
-    const { text, status } = req.body
+    const { text, status, detail } = req.body
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
@@ -411,6 +415,7 @@ exports.updatePurchaseSchedule = async (req, res) => {
                     status: {
                         name: status,
                         text: text,
+                        detail: detail,
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
@@ -597,6 +602,7 @@ exports.createNewProductionSchedule = async (req, res) => {
             status: {
                 name: 'new',
                 text: 'ตารางงานใหม่',
+                detail: '',
                 sender: {
                     name: `${userName.first} ${userName.last}`,
                     _id: userId,
@@ -696,6 +702,7 @@ exports.acceptProductionSchedule = async (req, res) => {
                     status: {
                         name: 'accept',
                         text: 'รับงานแล้ว',
+                        detail: '',
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
@@ -744,7 +751,7 @@ exports.acceptProductionSchedule = async (req, res) => {
 
 exports.updateProductionSchedule = async (req, res) => {
     const { id } = req.params
-    const { text, status } = req.body
+    const { text, status, detail } = req.body
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
@@ -755,6 +762,7 @@ exports.updateProductionSchedule = async (req, res) => {
                     status: {
                         name: status,
                         text: text,
+                        detail: detail,
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
@@ -922,6 +930,7 @@ exports.createNewQCSchedule = async (req, res) => {
             status: {
                 name: 'new',
                 text: 'ตารางงานใหม่',
+                detail: '',
                 sender: {
                     name: `${userName.first} ${userName.last}`,
                     _id: userId,
@@ -1021,6 +1030,7 @@ exports.acceptQCSchedule = async (req, res) => {
                     status: {
                         name: 'accept',
                         text: 'รับงานแล้ว',
+                        detail: '',
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
@@ -1069,7 +1079,7 @@ exports.acceptQCSchedule = async (req, res) => {
 
 exports.updateQCSchedule = async (req, res) => {
     const { id } = req.params
-    const { text, status } = req.body
+    const { text, status, detail } = req.body
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
@@ -1080,6 +1090,7 @@ exports.updateQCSchedule = async (req, res) => {
                     status: {
                         name: status,
                         text: text,
+                        detail: detail,
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
@@ -1245,6 +1256,7 @@ exports.createNewTransferSchedule = async (req, res) => {
             status: {
                 name: 'new',
                 text: 'ตารางงานใหม่',
+                detail: '',
                 sender: {
                     name: `${userName.first} ${userName.last}`,
                     _id: userId,
@@ -1344,6 +1356,7 @@ exports.acceptTransferSchedule = async (req, res) => {
                     status: {
                         name: 'accept',
                         text: 'รับงานแล้ว',
+                        detail: '',
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
@@ -1392,7 +1405,7 @@ exports.acceptTransferSchedule = async (req, res) => {
 
 exports.updateTransferSchedule = async (req, res) => {
     const { id } = req.params
-    const { text, status } = req.body
+    const { text, status, detail } = req.body
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
@@ -1403,6 +1416,7 @@ exports.updateTransferSchedule = async (req, res) => {
                     status: {
                         name: status,
                         text: text,
+                        detail: detail,
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,

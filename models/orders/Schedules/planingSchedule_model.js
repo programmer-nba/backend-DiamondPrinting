@@ -21,6 +21,7 @@ const plaingScheduleSchema = new Schema(
             {
                 name: String,
                 text: String,
+                detail: String,
                 sender: {
                     name: String,
                     _id: String,
