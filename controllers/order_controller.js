@@ -1497,7 +1497,6 @@ exports.createOrder = async (req, res) => {
         const quotation = await Quotation.findById( quotation_id )
         const prev_order = await Order.find()
         const code = `${quotation.code}-${genCode( prev_order.length )}`
-
         const new_order = new Order({
             code: code,
             quotation: quotation,

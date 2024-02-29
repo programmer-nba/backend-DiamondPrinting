@@ -7,6 +7,10 @@ const QCScheduleSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Order'
         },
+        customer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Customer'
+        },
         planingSchedule: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PlaningSchedule'

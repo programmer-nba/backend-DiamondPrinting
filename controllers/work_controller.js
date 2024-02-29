@@ -17,11 +17,12 @@ exports.createNewPlaningSchedule = async (req, res) => {
     const userId = req.user.id
     const userCode = req.user.code
     try {
+        const order = await Order.findById(orderId)
         const new_schedule = {
             order: orderId,
             start_time: start_time,
             end_time: end_time,
-            
+            customer: order.customer,
             status: {
                 name: 'new',
                 text: 'ตารางงานใหม่',
@@ -93,6 +94,7 @@ exports.getPlaningSchedules = async (req, res) => {
         .populate('qc')
         .populate('production')
         .populate('transfer')
+        .populate('customer')
         .exec()
         if(!schedules && schedules.length < 1){
             return res.send({
@@ -125,6 +127,7 @@ exports.getPlaningSchedule = async (req, res) => {
         .populate('qc')
         .populate('production')
         .populate('transfer')
+        .populate('customer')
         .exec()
         if(!schedule){
             return res.send({
@@ -236,8 +239,10 @@ exports.createNewPurchaseSchedule = async (req, res) => {
     const userId = req.user.id
     const userCode = req.user.code
     try {
+        const order = await Order.findById(orderId)
         const new_schedule = {
             order: orderId,
+            customer: order.customer,
             planingSchedule: scheduleId,
             start_time: start_time,
             end_time: end_time,
@@ -539,7 +544,7 @@ exports.getPurchaseSchedule = async (req, res) => {
     try {
         const purchaseSchedule = 
             await PurchaseSchedule.findById( id )
-            .populate('order').populate('planingSchedule')
+            .populate('order').populate('planingSchedule').populate('customer')
         if(!purchaseSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -580,6 +585,7 @@ exports.getPurchaseSchedules = async (req, res) => {
         const purchaseSchedules = await PurchaseSchedule.find()
         .populate('order')
         .populate('planingSchedule')
+        .populate('customer')
         .exec()
         if(!purchaseSchedules){
             return res.send({
@@ -640,8 +646,10 @@ exports.createNewProductionSchedule = async (req, res) => {
     const userId = req.user.id
     const userCode = req.user.code
     try {
+        const order = await Order.findById(orderId)
         const new_schedule = {
             order: orderId,
+            customer: order.customer,
             planingSchedule: scheduleId,
             start_time: start_time,
             end_time: end_time,
@@ -868,7 +876,7 @@ exports.getProductionSchedule = async (req, res) => {
     try {
         const productionSchedule = 
             await ProductionSchedule.findById( id )
-            .populate('order').populate('planingSchedule')
+            .populate('order').populate('planingSchedule').populate('customer')
         if(!productionSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -909,6 +917,7 @@ exports.getProductionSchedules = async (req, res) => {
         const productionSchedules = await ProductionSchedule.find()
         .populate('order')
         .populate('planingSchedule')
+        .populate('customer')
         if(!productionSchedules){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -955,6 +964,24 @@ exports.getProductionSchedules = async (req, res) => {
     }
 }
 
+exports.getFilesProduction = async (req, res) => {
+    const { id } = req.params
+    try {
+        const files = await File.find({preOrderId: id, fileName: 'production'})
+        return res.send({
+            data: files || [],
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message,
+            success: false
+        })
+    }
+}
+
 /*  QC  */
 exports.createNewQCSchedule = async (req, res) => {
     const { 
@@ -968,8 +995,10 @@ exports.createNewQCSchedule = async (req, res) => {
     const userId = req.user.id
     const userCode = req.user.code
     try {
+        const order = await Order.findById(orderId)
         const new_schedule = {
             order: orderId,
+            customer: order.customer,
             planingSchedule: scheduleId,
             start_time: start_time,
             end_time: end_time,
@@ -1196,7 +1225,7 @@ exports.getQCSchedule = async (req, res) => {
     try {
         const qcSchedule = 
             await QCSchedule.findById( id )
-            .populate('order').populate('planingSchedule')
+            .populate('order').populate('planingSchedule').populate('customer')
         if(!qcSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -1234,7 +1263,7 @@ exports.getQCSchedule = async (req, res) => {
 
 exports.getQCSchedules = async (req, res) => {
     try {
-        const qcSchedules = await QCSchedule.find().populate('order').populate('planingSchedule')
+        const qcSchedules = await QCSchedule.find().populate('order').populate('planingSchedule').populate('customer')
         if(!qcSchedules){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -1281,6 +1310,24 @@ exports.getQCSchedules = async (req, res) => {
     }
 }
 
+exports.getFilesQC = async (req, res) => {
+    const { id } = req.params
+    try {
+        const files = await File.find({preOrderId: id, fileName: 'qc'})
+        return res.send({
+            data: files || [],
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message,
+            success: false
+        })
+    }
+}
+
 /*  Transfer  */
 exports.createNewTransferSchedule = async (req, res) => {
     const { 
@@ -1294,8 +1341,10 @@ exports.createNewTransferSchedule = async (req, res) => {
     const userId = req.user.id
     const userCode = req.user.code
     try {
+        const order = await Order.findById(orderId)
         const new_schedule = {
             order: orderId,
+            customer: order.customer,
             planingSchedule: scheduleId,
             start_time: start_time,
             end_time: end_time,
@@ -1523,7 +1572,7 @@ exports.getTransferSchedule = async (req, res) => {
     try {
         const transferSchedule = 
             await TransferSchedule.findById( id )
-            .populate('order').populate('planingSchedule')
+            .populate('order').populate('planingSchedule').populate('customer')
         if(!transferSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -1561,7 +1610,7 @@ exports.getTransferSchedule = async (req, res) => {
 
 exports.getTransferSchedules = async (req, res) => {
     try {
-        const transferSchedules = await TransferSchedule.find().populate('order').populate('planingSchedule')
+        const transferSchedules = await TransferSchedule.find().populate('order').populate('planingSchedule').populate('customer')
         if(!transferSchedules){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -1625,3 +1674,5 @@ exports.getFilesTransfer = async (req, res) => {
         })
     }
 }
+
+/* ACCOUNTING */
