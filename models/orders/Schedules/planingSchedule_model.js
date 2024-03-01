@@ -11,6 +11,10 @@ const plaingScheduleSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customer'
         },
+        details: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'PreOrder'
+        },
         start_time: {
             type: Date
         },

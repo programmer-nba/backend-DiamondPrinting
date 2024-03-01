@@ -7,6 +7,10 @@ const accountScheduleSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Order'
         },
+        details: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'PreOrder'
+        },
         planingSchedule: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PlaningSchedule'

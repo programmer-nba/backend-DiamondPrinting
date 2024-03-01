@@ -11,6 +11,10 @@ const transferScheduleSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customer'
         },
+        details: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'PreOrder'
+        },
         planingSchedule: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PlaningSchedule'

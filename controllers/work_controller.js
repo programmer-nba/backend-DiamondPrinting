@@ -5,6 +5,7 @@ const ProductionSchedule = require('../models/orders/Schedules/productionSchedul
 const QCSchedule = require('../models/orders/Schedules/QCSchedule_model.js')
 const TransferSchedule = require('../models/orders/Schedules/transferSchedule_model.js')
 const File = require('../models/files/file_model.js')
+const PreOrder = require('../models/orders/order_model.js')
 
 /*  Planing  */
 exports.createNewPlaningSchedule = async (req, res) => {
@@ -20,6 +21,7 @@ exports.createNewPlaningSchedule = async (req, res) => {
         const order = await Order.findById(orderId)
         const new_schedule = {
             order: orderId,
+            details: order.details,
             start_time: start_time,
             end_time: end_time,
             customer: order.customer,
@@ -95,6 +97,7 @@ exports.getPlaningSchedules = async (req, res) => {
         .populate('production')
         .populate('transfer')
         .populate('customer')
+        .populate('details')
         .exec()
         if(!schedules && schedules.length < 1){
             return res.send({
@@ -128,6 +131,7 @@ exports.getPlaningSchedule = async (req, res) => {
         .populate('production')
         .populate('transfer')
         .populate('customer')
+        .populate('details')
         .exec()
         if(!schedule){
             return res.send({
@@ -243,6 +247,7 @@ exports.createNewPurchaseSchedule = async (req, res) => {
         const new_schedule = {
             order: orderId,
             customer: order.customer,
+            details: order.details,
             planingSchedule: scheduleId,
             start_time: start_time,
             end_time: end_time,
@@ -544,7 +549,7 @@ exports.getPurchaseSchedule = async (req, res) => {
     try {
         const purchaseSchedule = 
             await PurchaseSchedule.findById( id )
-            .populate('order').populate('planingSchedule').populate('customer')
+            .populate('order').populate('planingSchedule').populate('customer').populate('details')
         if(!purchaseSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -586,6 +591,7 @@ exports.getPurchaseSchedules = async (req, res) => {
         .populate('order')
         .populate('planingSchedule')
         .populate('customer')
+        .populate('details')
         .exec()
         if(!purchaseSchedules){
             return res.send({
@@ -649,6 +655,7 @@ exports.createNewProductionSchedule = async (req, res) => {
         const order = await Order.findById(orderId)
         const new_schedule = {
             order: orderId,
+            details: order.details,
             customer: order.customer,
             planingSchedule: scheduleId,
             start_time: start_time,
@@ -876,7 +883,7 @@ exports.getProductionSchedule = async (req, res) => {
     try {
         const productionSchedule = 
             await ProductionSchedule.findById( id )
-            .populate('order').populate('planingSchedule').populate('customer')
+            .populate('order').populate('planingSchedule').populate('customer').populate('details')
         if(!productionSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -918,6 +925,7 @@ exports.getProductionSchedules = async (req, res) => {
         .populate('order')
         .populate('planingSchedule')
         .populate('customer')
+        .populate('details')
         if(!productionSchedules){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -930,6 +938,7 @@ exports.getProductionSchedules = async (req, res) => {
                 success: true
             })
         }
+
         const formatSchedules = productionSchedules.map((schedule)=>{
             const datas = {}
             schedule.order.data.cal_data.forEach(item => {
@@ -939,9 +948,54 @@ exports.getProductionSchedules = async (req, res) => {
     
             const data = {
                 order: schedule.order.amount,
-                paper_type: `${datas.rawMatt?.paperType} ${datas.rawMatt?.option.gsm} แกรม` || null,
-                paper_cost: datas.rawMatt.paper.cost,
-                paper_amount: datas.rawMatt.paper.amount,
+                paper: {
+                    paper_type: `${datas.rawMatt.paperType} ${datas.rawMatt.option.gsm}`,
+                    paper_size: `${datas.rawMatt.option.width} ${datas.rawMatt.option.long}`,
+                    paper_cut: datas.rawMatt.order.cut,
+                    paper_lay: datas.rawMatt.order.lay,
+                },
+                plate: {
+                    plate_size: datas.plate.size,
+                    plate_flip: datas.plate.flip_plate,
+                    plate_colors: datas.plate.colors,
+                },
+                print: {
+                    front_colors: datas[`print_${datas.plate.size}_0`]?.colors,
+                    front_floor: datas[`print_${datas.plate.size}_Ffloor`],
+                    back_colors: datas[`print_${datas.plate.size}_1`]?.colors,
+                    back_floor: datas[`print_${datas.plate.size}_Bfloor`]
+                },
+                diecut: {
+                    block_size: datas.diecut?.blockSize,
+                    percent: datas.diecut?.percent,
+                    pru:  datas.diecut?.pru ? true : false,
+                    window: datas.diecut_window?.pumpPrice ? true : false,
+                    blow: datas.diecut_blow?.total ? true : false,
+                },
+                coating: {
+                    front: {
+                        type: datas.coating_0?.type,
+                        size: datas.coating_0 ? `${datas.coating_0?.inWidth} x ${datas.coating_0?.inLong}` : null,
+                        spot_uv: datas.coating_1 ? {
+                            type: datas.coating_1?.type,
+                            size: datas.coating_1 ? `${datas.coating_1?.inWidth} x ${datas.coating_1?.inLong}` : null,
+                        } : {
+                            type: null,
+                            size: null,
+                        }
+                    },
+                    back: {
+                        type: datas.coating_back_0?.type,
+                        size: datas.coating_back_0 ? `${datas.coating_back_0?.inWidth} x ${datas.coating_back_0?.inLong}` : null,
+                        spot_uv: datas.coating_back_1 ? {
+                            type: datas.coating_back_1?.type,
+                            size: datas.coating_back_1 ? `${datas.coating_back_1?.inWidth} x ${datas.coating_back_1?.inLong}` : null,
+                        } : {
+                            type: null,
+                            size: null,
+                        }
+                    },
+                }
             }
 
             return {
@@ -982,6 +1036,60 @@ exports.getFilesProduction = async (req, res) => {
     }
 }
 
+exports.editUpdateProductionSchedule = async (req, res) => {
+    const { id, statusId } = req.params
+    const { text, status, detail } = req.body
+    try {
+        const productionSchedule = await ProductionSchedule.findOneAndUpdate( 
+            {
+                _id: id,
+                'status._id' : statusId
+            },
+            {
+                $set: {
+                    'status.$.name' : status,
+                    'status.$.text' : text,
+                    'sstatus.$.detail' : detail,
+                    '.status.$.createAt' : new Date()
+                }
+            },
+            {
+                new : true
+            }   
+        ).exec()
+        if(!productionSchedule){
+            return res.send({
+                message: 'อัพเดทงานล้มเหลว',
+                schedule: productionSchedule
+            })
+        }
+
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(productionSchedule.planingSchedule,{
+            $set: {
+                production: productionSchedule
+            }
+        }, { new:true })
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
+            })
+        }
+
+        return res.send({
+            message: 'อัพเดทงานสำเร็จ',
+            schedule: productionSchedule,
+            success: true
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message
+        })
+    }
+}
+
 /*  QC  */
 exports.createNewQCSchedule = async (req, res) => {
     const { 
@@ -998,6 +1106,7 @@ exports.createNewQCSchedule = async (req, res) => {
         const order = await Order.findById(orderId)
         const new_schedule = {
             order: orderId,
+            details: order.details,
             customer: order.customer,
             planingSchedule: scheduleId,
             start_time: start_time,
@@ -1225,7 +1334,7 @@ exports.getQCSchedule = async (req, res) => {
     try {
         const qcSchedule = 
             await QCSchedule.findById( id )
-            .populate('order').populate('planingSchedule').populate('customer')
+            .populate('order').populate('planingSchedule').populate('customer').populate('details')
         if(!qcSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -1263,7 +1372,7 @@ exports.getQCSchedule = async (req, res) => {
 
 exports.getQCSchedules = async (req, res) => {
     try {
-        const qcSchedules = await QCSchedule.find().populate('order').populate('planingSchedule').populate('customer')
+        const qcSchedules = await QCSchedule.find().populate('order').populate('planingSchedule').populate('customer').populate('details')
         if(!qcSchedules){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -1344,6 +1453,7 @@ exports.createNewTransferSchedule = async (req, res) => {
         const order = await Order.findById(orderId)
         const new_schedule = {
             order: orderId,
+            details: order.details,
             customer: order.customer,
             planingSchedule: scheduleId,
             start_time: start_time,
@@ -1572,7 +1682,7 @@ exports.getTransferSchedule = async (req, res) => {
     try {
         const transferSchedule = 
             await TransferSchedule.findById( id )
-            .populate('order').populate('planingSchedule').populate('customer')
+            .populate('order').populate('planingSchedule').populate('customer').populate('details')
         if(!transferSchedule){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
@@ -1610,7 +1720,7 @@ exports.getTransferSchedule = async (req, res) => {
 
 exports.getTransferSchedules = async (req, res) => {
     try {
-        const transferSchedules = await TransferSchedule.find().populate('order').populate('planingSchedule').populate('customer')
+        const transferSchedules = await TransferSchedule.find().populate('order').populate('planingSchedule').populate('customer').populate('details')
         if(!transferSchedules){
             return res.send({
                 message: 'ไม่พบงานนี้ในระบบ',
