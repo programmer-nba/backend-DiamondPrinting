@@ -115,6 +115,8 @@ const preProductionSchema = new Schema(
         glueData : {
             glue: Array,
             glue2: Array,
+            chain: Array,
+            bag: Boolean,
             glue_dot: Array
         },
         status: [

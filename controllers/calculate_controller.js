@@ -260,8 +260,8 @@ exports.calAll = async (req, res) => {
                         },
                         cost: 2.5 * order
                     }
-                    datas.push({[`bag`]:bag_cost.data})
-                    costs[`bag`] = bag_cost.cost
+                    datas.push({bag:bag_cost.data})
+                    costs.bag = bag_cost.cost
                 }
                 
             }
