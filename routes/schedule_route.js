@@ -29,6 +29,8 @@ route.put('/production-update/:id', verifyToken, Work.updateProductionSchedule)
 route.get('/production/:id', verifyToken, Work.getProductionSchedule)
 route.get('/production-files/:id', verifyToken, Work.getFilesProduction)
 route.put('/production-edit-update/:id/:statusId', verifyToken, Work.editUpdateProductionSchedule)
+route.put('/production-qc-send/:id', verifyToken, Work.sendQc)
+route.put('/production-qc-reject/:id', verifyToken, Work.rejectQc)
 
 route.post('/qc', verifyToken, Work.createNewQCSchedule)
 route.put('/qc-edit/:id', verifyToken, Work.editDateQCSchedule) // planing

@@ -759,6 +759,138 @@ exports.editDateProductionSchedule = async (req, res) => {
     }
 }
 
+exports.sendQc = async (req, res) => {
+    const { amount, detail } = req.body
+    const { id } = req.params
+    const userName = req.user.name
+    const userId = req.user.id
+    const userCode = req.user.code
+    try {
+        let production = await ProductionSchedule.findById(id)
+        if(!production){
+            return res.send({
+                message: 'ไม่พบไอดี production นี้',
+                data: null,
+                success: false
+            })
+        }
+
+        production.process.sent += amount
+        production.process.status = 'ส่ง QC',
+        production.status.push({
+            name: 'sendQC',
+            text: 'ส่ง qc',
+            detail: detail || '',
+            sender: {
+                name: `${userName.first} ${userName.last}`,
+                _id: userId,
+                code: userCode
+            },
+            createAt: new Date()
+        })
+        const saved_production = await production.save()
+        if(!saved_production){
+            return res.send({
+                message: 'ไม่สามารถบันทึก production',
+                success: false,
+                data: null
+            })
+        }
+
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(saved_production.planingSchedule, {
+            $set: {
+                production: saved_schedule
+            }
+        }, { new:true } )
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
+            })
+        }
+
+        return res.send({
+            message: `ส่ง QC สำเร็จ จำนวน ${amount} ชิ้น`,
+            success: true,
+            data: saved_production
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message,
+            success: false,
+            data: null
+        })
+    }
+}
+
+exports.rejectQc = async (req, res) => {
+    const { amount, detail } = req.body
+    const { id } = req.params
+    const userName = req.user.name
+    const userId = req.user.id
+    const userCode = req.user.code
+    try {
+        let production = await ProductionSchedule.findById(id)
+        if(!production){
+            return res.send({
+                message: 'ไม่พบไอดี production นี้',
+                data: null,
+                success: false
+            })
+        }
+
+        production.process.sent -= amount
+        production.process.status = 'ไม่ผ่าน qc',
+        production.status.push({
+            name: 'rejectQC',
+            text: 'ไม่ผ่าน qc',
+            detail: detail || '',
+            sender: {
+                name: `${userName.first} ${userName.last}`,
+                _id: userId,
+                code: userCode
+            },
+            createAt: new Date()
+        })
+        const saved_production = await production.save()
+        if(!saved_production){
+            return res.send({
+                message: 'ไม่สามารถบันทึก production',
+                success: false,
+                data: null
+            })
+        }
+
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(saved_production.planingSchedule, {
+            $set: {
+                production: saved_schedule
+            }
+        }, { new:true } )
+        if(!planingUpdate) {
+            return res.send({
+                message: 'ไม่สามารถอัพเดทตารางงานของ planing',
+                schedule: planingUpdate
+            })
+        }
+
+        return res.send({
+            message: `ส่งกลับสินค้าไม่ผ่าน QC จำนวน ${amount} ชิ้น`,
+            success: true,
+            data: saved_production
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.send({
+            message: err.message,
+            success: false,
+            data: null
+        })
+    }
+}
+
 exports.acceptProductionSchedule = async (req, res) => {
     const { id } = req.params
     const userName = req.user.name

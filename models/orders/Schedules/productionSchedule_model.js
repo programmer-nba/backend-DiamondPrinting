@@ -27,7 +27,8 @@ const productionScheduleSchema = new Schema(
         },
         progress: {
             status: String,
-            percent: Number
+            percent: Number,
+            sent: Number
         },
         remark: {
             name: String,
