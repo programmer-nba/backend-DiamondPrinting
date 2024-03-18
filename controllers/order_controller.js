@@ -308,12 +308,15 @@ exports.updatePreOrder = async (req, res) => {
         brand,
         demensions,
         paper,
+        front_remark,
+        back_remark,
+        colors_uv,
         colors_front_type,
-        colors_front_text,
         colors_front,
+        colors_front_text,
         colors_back_type,
-        colors_back_text,
         colors_back,
+        colors_back_text,
         front_pantone,
         back_pantone,
         floor_front,
@@ -324,7 +327,8 @@ exports.updatePreOrder = async (req, res) => {
         hotStamp,
         emboss,
         dieCut,
-        dieCutWindow=null,
+        dieCutWindow,
+        dieCutBlow,
         glue,
         glue2,
         glue_dot,
@@ -332,10 +336,6 @@ exports.updatePreOrder = async (req, res) => {
         bag,
         note
     } = req.body
-
-    const userId = req.user.id
-    const userName = req.user.name
-    const userCode = req.user.code
 
     try {
         let preOrder = await PreOrder.findByIdAndUpdate(id,
@@ -363,12 +363,15 @@ exports.updatePreOrder = async (req, res) => {
                         front_text:(colors_front_text && colors_front_text.length > 0) ? colors_front_text : null,
                         front: (colors_front) ? colors_front : 0,
                         front_pantone: (front_pantone) && front_pantone,
+                        front_remark: (front_remark) && front_remark,
                         floor_front: (floor_front) && floor_front,
                         back_type:(colors_back_type) ? colors_back_type : null,
                         back_text:(colors_back_text && colors_back_text.length > 0) ? colors_back_text : null,
+                        back_remark: (back_remark) && back_remark,
                         back: (colors_back) ? colors_back : 0,
                         back_pantone: (back_pantone) && back_pantone,
                         floor_back: (floor_back) && floor_back,
+                        colors_uv: colors_uv
                     },
 
                     coating: (coating && coating.length!==0) ? coating : null,
@@ -389,6 +392,8 @@ exports.updatePreOrder = async (req, res) => {
                         detail: (dieCutWindow.detail) ? dieCutWindow.detail : null
                     } : null,
 
+                    dieCutBlow: dieCutBlow,
+
                     glue: (glue && glue.length!==0) ? glue : null,
                     glue2: (glue2 && glue2.length!==0) ? glue2 : null,
                     glue_dot: (glue_dot && glue_dot.length!==0) ? glue_dot : null,
@@ -397,18 +402,6 @@ exports.updatePreOrder = async (req, res) => {
                     bag: (bag) ? true : false, 
             
                     note: (note) ? note : ''
-                },
-                $push: {
-                    status: {
-                        name: 'new',
-                        text: 'พรีออร์เดอร์ใหม่',
-                        sender: {
-                            name: `${userName.first} ${userName.last}`,
-                            code: userCode,
-                            _id: userId,
-                        },
-                        createAt: new Date()
-                    }
                 }
             }, { new:true }
         )
@@ -427,10 +420,10 @@ exports.updatePreOrder = async (req, res) => {
 
     }
     catch (err) {
+        console.log(err)
         return res.status(500).send({
             message: err.message
         })
-        console.log(err)
     }
 }
 

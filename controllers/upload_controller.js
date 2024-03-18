@@ -131,3 +131,31 @@ exports.getFilesOfPreOrder = async (req, res) => {
         })
     }
 }
+
+exports.deleteFile = async (req, res) => {
+    const { id } = req.params
+    try {
+        const delete_file = await File.findOneAndDelete({_id:id})
+        if (!delete_file) {
+            return res.status(404).json({
+                message: "not found",
+                success: false,
+                files: null
+            })
+        }
+
+        return res.status(200).json({
+            message: "founded",
+            success: true,
+            files: null
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({
+            message: "error !",
+            success: false,
+            files: null
+        })
+    }
+}
