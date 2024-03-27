@@ -110,7 +110,7 @@ const uploadtoDrive = async (fileObjects, name) => {
       if(err){
           console.log('clear file in /uploads error')
       } else {
-          //console.log('clear file in /uploads success')
+        //console.log('clear file in /uploads success')
       }
     })
 
