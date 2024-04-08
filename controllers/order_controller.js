@@ -1593,7 +1593,9 @@ exports.editOrder = async (req, res) => {
         cost_detail, 
         cost_total, 
         cost_ppu, 
-        price 
+        price,
+        status_name,
+        status_text
     } = req.body
     const { id } = req.params
     const userId = req.user.id
@@ -1613,8 +1615,8 @@ exports.editOrder = async (req, res) => {
                 },
                 $push: {
                     status: {
-                        name: 'new',
-                        text: 'ออร์เดอร์ใหม่',
+                        name: status_name,
+                        text: status_text,
                         sender: {
                             name: `${userName.first} ${userName.last}`,
                             _id: userId,
