@@ -775,12 +775,17 @@ exports.sendQc = async (req, res) => {
             })
         }
 
-        production.process.sent += amount
-        production.process.status = 'ส่ง QC',
+        if (production.progress.sent && production.progress.sent > 0) {
+            production.progress.sent += amount
+        } else {
+            production.progress.sent = amount
+        }
+        
+        production.progress.status = `ส่ง QC ${amount}`,
         production.status.push({
-            name: 'sendQC',
-            text: 'ส่ง qc',
-            detail: detail || '',
+            name: 'working',
+            text: `กำลังดำเนินการผลิต`,
+            detail: detail || `ส่ง QC ${amount}`,
             sender: {
                 name: `${userName.first} ${userName.last}`,
                 _id: userId,
@@ -796,10 +801,10 @@ exports.sendQc = async (req, res) => {
                 data: null
             })
         }
-
-        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(saved_production.planingSchedule, {
+        console.log(saved_production.planingSchedule.toString())
+        const planingUpdate = await PlaningSchedule.findByIdAndUpdate(saved_production.planingSchedule.toString(), {
             $set: {
-                production: saved_schedule
+                production: saved_production
             }
         }, { new:true } )
         if(!planingUpdate) {
@@ -841,12 +846,16 @@ exports.rejectQc = async (req, res) => {
             })
         }
 
-        production.process.sent -= amount
-        production.process.status = 'ไม่ผ่าน qc',
+        if (production.progress.percent && production.progress.percent > 0) {
+            production.progress.percent += amount
+        } else {
+            production.progress.percent = amount
+        }
+        production.progress.status = `ไม่ผ่าน qc ${amount}`,
         production.status.push({
-            name: 'rejectQC',
-            text: 'ไม่ผ่าน qc',
-            detail: detail || '',
+            name: 'working',
+            text: `กำลังดำเนินการผลิต`,
+            detail: detail || `ไม่ผ่าน qc ${amount}`,
             sender: {
                 name: `${userName.first} ${userName.last}`,
                 _id: userId,
@@ -865,7 +874,7 @@ exports.rejectQc = async (req, res) => {
 
         const planingUpdate = await PlaningSchedule.findByIdAndUpdate(saved_production.planingSchedule, {
             $set: {
-                production: saved_schedule
+                production: saved_production
             }
         }, { new:true } )
         if(!planingUpdate) {
