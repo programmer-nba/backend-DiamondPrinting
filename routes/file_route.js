@@ -12,5 +12,6 @@ route.get('/all', File.getFiles)
 route.get('/:id', File.getFile)
 route.get('/pre-order/:id', File.getFilesOfPreOrder)
 route.delete('/:id',verifyToken, File.deleteFile)
+route.get('/image/:id', File.getImage)
 
 module.exports = route

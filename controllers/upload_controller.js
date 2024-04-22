@@ -1,4 +1,5 @@
 const File = require('../models/files/file_model.js')
+const fetch = require('node-fetch');
 
 exports.fileUpload = async (req, res) => {
     try {
@@ -55,6 +56,19 @@ exports.fileUpload = async (req, res) => {
             message: 'อัพโหลดไฟล์ผิดพลาด',
             err: err.message
         })
+    }
+}
+
+exports.getImage = async (req, res) => {
+    const { id } = req.params
+    try {
+        const response = await fetch(`https://drive.google.com/thumbnail?id=${id}`);
+        const imageBuffer = await response.buffer();
+        res.set('Content-Type', 'image/jpeg');
+        res.send(imageBuffer);
+    } catch (error) {
+        console.error('Error fetching image:', error);
+        res.status(500).send('Error fetching image');
     }
 }
 
