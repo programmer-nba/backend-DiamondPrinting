@@ -693,7 +693,7 @@ exports.addPreProduction = async (req, res) => {
                 colors_uv: (preOrder.colors && preOrder.colors.colors_uv) ? preOrder.colors.colors_uv : false,
             } : null,
             plateData : {
-                colors : (preOrder.colors && preOrder.colors.front_text?.length > 0) ? preOrder.colors.front_text?.length + preOrder.colors.back_text?.length : 0, // from pre-order
+                colors : (preOrder.colors && preOrder.colors.front_text?.length > 0) ? (preOrder.colors.front_text?.length || 0) + (preOrder.colors.back_text?.length || 0) : 0, // from pre-order
                 size : (plateSize) && plateSize.toString(),
                 flip_plate: preOrder.flip_plate,
             },
