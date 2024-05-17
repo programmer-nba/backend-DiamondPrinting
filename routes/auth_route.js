@@ -10,6 +10,7 @@ route.post('/register/purchase', Auth.purchaseRegister) // purchase
 route.post('/register/account', Auth.accountRegister) // account
 route.post('/register/planing', Auth.planingRegister) // planing
 route.post('/register/production', Auth.productionRegister) // production
+route.post('/register/transfer', Auth.transferRegister) // production
 
 // login
 route.post('/login', Auth.login)

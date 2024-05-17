@@ -7,6 +7,7 @@ const Purchase = require('../models/members/purchase_model.js')
 const Account = require('../models/members/account_model.js')
 const Production = require('../models/members/production_model.js')
 const Planing = require('../models/members/planing_model.js')
+const Transfer = require('../models/members/transfer_model.js')
 
 // middleware
 const validateDuplicate = async (data) => {
@@ -541,6 +542,71 @@ exports.productionRegister = async (req, res) => {
     }
 }
 
+// register -transfer-
+exports.transferRegister = async (req, res) => {
+    const {
+        username, password, phone_number, email,
+        first_name, last_name, subrole
+    } = req.body
+    try {
+
+        const validateData = {username:username, phone_number:phone_number, email:email}
+        const duplicate = await validateDuplicate(validateData)
+        if(duplicate) {
+            return res.status(500).send({
+                message: duplicate
+            })
+        }
+
+        const transfer = await Transfer.find()
+
+        const transfer_code = `TF-${transfer.length}`
+        const ipAddress = req.ip || req.connection.remoteAddress
+
+        const new_transfer = new Transfer({
+            name: {
+                first: first_name,
+                last: last_name,
+            },
+            username: username,
+            password: password,
+            phone_number: phone_number,
+            email: email,
+            role: {
+                main: 'จัดส่ง',
+                sub: subrole,
+            },
+            code: transfer_code,
+            logedInHis: 
+                {
+                    time: new Date(),
+                    ip: ipAddress,
+                },
+            rank: 'normal'
+        })
+
+        const saved_transfer = await new_transfer.save()
+        if(!saved_transfer){
+            return res.status(500).send({
+                message: 'ไม่สามารถสมัครสมาชิกได้'
+            })
+        }
+
+        return res.status(200).send({
+            message: 'ลงทะเบียน ฝ่ายจัดส่ง สำเร็จ',
+            user: saved_transfer
+        })
+
+    }
+    catch (err) {
+        res.send({
+            message: "ไม่สามารถสมัครสมาชิกได้",
+            error: err.message
+        })
+        console.log(err.message)
+    }
+}
+
 exports.login = async (req, res) => {
     const {username, password} = req.body
     try {
@@ -550,8 +616,9 @@ exports.login = async (req, res) => {
         const account = await Account.findOne({username:username})
         const production = await Production.findOne({username:username})
         const planing = await Planing.findOne({username:username})
+        const transfer = await Transfer.findOne({username:username})
 
-        if (!sale && !admin && !purchase && !account && !production && !planing) {
+        if (!sale && !admin && !purchase && !account && !production && !planing && !transfer) {
             return res.send({
                 message: 'ไม่พบ username นี้ในระบบ',
             })
@@ -593,6 +660,12 @@ exports.login = async (req, res) => {
             })
         }
 
+        if (transfer && password!==transfer.password) {
+            return res.send({
+                message: 'รหัสผ่านไม่ถูกต้อง',
+            })
+        }
+
         const secretKey = process.env.SECRET_KEY
 
         const payload 
@@ -614,24 +687,35 @@ exports.login = async (req, res) => {
             code: account.code,
             role: account.role,
             name: account.name,
+            phone_number: account.phone_number
         }
         : (planing) ? {
             id: planing._id ,
             code: planing.code,
             role: planing.role,
             name: planing.name,
+            phone_number: planing.phone_number
         }
         : (production) ? {
             id: production._id ,
             code: production.code,
             role: production.role,
             name: production.name,
+            phone_number: production.phone_number
         }
         : (purchase) ? {
             id: purchase._id ,
             code: purchase.code,
             role: purchase.role,
             name: purchase.name,
+            phone_number: purchase.phone_number
+        }
+        : (transfer) ? {
+            id: transfer._id ,
+            code: transfer.code,
+            role: transfer.role,
+            name: transfer.name,
+            phone_number: transfer.phone_number
         }
         : null
 
