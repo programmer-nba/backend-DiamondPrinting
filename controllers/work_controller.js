@@ -1608,8 +1608,8 @@ exports.createNewTransferSchedule = async (req, res) => {
                 createAt: new Date()
             },
             status: {
-                name: 'new',
-                text: 'ตารางงานใหม่',
+                name: 'pending',
+                text: 'รอจัดส่ง',
                 detail: '',
                 sender: {
                     name: `${userName.first} ${userName.last}`,
