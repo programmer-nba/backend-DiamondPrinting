@@ -1238,7 +1238,7 @@ exports.calCoating = async (req,res) => {
             })
         }
 
-        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         const inWidth = width/cut
         const inLong = long/cut
         
@@ -1297,7 +1297,7 @@ exports.calEmboss = async (req,res) => {
             })
         }
 
-        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         
         const round_option = emboss.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
         if(round_option.length===0){
@@ -1359,7 +1359,7 @@ exports.calHotStamp = async (req,res) => {
             })
         }
 
-        const block_cost = Math.round((block.inWidth*block.inLong*13)*0.01)*100
+        const block_cost = Math.ceil((block.inWidth*block.inLong*13)*0.01)*100
         const total_block_cost = block_cost*block.lay
         const stamp_color_cost = ((block.inWidth*block.inLong*hotStamp.avr)+0.1)*stamp.k
         const total_stamp_color_cost = stamp_color_cost*order
@@ -1411,7 +1411,7 @@ exports.calDiecut = async (req,res) => {
             })
         }
 
-        const order_lay = Math.floor(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
         
         const diecut = diecuts.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
         const option = diecut[0].option.filter(option=>option.plateSize===plateSize)
