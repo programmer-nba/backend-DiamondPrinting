@@ -28,6 +28,10 @@ const quotationSchema = new Schema(
                 special: {
                     total: Number,
                     unit: Number
+                },
+                insite: {
+                    total: Number,
+                    unit: Number
                 }
             }
         ],
