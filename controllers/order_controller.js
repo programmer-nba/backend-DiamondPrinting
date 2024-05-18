@@ -444,18 +444,6 @@ exports.editEmbossSize = async (req, res) => {
                     'emboss.$.inLong' : inLong,
                     'emboss.$.mark' : mark
                 }, 
-                $push: {
-                    status: {
-                        name: 'edit',
-                        text: 'แก้ไขข้อมูล',
-                        sender: {
-                            name: `${userName.first} ${userName.last}`,
-                            code: userCode,
-                            _id: userId
-                        },
-                        createAt: new Date()
-                    }
-                }
             },
             {
                 new : true
@@ -499,18 +487,6 @@ exports.editStampSize = async (req, res) => {
                     'hotStamp.$.inWidth' : inWidth,
                     'hotStamp.$.inLong' : inLong,
                     'hotStamp.$.mark' : mark
-                }, 
-                $push: {
-                    status: {
-                        name: 'edit',
-                        text: 'แก้ไขข้อมูล',
-                        sender: {
-                            name: `${userName.first} ${userName.last}`,
-                            code: userCode,
-                            _id: userId
-                        },
-                        createAt: new Date()
-                    }
                 }
             },
             {
