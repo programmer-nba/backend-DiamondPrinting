@@ -208,17 +208,21 @@ exports.editPlaningSchedule = async (req, res) => {
 exports.deletePlaningSchedule = async (req, res) => {
     const { id } = req.params
     try {
-        const schedule = await PlaningSchedule.findByIdAndDelete( id )
+        const schedule = await PlaningSchedule.findById( id )
         if(!schedule){
             return res.send({
-                message: 'ไม่พบตารางงาน',
-                planingSchedule: schedule
+                message: 'ไม่พบตารางงาน'
             })
         }
 
+        const purchase = await PurchaseSchedule.deleteOne( {_id: schedule.purchase} )
+        const production = await ProductionSchedule.deleteOne( {_id: schedule.production} )
+        const transfer = await TransferSchedule.deleteOne( {_id: schedule.transfer} )
+        const planing = await PlaningSchedule.findByIdAndDelete( id )
+
         return res.send({
-            message: 'ลบตารางงานเรียบร้อย',
-            success: true
+            message: `ลบจัดซื้อ ${ purchase?.deletedCount }, ลบโปรดักชั่น ${ production?.deletedCount }, ลบจัดส่ง ${ transfer?.deletedCount }, ลบแพลนนิ่ง ${ planing?.deletedCount },`,
+            success: true,
         })
 
     }
