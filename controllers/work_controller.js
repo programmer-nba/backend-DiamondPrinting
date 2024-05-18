@@ -1763,35 +1763,41 @@ exports.acceptTransferSchedule = async (req, res) => {
 
 exports.updateTransferSchedule = async (req, res) => {
     const { id } = req.params
-    const { text, status, detail } = req.body
+    const { text, status, detail, amount } = req.body
     const userName = req.user.name
     const userId = req.user.id
     const userCode = req.user.code
     try {
-        const transferSchedule = await TransferSchedule.findByIdAndUpdate( id,
-            {
-                $push: {
-                    status: {
-                        name: status,
-                        text: text,
-                        detail: detail,
-                        sender: {
-                            name: `${userName.first} ${userName.last}`,
-                            _id: userId,
-                            code: userCode
-                        },
-                        createAt: new Date()
-                    }
-                }
-            },
-            {
-                new : true
-            }   
-        )
+        let transferSchedule = await TransferSchedule.findById( id )
         if(!transferSchedule){
             return res.send({
                 message: 'อัพเดทงานล้มเหลว',
-                schedule: transferSchedule
+            })
+        }
+        transferSchedule.status.push({
+            name: status,
+            text: text,
+            detail: detail,
+            sender: {
+                name: `${userName.first} ${userName.last}`,
+                _id: userId,
+                code: userCode
+            },
+            createAt: new Date()
+        })
+
+        if (transferSchedule.progress.percent >= 0 && amount) {
+            transferSchedule.progress.percent += amount
+        } else if (!transferSchedule.progress.percent >= 0 && amount) {
+            transferSchedule.progress.percent = amount
+        } else {
+            transferSchedule.progress.percent = 0
+        }
+
+        const saved_transfer = await transferSchedule.save()
+        if(!saved_transfer) {
+            return res.json({
+                message: "can not saved data"
             })
         }
 
@@ -1810,7 +1816,7 @@ exports.updateTransferSchedule = async (req, res) => {
 
         return res.send({
             message: 'อัพเดทงานสำเร็จ',
-            schedule: transferSchedule,
+            schedule: saved_transfer,
             success: true
         })
     }
