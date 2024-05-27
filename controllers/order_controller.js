@@ -160,8 +160,8 @@ exports.addPreOrder = async (req, res) => {
         let nextPreOrderCodeText = '0001'
         if (prev_preOrders.length) {
             const lastPreOrderCode = prev_preOrders[prev_preOrders.length - 1].code
-            const lastPreOrderCodeFormat = lastPreOrderCode.split('-')[2]
-            const nextPreOrderCodeNumber = parseInt(lastPreOrderCodeFormat) + 1
+            const lastPreOrderCodeFormat = lastPreOrderCode.includes('-') ? lastPreOrderCode.split('-')[2] : '0001'
+            const nextPreOrderCodeNumber = !lastPreOrderCode.split('-')[2] ? 1 : parseInt(lastPreOrderCodeFormat) + 1
             nextPreOrderCodeText = String(nextPreOrderCodeNumber).padStart(4, '0')
         }
         const code = 'PRE-' + nextCustomerCodeText + '-' + nextPreOrderCodeText
