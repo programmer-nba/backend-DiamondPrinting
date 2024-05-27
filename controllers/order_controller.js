@@ -26,6 +26,15 @@ const customRound = (value) => {
     }
 }
 
+function getCurrentYearMonthTh() {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear() - 543; // Convert to Buddhist calendar (B.E.)
+    const month = currentDate.getMonth() + 1; // Months are zero-indexed, so add 1
+    const yearStr = year.toString().slice(-2); // Get last 2 digits of the year
+    const monthStr = month < 10 ? '0' + month : month.toString(); // Add leading zero if necessary
+    return yearStr + monthStr;
+}
+
 // Sale ----------------------------------------
 
 exports.addPreOrder = async (req, res) => {
@@ -71,6 +80,13 @@ exports.addPreOrder = async (req, res) => {
     try {
         let curCustomer = null
         const allCustumers = await Customer.find()
+        let nextCustomerCodeText = '0001'
+        if (allCustumers.length) {
+            const lastCustomerCode = allCustumers[allCustumers.length - 1].code
+            const nextCustomerCodeNumber = parseInt(lastCustomerCode) + 1
+            nextCustomerCodeText = String(nextCustomerCodeNumber).padStart(4, '0')
+        }
+        
         const existCustomer = await Customer.findOne({
             $or: [
                 {name: customer.nameTh},
@@ -91,7 +107,7 @@ exports.addPreOrder = async (req, res) => {
                     postcode: (customer.address && customer.address.postcode) ? customer.address.postcode : '-'
                 },
                 taxID: (customer.taxID) ? customer.taxID : '-',
-                code: genCode(allCustumers.length),
+                code: nextCustomerCodeText,
                 contact: {
                     name: (customer.contact && customer.contact.name) ? customer.contact.name : '-',
                     tel: (customer.contact && customer.contact.tel) ? customer.contact.tel : '-',
@@ -107,7 +123,6 @@ exports.addPreOrder = async (req, res) => {
             }
             curCustomer = saved_customer
         } else {
-            
             const updated_customer = await Customer.findByIdAndUpdate(existCustomer._id,
                 {
                     $set: {
@@ -139,11 +154,17 @@ exports.addPreOrder = async (req, res) => {
                 })
             }
             curCustomer = updated_customer
-            
         }
 
-        const prev_preOrder = await PreOrder.find()
-        const code = genCode(prev_preOrder.length)
+        const prev_preOrders = await PreOrder.find()
+        let nextPreOrderCodeText = '0001'
+        if (prev_preOrders.length) {
+            const lastPreOrderCode = prev_preOrders[prev_preOrders.length - 1].code
+            const lastPreOrderCodeFormat = lastPreOrderCode.split('-')[2]
+            const nextPreOrderCodeNumber = parseInt(lastPreOrderCodeFormat) + 1
+            nextPreOrderCodeText = String(nextPreOrderCodeNumber).padStart(4, '0')
+        }
+        const code = 'PRE-' + nextCustomerCodeText + '-' + nextPreOrderCodeText
 
         const gluess = (glue && glue.length > 0) 
             ? glue.map(g => {
@@ -629,7 +650,7 @@ exports.addPreProduction = async (req, res) => {
         }
         
         const prev_preProduction = await PreProduction.find()
-        const code = `${preOrder.code}-${genCode(prev_preProduction.length)}`
+        const code = `${preOrder.code}-${genCode(prev_preProduction.length)}(${cut}/${cut*lay})`
         const new_preProduction = new PreProduction({
             code: code,
             customer: preOrder.customer,
@@ -1016,8 +1037,18 @@ exports.creatQuotation = async (req, res) => {
                 preOrder: preOrder
             })
         }
-        const length_Quotation = await Quotation.find()
-        const code = `DM-${preOrder.customer.code}-${preOrder.code}-${genCode(length_Quotation.length)}`
+        const allQuotations = await Quotation.find()
+        const curYearMonth = getCurrentYearMonthTh()
+        const filteredAllQuotations = allQuotations.filter((item) => item.code.split('-')[2].slice(0, 4) === curYearMonth)
+        let nextQtCodeText = curYearMonth+'001'
+        if (filteredAllQuotations.length) {
+            const lastQtCode = filteredAllQuotations[filteredAllQuotations.length - 1].code
+            const lastQtCodeNumberFormatted = lastQtCode.split('-')[2]
+            const part2 = lastQtCodeNumberFormatted.slice(4)
+            const nextQtCodeNumber = parseInt(part2) + 1
+            nextQtCodeText = String(nextQtCodeNumber).padStart(3, '0')
+        }
+        const code = `QT-${preOrder.customer.code}-${nextQtCodeText}`
         const curDate = new Date();
         const expirationDate = new Date(curDate)
         expirationDate.setDate(curDate.getDate() + 20)
@@ -1464,8 +1495,18 @@ exports.createOrder = async (req, res) => {
     const userCode = req.user.code
     try {
         const quotation = await Quotation.findById( quotation_id )
-        const prev_order = await Order.find()
-        const code = `${quotation.code}-${genCode( prev_order.length )}`
+        const allOrders = await Order.find()
+        const curYearMonth = getCurrentYearMonthTh()
+        const filteredAllOrders = allOrders.filter((item) => item.code.split('-')[2].slice(0, 4) === curYearMonth)
+        let nextOrderCodeText = curYearMonth+'001'
+        if (filteredAllOrders.length) {
+            const lastOrderCode = filteredAllOrders[filteredAllOrders.length - 1].code
+            const lastOrderCodeNumberFormatted = lastOrderCode.split('-')[2]
+            const part2 = lastOrderCodeNumberFormatted.slice(4)
+            const nextOrderCodeNumber = parseInt(part2) + 1
+            nextOrderCodeText = String(nextOrderCodeNumber).padStart(3, '0')
+        }
+        const code = `DPP-${quotation.code.split('-')[1]}-${nextOrderCodeText}`
         const new_order = new Order({
             code: code,
             quotation: quotation,
