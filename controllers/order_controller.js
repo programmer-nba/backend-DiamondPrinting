@@ -423,6 +423,18 @@ exports.updatePreOrder = async (req, res) => {
                     bag: (bag) ? true : false, 
             
                     note: (note) ? note : ''
+                },
+                $push : {
+                    status: {
+                        name: 'new',
+                        text: 'พรีออร์เดอร์ใหม่',
+                        sender: {
+                            name: `${userName.first} ${userName.last}`,
+                            code: userCode,
+                            _id: userId,
+                        },
+                        createAt: new Date()
+                    }
                 }
             }, { new:true }
         )
