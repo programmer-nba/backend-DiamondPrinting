@@ -128,7 +128,7 @@ exports.getCustomer = async (req, res) => {
         }
 
         return res.send({
-            customer: customer
+            customer
         })
     }
     catch( err ) {
