@@ -1610,8 +1610,8 @@ exports.recreateOrder = async (req, res) => {
                 price: order.data.price,
             },
             status: {
-                name: 'new',
-                text: 'ออร์เดอร์ใหม่',
+                name: 'plating',
+                text: 'คอนเฟิร์ม mockup แล้ว',
                 sender: {
                     name: `${userName.first} ${userName.last}`,
                     _id: userId,
