@@ -34,6 +34,7 @@ route.put('/quotation-ok/:id',verifyToken, Order.approveQuotation)
 route.put('/quotation-reject/:id',verifyToken, Order.rejectQuotation)
 
 route.post('/order', verifyToken, Order.createOrder)
+route.post('/reorder/:id', verifyToken, Order.recreateOrder)
 route.get('/orders', Order.getAllOrders)
 route.get('/order/:id', Order.getOrder)
 route.put('/order/:id', verifyToken, Order.editOrder)

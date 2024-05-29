@@ -1570,6 +1570,78 @@ exports.createOrder = async (req, res) => {
     }
 }
 
+exports.recreateOrder = async (req, res) => {
+    const userId = req.user.id
+    const userName = req.user.name
+    const userCode = req.user.code
+    const { id } = req.params
+    try {
+        const order = await Order.findById(id)
+        if (!order) {
+            return res.status(404).json({
+                message: "order not found!"
+            }) 
+        }
+        const quotation = await Quotation.findById( order.quotation._id )
+        const allOrders = await Order.find()
+        const curYearMonth = getCurrentYearMonthTh()
+        const filteredAllOrders = allOrders.filter((item) => item.code.split('-')[2].slice(0, 4) === curYearMonth)
+        let nextOrderCodeText = curYearMonth+'001'
+        if (filteredAllOrders.length) {
+            const lastOrderCode = filteredAllOrders[filteredAllOrders.length - 1].code
+            const lastOrderCodeNumberFormatted = lastOrderCode.split('-')[2]
+            const part2 = lastOrderCodeNumberFormatted.slice(4)
+            const nextOrderCodeNumber = parseInt(part2) + 1
+            nextOrderCodeText = String(nextOrderCodeNumber).padStart(3, '0')
+        }
+        const code = `DPP-${quotation.code.split('-')[1]}-${nextOrderCodeText}`
+        const new_order = new Order({
+            code: code,
+            quotation: quotation,
+            customer: quotation.customer,
+            details: quotation.preOrder,
+            data: {
+                price_type: order.data.price_type,
+                amount: order.data.amount,
+                cal_data: order.data.cal_data,
+                cost_detail: order.data.cost_detail,
+                cost_total: order.data.cost_total,
+                cost_ppu: order.data.cost_ppu,
+                price: order.data.price,
+            },
+            status: {
+                name: 'new',
+                text: 'ออร์เดอร์ใหม่',
+                sender: {
+                    name: `${userName.first} ${userName.last}`,
+                    _id: userId,
+                    code: userCode
+                },
+                createAt: new Date()
+            },
+        })
+        const saved_order = await new_order.save()
+        if(!saved_order) {
+            return res.send({
+                message: 'บันทึกออร์เดอร์ใหม่ไม่สำเร็จ',
+                order: saved_order
+            })
+        }
+
+        return res.send({
+            message: 'สร้างออร์เดอร์ใหม่สำเร็จ !!!',
+            order: saved_order,
+            success: true
+        })
+    }
+    catch (error) {
+        console.log(error)
+        return res.send({
+            message: error.message
+        })
+    }
+}
+
 exports.getAllOrders = async (req, res) => {
     try {
         const orders = await Order.find().populate('quotation').populate('customer').populate('details')
