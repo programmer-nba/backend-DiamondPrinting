@@ -358,6 +358,10 @@ exports.updatePreOrder = async (req, res) => {
         note
     } = req.body
 
+    const userName = req.user.name
+    const userId = req.user.id
+    const userCode = req.user.code
+
     try {
         let preOrder = await PreOrder.findByIdAndUpdate(id,
             {
