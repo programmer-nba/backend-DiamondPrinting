@@ -98,12 +98,7 @@ exports.addPreOrder = async (req, res) => {
             nextCustomerCodeText = String(nextCustomerCodeNumber).padStart(4, '0')
         }
         
-        const existCustomer = await Customer.findOne({
-            $or: [
-                {name: customer.nameTh},
-                {taxID: customer.taxID}
-            ]
-        })
+        const existCustomer = await Customer.findOne({name: customer.nameTh})
         if(!existCustomer) {
             const new_customer = new Customer({
                 nameTh: (customer.nameTh) ? customer.nameTh : '-',
@@ -148,7 +143,11 @@ exports.addPreOrder = async (req, res) => {
                             street: customer.address.street,
                             postcode: customer.address.postcode
                         },
-                        taxID: customer.taxID
+                        taxID: customer.taxID,
+                        contacted: {
+                            name: customer.contact.name,
+                            tel: customer.contact.tel,
+                        }
                     },
                     $push: {
                         contact: {
@@ -169,13 +168,14 @@ exports.addPreOrder = async (req, res) => {
 
         const prev_preOrders = await PreOrder.find()
         let nextPreOrderCodeText = '0001'
-        if (prev_preOrders.length) {
+        if (prev_preOrders.length > 0) {
             const lastPreOrderCode = prev_preOrders[prev_preOrders.length - 1].code
             const lastPreOrderCodeFormat = lastPreOrderCode.includes('-') ? lastPreOrderCode.split('-')[2] : '0001'
             const nextPreOrderCodeNumber = !lastPreOrderCode.split('-')[2] ? 1 : parseInt(lastPreOrderCodeFormat) + 1
             nextPreOrderCodeText = String(nextPreOrderCodeNumber).padStart(4, '0')
         }
-        const code = 'PRE-' + nextCustomerCodeText + '-' + nextPreOrderCodeText
+        const customerCurCode = existCustomer ? existCustomer.code : nextCustomerCodeText
+        const code = 'PRE-' + customerCurCode + '-' + nextPreOrderCodeText
 
         const gluess = (glue && glue.length > 0) 
             ? glue.map(g => {

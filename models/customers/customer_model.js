@@ -16,6 +16,10 @@ const customerSchema = new Schema(
             postcode: String
         },
         taxID: String,
+        contacted: {
+            name: String,
+            tel: String,
+        },
         contact: [
             {
                 name: String,

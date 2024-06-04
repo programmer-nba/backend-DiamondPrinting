@@ -143,12 +143,7 @@ exports.createCustomer = async (req, res) => {
     const { customer } = req.body
     try {
         const allCustumers = await Customer.find()
-        const existCustomer = await Customer.findOne({
-            $or: [
-                {name: customer.nameTh},
-                {taxID: customer.taxID}
-            ]
-        })
+        const existCustomer = await Customer.findOne({name: customer.nameTh})
 
         if (!existCustomer){
             const new_customer = new Customer({
@@ -198,7 +193,11 @@ exports.createCustomer = async (req, res) => {
                             street: customer.address.street,
                             postcode: customer.address.postcode
                         },
-                        taxID: customer.taxID
+                        taxID: customer.taxID,
+                        contacted: {
+                            name: customer.contact.name,
+                            tel: customer.contact.tel,
+                        }
                     },
                     $push: {
                         contact: {
@@ -326,7 +325,11 @@ exports.updateCustomer = async (req, res) => {
                         street: customer.address.street,
                         postcode: customer.address.postcode
                     },
-                    taxID: customer.taxID
+                    taxID: customer.taxID,
+                    contacted: {
+                        name: customer.contact.name,
+                        tel: customer.contact.tel,
+                    }
                 },
                 $push: {
                     contact: {
