@@ -1075,7 +1075,7 @@ exports.creatQuotation = async (req, res) => {
             const nextQtCodeNumber = parseInt(part2) + 1
             nextQtCodeText = String(nextQtCodeNumber).padStart(3, '0')
         }
-        const code = `QT-${preOrder.customer.code}-${nextQtCodeText}`
+        const code = `QT-${preOrder.customer.code}-${curYearMonth}${nextQtCodeText}`
         const curDate = new Date();
         const expirationDate = new Date(curDate)
         expirationDate.setDate(curDate.getDate() + 20)
