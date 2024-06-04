@@ -27,12 +27,23 @@ const customRound = (value) => {
 }
 
 function getCurrentYearMonthTh() {
-    const currentDate = new Date();
-    const year = currentDate.getFullYear() - 543; // Convert to Buddhist calendar (B.E.)
-    const month = currentDate.getMonth() + 1; // Months are zero-indexed, so add 1
-    const yearStr = year.toString().slice(-2); // Get last 2 digits of the year
-    const monthStr = month < 10 ? '0' + month : month.toString(); // Add leading zero if necessary
-    return yearStr + monthStr;
+    // Get the current date
+    let currentDate = new Date();
+    
+    // Get the current Gregorian year and month
+    let currentYear = currentDate.getFullYear();
+    let currentMonth = currentDate.getMonth() + 1; // Months are zero-indexed in JavaScript
+    
+    // Convert Gregorian year to Thai year (adding 543)
+    let thaiYear = currentYear + 543;
+    
+    // Pad the month with leading zero if necessary
+    let paddedMonth = currentMonth.toString().padStart(2, '0');
+    
+    // Format Thai year and month as desired
+    let formattedYearMonth = (thaiYear % 100) + paddedMonth;
+    
+    return formattedYearMonth;
 }
 
 // Sale ----------------------------------------
