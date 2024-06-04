@@ -1066,9 +1066,9 @@ exports.creatQuotation = async (req, res) => {
         }
         const allQuotations = await Quotation.find()
         const curYearMonth = getCurrentYearMonthTh()
-        const filteredAllQuotations = allQuotations.filter((item) => item.code.split('-')[2].slice(0, 4) === curYearMonth)
+        const filteredAllQuotations = allQuotations.filter((item) => item.code.includes('-'+curYearMonth))
         let nextQtCodeText = curYearMonth+'001'
-        if (filteredAllQuotations.length) {
+        if (filteredAllQuotations.length > 0) {
             const lastQtCode = filteredAllQuotations[filteredAllQuotations.length - 1].code
             const lastQtCodeNumberFormatted = lastQtCode.split('-')[2]
             const part2 = lastQtCodeNumberFormatted.slice(4)
