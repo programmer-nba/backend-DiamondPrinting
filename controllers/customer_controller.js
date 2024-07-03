@@ -140,7 +140,7 @@ exports.getCustomer = async (req, res) => {
 }
 
 exports.createCustomer = async (req, res) => {
-    const { customer } = req.body
+    const { customer, addedBy } = req.body
     try {
         const allCustumers = await Customer.find()
         const existCustomer = await Customer.findOne({name: customer.nameTh})
@@ -164,7 +164,8 @@ exports.createCustomer = async (req, res) => {
                     name: (customer.contact && customer.contact.name) ? customer.contact.name : '-',
                     tel: (customer.contact && customer.contact.tel) ? customer.contact.tel : '-',
                     createAt: new Date()
-                }
+                },
+                addedBy: addedBy
             })
             const saved_customer = await new_customer.save()
             if(!saved_customer){

@@ -36,7 +36,8 @@ const customerSchema = new Schema(
         enable: {
             type: Boolean,
             default: true
-        }
+        },
+        addedBy: { type: String, default: "" }
     },
     {
         timestamps: true
