@@ -89,7 +89,7 @@ exports.addPreOrder = async (req, res) => {
     const userCode = req.user.code
     
     try {
-        let curCustomer = null
+        /* let curCustomer = null
         const allCustumers = await Customer.find()
         let nextCustomerCodeText = '0001'
         if (allCustumers.length) {
@@ -164,7 +164,7 @@ exports.addPreOrder = async (req, res) => {
                 })
             }
             curCustomer = updated_customer
-        }
+        } */
 
         const prev_preOrders = await PreOrder.find()
         let nextPreOrderCodeText = '0001'
@@ -174,8 +174,8 @@ exports.addPreOrder = async (req, res) => {
             const nextPreOrderCodeNumber = !lastPreOrderCode.split('-')[2] ? 1 : parseInt(lastPreOrderCodeFormat) + 1
             nextPreOrderCodeText = String(nextPreOrderCodeNumber).padStart(4, '0')
         }
-        const customerCurCode = existCustomer ? existCustomer.code : nextCustomerCodeText
-        const code = 'PRE-' + customerCurCode + '-' + nextPreOrderCodeText
+        //const customerCurCode = customer.code
+        const code = 'PRE-' + customer?.code + '-' + nextPreOrderCodeText
 
         const gluess = (glue && glue.length > 0) 
             ? glue.map(g => {
@@ -188,7 +188,7 @@ exports.addPreOrder = async (req, res) => {
         // add new pre-order
         const new_preOrder = new PreOrder({
             code: code,
-            customer: curCustomer._id,
+            customer: customer._id,
             name: (name) && name,
             brand: (brand) && brand,
             
@@ -279,11 +279,11 @@ exports.addPreOrder = async (req, res) => {
         })
     }
     catch (err) {
+        console.log(err)
         return res.status(500).send({
             message: 'ไม่สามารถเพิ่ม preorder',
             err: err.message
         })
-        console.log(err)
     }
 }
 
