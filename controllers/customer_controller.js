@@ -143,84 +143,52 @@ exports.createCustomer = async (req, res) => {
     const { customer, addedBy } = req.body
     try {
         const allCustumers = await Customer.find()
-        const existCustomer = await Customer.findOne({name: customer.nameTh})
+        let nextCustomerCodeText = '0001'
+        if (allCustumers.length) {
+            const lastCustomerCode = allCustumers[allCustumers.length - 1].code
+            const nextCustomerCodeNumber = parseInt(lastCustomerCode) + 1
+            nextCustomerCodeText = String(nextCustomerCodeNumber).padStart(4, '0')
+        }
 
-        if (!existCustomer){
-            const new_customer = new Customer({
-                nameTh: (customer.nameTh) ? customer.nameTh : '-',
-                nameEng: (customer.nameEng) ? customer.nameEng : null,
-                email: (customer.email) ? customer.email : null,
-                address: {
-                    houseNo: (customer.address && customer.address.houseNo) ? customer.address.houseNo : '-',
-                    province: (customer.address && customer.address.province) ? customer.address.province : '-',
-                    district: (customer.address && customer.address.district) ? customer.address.district : '-',
-                    subdistrict: (customer.address && customer.address.subdistrict) ? customer.address.subdistrict : '-',
-                    street: (customer.address && customer.address.street) ? customer.address.street : '-',
-                    postcode: (customer.address && customer.address.postcode) ? customer.address.postcode : '-'
-                },
-                taxID: (customer.taxID) ? customer.taxID : '-',
-                code: genCode(allCustumers.length),
-                contact: {
-                    name: (customer.contact && customer.contact.name) ? customer.contact.name : '-',
-                    tel: (customer.contact && customer.contact.tel) ? customer.contact.tel : '-',
-                    createAt: new Date()
-                },
-                addedBy: addedBy
-            })
-            const saved_customer = await new_customer.save()
-            if(!saved_customer){
-                return res.send({
-                    message: 'can not saved new customer!',
-                    customer: saved_customer
-                })
-            }
+        const existCustomer = await Customer.findOne({name: customer.nameTh})
+        if (existCustomer) {
+            return res.status(400).json({ message: 'มีลูกค้านี้อยู่แล้ว' })
+        }
+
+        const new_customer = new Customer({
+            nameTh: (customer.nameTh) ? customer.nameTh : '-',
+            nameEng: (customer.nameEng) ? customer.nameEng : null,
+            email: (customer.email) ? customer.email : null,
+            address: {
+                houseNo: (customer.address && customer.address.houseNo) ? customer.address.houseNo : '-',
+                province: (customer.address && customer.address.province) ? customer.address.province : '-',
+                district: (customer.address && customer.address.district) ? customer.address.district : '-',
+                subdistrict: (customer.address && customer.address.subdistrict) ? customer.address.subdistrict : '-',
+                street: (customer.address && customer.address.street) ? customer.address.street : '-',
+                postcode: (customer.address && customer.address.postcode) ? customer.address.postcode : '-'
+            },
+            taxID: (customer.taxID) ? customer.taxID : '-',
+            code: nextCustomerCodeText,
+            contact: {
+                name: (customer.contact && customer.contact.name) ? customer.contact.name : '-',
+                tel: (customer.contact && customer.contact.tel) ? customer.contact.tel : '-',
+                createAt: new Date()
+            },
+            addedBy: addedBy
+        })
+        const saved_customer = await new_customer.save()
+        if(!saved_customer){
             return res.send({
-                message: 'success! create new customer',
-                success: true,
+                message: 'can not saved new customer!',
                 customer: saved_customer
             })
-        } else {
-            const updated_customer = await Customer.findByIdAndUpdate(existCustomer._id,
-                {
-                    $set: {
-                        nameTh: customer.nameTh,
-                        nameEng: customer.nameEng,
-                        email: customer.email,
-                        address: {
-                            houseNo: customer.address.houseNo,
-                            province: customer.address.province,
-                            district: customer.address.district,
-                            subdistrict: customer.address.subdistrict,
-                            street: customer.address.street,
-                            postcode: customer.address.postcode
-                        },
-                        taxID: customer.taxID,
-                        contacted: {
-                            name: customer.contact.name,
-                            tel: customer.contact.tel,
-                        }
-                    },
-                    $push: {
-                        contact: {
-                            name: customer.contact.name,
-                            tel: customer.contact.tel,
-                            createAt: new Date()
-                        }
-                    }
-                }, {new:true}
-            )
-            if(!updated_customer) {
-                return res.send({
-                    message: 'ERROR! update customer',
-                    customer: updated_customer
-                })
-            }
-            return res.send({
-                message: 'success! update customer',
-                success: true,
-                customer: updated_customer
-            })
         }
+        return res.send({
+            message: 'success! create new customer',
+            success: true,
+            customer: saved_customer
+        })
+        
     }
     catch(err){
         console.log(err)
