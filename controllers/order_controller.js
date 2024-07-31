@@ -175,7 +175,8 @@ exports.addPreOrder = async (req, res) => {
             nextPreOrderCodeText = String(nextPreOrderCodeNumber).padStart(4, '0')
         }
         //const customerCurCode = customer.code
-        const code = 'PRE-' + customer?.code + '-' + nextPreOrderCodeText
+        const customerRef = await Customer.findOne({ nameTh: customer.nameTh })
+        const code = 'PRE-' + customerRef?.code + '-' + nextPreOrderCodeText
 
         const gluess = (glue && glue.length > 0) 
             ? glue.map(g => {
@@ -188,7 +189,7 @@ exports.addPreOrder = async (req, res) => {
         // add new pre-order
         const new_preOrder = new PreOrder({
             code: code,
-            customer: customer._id,
+            customer: customerRef._id,
             name: (name) && name,
             brand: (brand) && brand,
             
