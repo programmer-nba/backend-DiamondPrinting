@@ -40,10 +40,13 @@ exports.calAll = async (req, res) => {
                 diecutBlowData,
             } = preProduction
 
+            let = paperAmount = 0
+
             if(rawMattData){
                 const rawMatt_cost = await calRawMattCost(order,rawMattData)
                 datas.push({rawMatt:rawMatt_cost.data})
                 costs.rawMatt = rawMatt_cost.cost
+                paperAmount = rawMatt_cost.amount
             }
             
             if(plateData){
@@ -117,10 +120,12 @@ exports.calAll = async (req, res) => {
             }
 
             if(diecutBlowData){
-                const blow_cost = (order*0.05 < 500) ? 500 : order*0.05
+                //const blow_cost = (order*0.05 < 500) ? 500 : order*0.05
+                costs.diecut_block = 0
+                const blow_cost = (paperAmount*0.15 < 500) ? 500 : paperAmount*0.15
                 datas.push({diecut_blow: {
-                    avr: 0.05,
-                    cal: `${order}x0.05`,
+                    avr: 0.15,
+                    cal: `${paperAmount}x0.05`,
                     total: blow_cost
                 }})
                 costs.diecut_blow = blow_cost
@@ -387,7 +392,7 @@ const calRawMattCost = async (order, rawMattData) => {
 
         }
 
-        return {cost:calRawMaterial.paper.cost ,data:calRawMaterial}
+        return {cost:calRawMaterial.paper.cost ,data:calRawMaterial, amount:calRawMaterial.paper.amount }
         
     }
     catch (err) {
