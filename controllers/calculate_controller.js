@@ -228,8 +228,8 @@ exports.calAll = async (req, res) => {
                 if(glueData.glue2 && glueData.glue2.length!==0){
                     for (g in glueData.glue2) {
                         const glu2Data = {
-                            width: glueData.glue2[g].width,
-                            long: glueData.glue2[g].long,
+                            //width: glueData.glue2[g].width,
+                            //long: glueData.glue2[g].long,
                             price: glueData.glue2[g].price
                         }
                         const glue2_cost = await calGlue2Cost(order, glu2Data)
@@ -794,14 +794,14 @@ const calDiecutWindowCost = async (order, diecutWindowData) => {
             lay: lay,
             order_lay: order_lay,
             blockSize: diecut_option.plateSize || plateSize,
-            blockPrice: diecut_option.blockPrice,
+            blockPrice: diecut_option.blockPrice/2,
             diecutRound : diecut[0].round.join,
             pumpPrice: (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay) : Math.ceil(diecut_pumpPrice),
-            totalPrice: (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay + diecut_option.blockPrice) : Math.ceil(diecut_pumpPrice + diecut_option.blockPrice),
+            totalPrice: (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay + (diecut_option.blockPrice/2)) : Math.ceil(diecut_pumpPrice + (diecut_option.blockPrice/2)),
             details: {
                 'ขนาดบล๊อค' : diecut_option.plateSize || plateSize,
                 'รอบไดคัท' : diecut[0].round.join,
-                'ค่าบล๊อค' : diecut_option.blockPrice,
+                'ค่าบล๊อค' : diecut_option.blockPrice/2,
                 'ค่าปั้มไดคัท' : (diecut[0].round.start>5000) ? Math.ceil(diecut_pumpPrice*order_lay) : Math.ceil(diecut_pumpPrice)
             },
             cal: {
@@ -903,19 +903,19 @@ const calGlueCost = async (order, long) => {
 }
 
 const calGlue2Cost = async (order, glue2Data) => {
-    const { width, long, price } = glue2Data
+    const { price } = glue2Data
     try {
 
         const glue2data = {
             order: order,
-            width: width,
-            long: long,
+            //width: width,
+            //long: long,
             ppu: price,
             cal: {
-                unit_result_formula: `${width} * ${long} * ${price}`,
-                unit_result: parseFloat((width*long*price).toFixed(2)),
-                order_result_formula: `${width} * ${long} * ${price} * ${order}`,
-                order_result: parseFloat((width*long*price*order).toFixed(2))
+                unit_result_formula: `${order} * ${price}`,
+                unit_result: parseFloat((price).toFixed(2)),
+                order_result_formula: `${order} * ${price}`,
+                order_result: parseFloat((price*order).toFixed(2))
             }
         }
 
