@@ -721,7 +721,7 @@ const calHotStampCost = async (order, hotStampData) => {
 
         const block_cost = Math.ceil((block.inWidth*block.inLong*13)*0.01)*100
         const total_block_cost = block_cost*block.lay
-        const stamp_color_cost = (((block.inWidth*block.inLong*hotStamp.avr)+0.1)*stamp.k < 0.30) ? 0.30 : ((block.inWidth*block.inLong*hotStamp.avr)+0.1)*stamp.k
+        const stamp_color_cost = (((block.inWidth*block.inLong*hotStamp.avr)+0.2)*stamp.k < 0.30) ? 0.30 : ((block.inWidth*block.inLong*hotStamp.avr)+0.2)*stamp.k
         const total_stamp_color_cost = parseFloat(stamp_color_cost.toFixed(2))*order
 
         const cal_hotStamp = {
@@ -751,7 +751,7 @@ const calHotStampCost = async (order, hotStampData) => {
             cal: {
                 block_cost_formula: `(roundup((${block.inWidth}*${block.inLong}*13)*0.01)*100)*${block.lay}`,
                 block_cost_result: total_block_cost,
-                k_cost_formula: `((${block.inWidth}*${block.inLong}*${hotStamp.avr})+0.1)*${stamp.k}`,
+                k_cost_formula: `((${block.inWidth}*${block.inLong}*${hotStamp.avr})+0.2)*${stamp.k}`,
                 k_cost_result: (parseFloat(stamp_color_cost.toFixed(2)) < 0.30) ? 0.30 : parseFloat(stamp_color_cost.toFixed(2)),
             }
         }
