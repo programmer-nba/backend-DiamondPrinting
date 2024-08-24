@@ -120,12 +120,12 @@ exports.calAll = async (req, res) => {
             }
 
             if(diecutBlowData){
-                //const blow_cost = (order*0.05 < 500) ? 500 : order*0.05
+                const blow_cost = (order*0.15 < 500) ? 500 : order*0.15
                 costs.diecut_block = 0
-                const blow_cost = (paperAmount*0.15 < 500) ? 500 : paperAmount*0.15
+                //const blow_cost = (paperAmount*0.15 < 500) ? 500 : paperAmount*0.15
                 datas.push({diecut_blow: {
                     avr: 0.15,
-                    cal: `${paperAmount}x0.15`,
+                    cal: `${order}x0.15`,
                     total: blow_cost
                 }})
                 costs.diecut_blow = blow_cost
