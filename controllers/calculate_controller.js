@@ -120,12 +120,12 @@ exports.calAll = async (req, res) => {
             }
 
             if(diecutBlowData){
-                const blow_cost = (order*0.15 < 500) ? 500 : order*0.15
+                //const blow_cost = (order*0.05 < 500) ? 500 : order*0.05
                 costs.diecut_block = 0
-                //const blow_cost = (paperAmount*0.15 < 500) ? 500 : paperAmount*0.15
+                const blow_cost = (paperAmount*0.15 < 500) ? 500 : paperAmount*0.15
                 datas.push({diecut_blow: {
                     avr: 0.15,
-                    cal: `${order}x0.15`,
+                    cal: `${paperAmount}x0.15`,
                     total: blow_cost
                 }})
                 costs.diecut_blow = blow_cost
@@ -464,8 +464,10 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
         colors,
         lay,
         floor,
-        uv
+        uv,
+        flip
     } = print_2_Data
+    
     console.log(print_2_Data)
     try {
         const print = await Print_2.findOne({
@@ -490,16 +492,31 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
             : option[0].price*floor*uv,
             colors: colors,
             details: {
+                'เพลทกลับในตัว' : flip ? 'เพลทกลับในตัว' : '-',
                 'ออร์เดอร์ต่อเล' : order_lay,
                 'รอบการพิมพ์' : option[0].round.join,
                 'เทพื้น' : (floor>1) ? 'เทพื้น' : null,
                 'สีUV': (uv > 1) ? 'สีUV' : null,
-                'ค่าพิมพ์' : (option[0].round.start >= 10001)
-                ? option[0].price*order_lay*floor*uv : option[0].price*floor*uv
+                'ค่าพิมพ์' : 
+                flip 
+                ? order*2 
+                : !flip && (option[0].round.start >= 10001)
+                ? option[0].price*order_lay*floor*uv 
+                : option[0].price*floor*uv
             },
             cal: {
-                print_price_formula: (option[0].round.start >= 10001) ? `${option[0].price}*${order_lay}*${floor}*${uv}` : `${option[0].price}*${floor}*${uv}`,
-                print_price_result: (option[0].round.start >= 10001) ? option[0].price*order_lay*floor*uv : option[0].price*floor*uv
+                print_price_formula: 
+                flip 
+                ? `${order}*2` 
+                : !flip && (option[0].round.start >= 10001) 
+                ? `${option[0].price}*${order_lay}*${floor}*${uv}` 
+                : `${option[0].price}*${floor}*${uv}`,
+                print_price_result: 
+                flip
+                ? order*2
+                : !flip && (option[0].round.start >= 10001) 
+                ? option[0].price*order_lay*floor*uv 
+                : option[0].price*floor*uv
             }
         }
         return {cost: cal_print.price, data: cal_print}
@@ -521,7 +538,8 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
         colors,
         lay,
         floor,
-        uv
+        uv,
+        flip
     } = print_4_Data
 
     try {
@@ -546,16 +564,31 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             ? option[0].price*order_lay*floor*uv : option[0].price*floor*uv,
             colors: colors,
             details: {
+                'เพลทกลับในตัว' : flip ? 'เพลทกลับในตัว' : '-',
                 'ออร์เดอร์ต่อเล' : order_lay,
                 'รอบการพิมพ์' : option[0].round.join,
                 'เทพื้น' : (floor>1) ? 'เทพื้น' : null,
                 'สีUV': (uv > 1) ? 'สีUV' : null,
-                'ค่าพิมพ์' : (option[0].round.start >= 10001)
-                ? option[0].price*order_lay*floor*uv: option[0].price*floor*uv
+                'ค่าพิมพ์' : 
+                flip
+                ? order*2
+                : !flip && (option[0].round.start >= 10001)
+                ? option[0].price*order_lay*floor*uv
+                : option[0].price*floor*uv
             },
             cal: {
-                print_price_formula: (option[0].round.start >= 10001) ? `${option[0].price}*${order_lay}*${floor}*${uv}` : `${option[0].price}*${floor}*${uv}`,
-                print_price_result: (option[0].round.start >= 10001) ? option[0].price*order_lay*floor*uv : option[0].price*floor*uv
+                print_price_formula: 
+                flip
+                ? `${order}*2`
+                : !flip && (option[0].round.start >= 10001) 
+                ? `${option[0].price}*${order_lay}*${floor}*${uv}` 
+                : `${option[0].price}*${floor}*${uv}`,
+                print_price_result: 
+                flip
+                ? order*2
+                : !flip && (option[0].round.start >= 10001) 
+                ? option[0].price*order_lay*floor*uv 
+                : option[0].price*floor*uv
             }
         }
         return {cost: cal_print.price, data: cal_print}
