@@ -281,17 +281,17 @@ exports.calAll = async (req, res) => {
                 costperOrder: parseFloat((sumCost/order).toFixed(2)),
                 normal: {
                     percent: `26.00%`,
-                    total_price: parseFloat(((((26.00*sumCost)/100)+sumCost)/order).toFixed(2))*order,
+                    total_price: ((Math.ceil(parseFloat((((26.00*sumCost)/100)+sumCost)/order)* 100)/100).toFixed(2))*order,
                     unit_price:  parseFloat(((((26.00*sumCost)/100)+sumCost)/order).toFixed(2))
                 },
                 special: {
                     percent: `24.00%`,
-                    total_price: parseFloat(((((24.00*sumCost)/100)+sumCost)/order).toFixed(2))*order,
+                    total_price: ((Math.ceil(parseFloat((((24.00*sumCost)/100)+sumCost)/order)* 100)/100).toFixed(2))*order,
                     unit_price:  parseFloat(((((24.00*sumCost)/100)+sumCost)/order).toFixed(2))
                 },
                 insite: {
                     percent: `17.00%`,
-                    total_price: parseFloat(((((17.00*sumCost)/100)+sumCost)/order).toFixed(2))*order,
+                    total_price: ((Math.ceil(parseFloat((((17.00*sumCost)/100)+sumCost)/order)* 100)/100).toFixed(2))*order,
                     unit_price:  parseFloat(((((17.00*sumCost)/100)+sumCost)/order).toFixed(2))
                 }
             })
