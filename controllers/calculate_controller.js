@@ -67,7 +67,7 @@ exports.calAll = async (req, res) => {
                             : (i==='1' && print_2_Data.floor_back) ? 2
                             : (i==='1' && !print_2_Data.floor_back) ? 1
                             : 1,
-                        flip: (print_2_Data.flip),
+                        flip: plateData.flip_plate,
                         uv: (print_2_Data.colors_uv) ? 1.5 : 1
                     }
                     const print_2_cost = await calPrint_2_Cost(order,sendPrint)
@@ -92,7 +92,7 @@ exports.calAll = async (req, res) => {
                             : (i==='1' && print_4_Data.floor_back) ? 2
                             : (i==='1' && !print_4_Data.floor_back) ? 1
                             : 1,
-                        flip: (print_4_Data.flip),
+                        flip: plateData.flip_plate,
                         uv: (print_4_Data.colors_uv) ? 1.5 : 1
                     }
                     const print_4_cost = await calPrint_4_Cost(order,sendPrint)
@@ -541,7 +541,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
         uv,
         flip
     } = print_4_Data
-
+    let flip_cost = flip ? 2 : 1
     try {
         const print = await Print_4.findOne({
             colors: parseInt(colors)
