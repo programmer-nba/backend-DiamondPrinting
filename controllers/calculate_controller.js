@@ -82,7 +82,7 @@ exports.calAll = async (req, res) => {
 
             if(print_4_Data && print_4_Data.colors.length!==0){
                 let prints = []
-                for (i in print_4_Data.colors) {
+                for (i in print_4_Data.colors.map(a=>a)) {
                     const sendPrint = {
                         lay: print_4_Data.lay,
                         colors: print_4_Data.colors[i],
@@ -95,9 +95,24 @@ exports.calAll = async (req, res) => {
                         flip: plateData.flip_plate,
                         uv: (print_4_Data.colors_uv) ? 1.5 : 1
                     }
-                    const print_4_cost = await calPrint_4_Cost(order,sendPrint)
-                    prints.push(print_4_cost.cost)
-                    datas.push({[`print_4_${i}`]:print_4_cost.data})
+                    let print_4_cost = await calPrint_4_Cost(order,sendPrint)
+
+                    if (i === '0') {
+                        prints.push(print_4_cost.cost)
+                        datas.push({[`print_4_${i}`]:print_4_cost.data})
+                    } else {
+                        if (plateData.flip_plate) {
+
+                            prints.push(0)
+                            print_4_cost.data.price = 0
+                            print_4_cost.data.cal.print_price_formula = 0
+                            print_4_cost.data.cal.print_price_result = 0
+                            datas.push({[`print_4_${i}`]:print_4_cost.data})
+                        } else {
+                            prints.push(print_4_cost.cost)
+                            datas.push({[`print_4_${i}`]:print_4_cost.data})
+                        }
+                    }
                 }
                 datas.push({print_4_Ffloor:print_4_Data.floor_front})
                 datas.push({print_4_Bfloor:print_4_Data.floor_back})
@@ -560,8 +575,11 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
         const cal_print = {
             order_lay: order_lay,
             round: option[0].round.join,
-            price: (option[0].round.start >= 10001)
-            ? option[0].price*order_lay*floor*uv : option[0].price*floor*uv,
+            price:flip
+            ? order*2
+            : !flip && (option[0].round.start >= 10001)
+            ? option[0].price*order_lay*floor*uv
+            : option[0].price*floor*uv,
             colors: colors,
             details: {
                 'เพลทกลับในตัว' : flip ? 'เพลทกลับในตัว' : '-',
