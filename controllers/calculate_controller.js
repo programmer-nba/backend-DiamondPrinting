@@ -57,7 +57,7 @@ exports.calAll = async (req, res) => {
             
             if(print_2_Data && print_2_Data.colors.length!==0){
                 let prints = []
-                for (i in print_2_Data.colors) {
+                for (i in print_2_Data.colors.map(a=>a)) {
                     const sendPrint = {
                         lay: print_2_Data.lay,
                         colors: print_2_Data.colors[i],
@@ -70,9 +70,24 @@ exports.calAll = async (req, res) => {
                         flip: plateData.flip_plate,
                         uv: (print_2_Data.colors_uv) ? 1.5 : 1
                     }
-                    const print_2_cost = await calPrint_2_Cost(order,sendPrint)
-                    prints.push(print_2_cost.cost)
-                    datas.push({[`print_2_${i}`]:print_2_cost.data})
+                    let print_2_cost = await calPrint_2_Cost(order,sendPrint)
+
+                    if (i === '0') {
+                        prints.push(print_2_cost.cost)
+                        datas.push({[`print_2_${i}`]:print_2_cost.data})
+                    } else {
+                        if (plateData.flip_plate) {
+
+                            prints.push(0)
+                            print_2_cost.data.price = 0
+                            print_2_cost.data.cal.print_price_formula = 0
+                            print_2_cost.data.cal.print_price_result = 0
+                            datas.push({[`print_2_${i}`]:print_2_cost.data})
+                        } else {
+                            prints.push(print_2_cost.cost)
+                            datas.push({[`print_2_${i}`]:print_2_cost.data})
+                        }
+                    }
                 }
                 datas.push({print_2_Ffloor:print_2_Data.floor_front})
                 datas.push({print_2_Bfloor:print_2_Data.floor_back})
@@ -492,7 +507,7 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
             return {cost: 0, data: null}
         }
 
-        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = flip ? Math.ceil(parseInt(order)/parseInt(lay))*2 : Math.ceil(parseInt(order)/parseInt(lay))
         
         const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         if(option.length!==1){
@@ -513,23 +528,17 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
                 'เทพื้น' : (floor>1) ? 'เทพื้น' : null,
                 'สีUV': (uv > 1) ? 'สีUV' : null,
                 'ค่าพิมพ์' : 
-                flip 
-                ? order*2 
-                : !flip && (option[0].round.start >= 10001)
+                (option[0].round.start >= 10001)
                 ? option[0].price*order_lay*floor*uv 
                 : option[0].price*floor*uv
             },
             cal: {
                 print_price_formula: 
-                flip 
-                ? `${order}*2` 
-                : !flip && (option[0].round.start >= 10001) 
+                (option[0].round.start >= 10001) 
                 ? `${option[0].price}*${order_lay}*${floor}*${uv}` 
                 : `${option[0].price}*${floor}*${uv}`,
                 print_price_result: 
-                flip
-                ? order*2
-                : !flip && (option[0].round.start >= 10001) 
+               (option[0].round.start >= 10001) 
                 ? option[0].price*order_lay*floor*uv 
                 : option[0].price*floor*uv
             }
@@ -556,7 +565,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
         uv,
         flip
     } = print_4_Data
-    let flip_cost = flip ? 2 : 1
+    
     try {
         const print = await Print_4.findOne({
             colors: parseInt(colors)
@@ -565,7 +574,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             return {cost: 0, data: null}
         }
 
-        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = flip ? Math.ceil(parseInt(order)/parseInt(lay))*2 : Math.ceil(parseInt(order)/parseInt(lay))
         
         const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         if(option.length!==1){
@@ -575,9 +584,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
         const cal_print = {
             order_lay: order_lay,
             round: option[0].round.join,
-            price:flip
-            ? order*2
-            : !flip && (option[0].round.start >= 10001)
+            price: (option[0].round.start >= 10001)
             ? option[0].price*order_lay*floor*uv
             : option[0].price*floor*uv,
             colors: colors,
@@ -588,23 +595,17 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
                 'เทพื้น' : (floor>1) ? 'เทพื้น' : null,
                 'สีUV': (uv > 1) ? 'สีUV' : null,
                 'ค่าพิมพ์' : 
-                flip
-                ? order*2
-                : !flip && (option[0].round.start >= 10001)
+                (option[0].round.start >= 10001)
                 ? option[0].price*order_lay*floor*uv
                 : option[0].price*floor*uv
             },
             cal: {
                 print_price_formula: 
-                flip
-                ? `${order}*2`
-                : !flip && (option[0].round.start >= 10001) 
+                (option[0].round.start >= 10001) 
                 ? `${option[0].price}*${order_lay}*${floor}*${uv}` 
                 : `${option[0].price}*${floor}*${uv}`,
                 print_price_result: 
-                flip
-                ? order*2
-                : !flip && (option[0].round.start >= 10001) 
+                (option[0].round.start >= 10001) 
                 ? option[0].price*order_lay*floor*uv 
                 : option[0].price*floor*uv
             }
