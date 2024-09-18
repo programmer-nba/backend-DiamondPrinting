@@ -79,6 +79,8 @@ exports.calAll = async (req, res) => {
                         if (plateData.flip_plate) {
 
                             prints.push(0)
+                            print_2_cost.data = {}
+                            print_2_cost.data.cal = {}
                             print_2_cost.data.price = 0
                             print_2_cost.data.cal.print_price_formula = 0
                             print_2_cost.data.cal.print_price_result = 0
@@ -119,6 +121,8 @@ exports.calAll = async (req, res) => {
                         if (plateData.flip_plate) {
 
                             prints.push(0)
+                            print_4_cost.data = {}
+                            print_4_cost.data.cal = {}
                             print_4_cost.data.price = 0
                             print_4_cost.data.cal.print_price_formula = 0
                             print_4_cost.data.cal.print_price_result = 0
@@ -553,7 +557,8 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
 
 // calculate Print4
 const calPrint_4_Cost = async (order, print_4_Data) => {
-
+    //console.log(order)
+    //console.log(print_4_Data)
     if(!print_4_Data){
         return {cost: 0, data: null}
     }
