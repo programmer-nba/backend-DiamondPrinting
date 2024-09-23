@@ -9,6 +9,7 @@ const PreProduction = require('../models/orders/preProduction_model.js')
 const HotStamp = require('../models/products/hotStamp_model.js')
 const Diecut = require('../models/products/diecut_model.js')
 const Glue = require('../models/products/glue_model.js')
+const Profit = require('../models/profit/profitModel.js')
 
 exports.calAll = async (req, res) => {
     const { id } = req.params
@@ -307,6 +308,9 @@ exports.calAll = async (req, res) => {
 
             const costIncosts = Object.values(costs)
             const sumCost = costIncosts.reduce( (a, b)=> a + b )
+            const profitNormal = await Profit.findOne({title: 'normal'})
+            const profitSpecial = await Profit.findOne({title: 'special'})
+            const profitInsite = await Profit.findOne({title: 'insite'})
             costs_list.push({
                 order: order,
                 datas: datas,
@@ -314,19 +318,19 @@ exports.calAll = async (req, res) => {
                 sumCost: sumCost,
                 costperOrder: parseFloat((sumCost/order).toFixed(2)),
                 normal: {
-                    percent: `26.00%`,
-                    total_price: ((Math.ceil(parseFloat((((26.00*sumCost)/100)+sumCost)/order)* 100)/100).toFixed(2))*order,
-                    unit_price:  parseFloat(((((26.00*sumCost)/100)+sumCost)/order).toFixed(2))
+                    percent: profitNormal?.percent || `26.00%`,
+                    total_price: ((Math.ceil(parseFloat(((((profitNormal?.percent || 26.00)*sumCost)/100)+sumCost)/order)* 100)/100).toFixed(2))*order,
+                    unit_price:  parseFloat((((((profitNormal?.percent || 26.00)*sumCost)/100)+sumCost)/order).toFixed(2))
                 },
                 special: {
-                    percent: `24.00%`,
-                    total_price: ((Math.ceil(parseFloat((((24.00*sumCost)/100)+sumCost)/order)* 100)/100).toFixed(2))*order,
-                    unit_price:  parseFloat(((((24.00*sumCost)/100)+sumCost)/order).toFixed(2))
+                    percent: profitSpecial?.percent || `24.00%`,
+                    total_price: ((Math.ceil(parseFloat(((((profitSpecial?.percent || 24.00)*sumCost)/100)+sumCost)/order)* 100)/100).toFixed(2))*order,
+                    unit_price:  parseFloat((((((profitSpecial?.percent || 24.00)*sumCost)/100)+sumCost)/order).toFixed(2))
                 },
                 insite: {
-                    percent: `17.00%`,
-                    total_price: ((Math.ceil(parseFloat((((17.00*sumCost)/100)+sumCost)/order)* 100)/100).toFixed(2))*order,
-                    unit_price:  parseFloat(((((17.00*sumCost)/100)+sumCost)/order).toFixed(2))
+                    percent: profitInsite?.percent || `17.00%`,
+                    total_price: ((Math.ceil(parseFloat(((((profitInsite?.percent || 17.00)*sumCost)/100)+sumCost)/order)* 100)/100).toFixed(2))*order,
+                    unit_price:  parseFloat((((((profitInsite?.percent || 17.00)*sumCost)/100)+sumCost)/order).toFixed(2))
                 }
             })
         }

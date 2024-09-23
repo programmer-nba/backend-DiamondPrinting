@@ -20,6 +20,7 @@ app.use('/daimond/order', require('./routes/order_route.js'))
 app.use('/daimond/file', require('./routes/file_route.js'))
 app.use('/daimond/admin', require('./routes/admin_route.js'))
 app.use('/daimond/schedule', require('./routes/schedule_route.js'))
+app.use('/daimond/profits', require('./routes/profit_route.js'))
 
 //const mongoDBUrl = process.env.MONGODB_URL
 const mongoDBUrl = process.env.MONGODB_URL
