@@ -515,7 +515,7 @@ const calPrint_2_Cost = async (order, print_2_Data) => {
             return {cost: 0, data: null}
         }
 
-        const order_lay = flip ? Math.ceil(parseInt(order)/parseInt(lay))*2 : Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = flip ? Math.ceil(parseInt(order)/parseFloat(lay))*2 : Math.ceil(parseInt(order)/parseFloat(lay))
         
         const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         if(option.length!==1){
@@ -583,7 +583,7 @@ const calPrint_4_Cost = async (order, print_4_Data) => {
             return {cost: 0, data: null}
         }
 
-        const order_lay = flip ? Math.ceil(parseInt(order)/parseInt(lay))*2 : Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = flip ? Math.ceil(parseInt(order)/parseFloat(lay))*2 : Math.ceil(parseInt(order)/parseFloat(lay))
         
         const option = print.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         if(option.length!==1){
@@ -647,7 +647,7 @@ const calCoatingCost = async (order, coatingData) => {
             return {cost: 0, data: 'ไม่พบ'}
         }
         
-        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseFloat(lay))
         //const inWidth = inWidth
         //const inLong = inLong
 
@@ -712,7 +712,7 @@ const calEmbossCost = async (order, embossData) => {
             return {cost: 0, data: 'ไม่พบ'}
         }
 
-        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseFloat(lay))
         
         const round_option = emboss.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
         if(round_option.length===0){
@@ -839,7 +839,7 @@ const calDiecutWindowCost = async (order, diecutWindowData) => {
             return {data: 'ไม่พบไดคัต', cost: 0}
         }
         
-        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseFloat(lay))
         
         const diecut = diecuts.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
         
@@ -892,7 +892,7 @@ const calDiecutCost = async (order, diecutData) => {
             return {data: 'ไม่พบไดคัต', cost: 0}
         }
 
-        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseFloat(lay))
         
         const diecut = diecuts.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
         
@@ -1206,7 +1206,7 @@ exports.calPrint2 = async (req,res) => {
             })
         }
         console.log(print2)
-        const order_lay = parseInt(order)/parseInt(lay)
+        const order_lay = parseInt(order)/parseFloat(lay)
         
         const option = print2.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         console.log(option)
@@ -1255,7 +1255,7 @@ exports.calPrint4 = async (req,res) => {
             })
         }
 
-        const order_lay = parseInt(order)/parseInt(lay)
+        const order_lay = parseInt(order)/parseFloat(lay)
         
         const option = print4.option.filter(item=>item.round.end >= order_lay && item.round.start < order_lay)
         if(option.length!==1){
@@ -1304,7 +1304,7 @@ exports.calCoating = async (req,res) => {
             })
         }
 
-        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseFloat(lay))
         const inWidth = width/cut
         const inLong = long/cut
         
@@ -1363,7 +1363,7 @@ exports.calEmboss = async (req,res) => {
             })
         }
 
-        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseFloat(lay))
         
         const round_option = emboss.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
         if(round_option.length===0){
@@ -1477,7 +1477,7 @@ exports.calDiecut = async (req,res) => {
             })
         }
 
-        const order_lay = Math.ceil(parseInt(order)/parseInt(lay))
+        const order_lay = Math.ceil(parseInt(order)/parseFloat(lay))
         
         const diecut = diecuts.filter(item=>item.round.start < order_lay && item.round.end+1 > order_lay)
         const option = diecut[0].option.filter(option=>option.plateSize===plateSize)
