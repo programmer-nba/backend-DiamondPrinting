@@ -10,6 +10,7 @@ const HotStamp = require('../models/products/hotStamp_model.js')
 const Diecut = require('../models/products/diecut_model.js')
 const Glue = require('../models/products/glue_model.js')
 const Profit = require('../models/profit/profitModel.js')
+const Bag = require('../models/products/bag_model.js')
 
 exports.calAll = async (req, res) => {
     const { id } = req.params
@@ -293,12 +294,17 @@ exports.calAll = async (req, res) => {
                 }
 
                 if(glueData.bag){
+                    let cost = 2.5
+                    const bag = await Bag.findOne()
+                    if (bag) {
+                        cost = bag.price
+                    }
                     const bag_cost = {
                         data: {
                             order: order,
-                            ppu: 2.5
+                            ppu: cost
                         },
-                        cost: 2.5 * order
+                        cost: cost * order
                     }
                     datas.push({bag:bag_cost.data})
                     costs.bag = bag_cost.cost
@@ -1028,10 +1034,10 @@ const calChainCost = async (order, chainData) => {
             long: long,
             ppu: price,
             cal: {
-                unit_result_formula: `${width} * ${long} * ${price}`,
-                unit_result: parseFloat((width*long*price).toFixed(2)),
-                order_result_formula: `${width} * ${long} * ${price} * ${order}`,
-                order_result: parseFloat((width*long*price*order).toFixed(2))
+                unit_result_formula: `${order} * ${price}`,
+                unit_result: parseFloat((order*price).toFixed(2)),
+                order_result_formula: `${price} * ${order}`,
+                order_result: parseFloat((price*order).toFixed(2))
             }
         }
 
