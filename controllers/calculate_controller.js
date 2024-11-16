@@ -679,19 +679,19 @@ const calCoatingCost = async (order, coatingData) => {
             inLong: inLong,
             order_lay: order_lay,
             avr: coating_option.avr,
-            coating_price: parseFloat(coating_price.toFixed(2)),
+            coating_price: Math.ceil(parseFloat(coating_price.toFixed(2))),
             cost: (total_price < coating_option.minPrice)
             ? coating_option.minPrice : parseFloat(total_price.toFixed(2)),
             details: {
                 'ขนาดใบพิมพ์กว้าง' : `${inWidth} นิ้ว`,
                 'ขนาดใบพิมพ์ยาว' : `${inLong} นิ้ว`,
                 'ออร์เดอร์ต่อเล' : order_lay,
-                'ประเภทเคลือบ' : `${method.type} ${method.subType} (${parseFloat(coating_price.toFixed(2))})`,
+                'ประเภทเคลือบ' : `${method.type} ${method.subType} Roundup(${parseFloat(coating_price.toFixed(2))})`,
                 'ค่าเคลือบ' : (total_price < coating_option.minPrice) ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
             },
             cal: {
                 coating_price_unit_formula: (method.type==='spot-uv' && coating_option.avr*parseFloat(inWidth)*parseFloat(inLong) < 1.2) ? `1.2` : (method.type==='dip-off') ? 5 : `${coating_option.avr}*(${inWidth}*${inLong})`,
-                coating_price_formula: (total_price < coating_option.minPrice) ? `${coating_option.minPrice}` : `${parseFloat(coating_price.toFixed(2))}*${order_lay}`,
+                coating_price_formula: (total_price < coating_option.minPrice) ? `${coating_option.minPrice}` : `Roundup(${parseFloat(coating_price.toFixed(2))}*${order_lay})`,
                 coating_price_result: (total_price < coating_option.minPrice) ? coating_option.minPrice : parseFloat(total_price.toFixed(2))
             }
         }
